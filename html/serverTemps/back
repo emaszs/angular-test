@@ -1,0 +1,264 @@
+[erupeika@mmascher-mon ~]$ rm -r angular_test/
+[erupeika@mmascher-mon ~]$ ls curl 'https://mmascher-mon.cern.ch/crabserver/dev/task?subresource=summary' -H 'Host: mmascher-mon.cern.ch' -H 'User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:38.0) Gecko/20100101 Firefox/38.0' -H 'Accept: application/json, text/plain, */*' -H 'Accept-Language: en-US,en;q=0.5' -H 'Accept-Encoding: gzip, deflate' -H 'Referer: https://mmascher-mon.cern.ch/crabserver/ui' -H 'Cookie: _ga=GA1.2.1611115738.1435838118; __utma=203412483.1611115738.1435838118.1436268137.1436352634.4; __utmz=203412483.1436352634.4.2.utmcsr=glidemon.web.cern.ch|utmccn=(referral)|utmcmd=referral|utmcct=/glidemon/jobs.php; __utmc=203412483'^C
+[erupeika@mmascher-mon ~]$ ^C
+[erupeika@mmascher-mon ~]$ ^C
+[erupeika@mmascher-mon ~]$ ls /data/srv/current/apps/crabserver/data/html/
+cacheTemps  index.html  searchTemps  serverTemps
+[erupeika@mmascher-mon ~]$ vim /data/srv/current/config/crabserver/config.py 
+[erupeika@mmascher-mon ~]$ vim /data/srv/current/config/crabserver/config.py 
+[erupeika@mmascher-mon ~]$ vim /data/srv/current/apps/crabserver/
+bin/   data/  etc/   lib/   xbin/  xdata/ xdoc/  xlib/  
+[erupeika@mmascher-mon ~]$ vim /data/srv/current/apps/crabserver/lib/python2.6/site-packages/
+CRABInterface/            Databases/                HTCondorUtils.py          PandaServerInterface.pyc  WMCore/
+CRABQuality.py            HTCondorLocator.py        HTCondorUtils.pyc         ServerUtilities.py        
+CRABQuality.pyc           HTCondorLocator.pyc       PandaServerInterface.py   ServerUtilities.pyc       
+[erupeika@mmascher-mon ~]$ vim /data/srv/current/apps/crabserver/lib/python2.6/site-packages/CRABInterface/Pa
+Pages/                 PandaDataWorkflow.py   PandaDataWorkflow.pyc  
+[erupeika@mmascher-mon ~]$ vim /data/srv/current/apps/crabserver/lib/python2.6/site-packages/CRABInterface/Pages/
+FrontPage.py   FrontPage.pyc  __init__.py    __init__.pyc   
+[erupeika@mmascher-mon ~]$ vim /data/srv/current/apps/crabserver/lib/python2.6/site-packages/CRABInterface/Pages/FrontPage.py
+[erupeika@mmascher-mon ~]$ sudo vim /data/srv/current/apps/crabserver/lib/python2.6/site-packages/CRABInterface/Pages/FrontPage.py
+[sudo] password for erupeika: 
+[sudo] password for erupeika: 
+Sorry, try again.
+[sudo] password for erupeika: 
+[sudo] password for erupeika: 
+[erupeika@mmascher-mon ~]$ cd 
+.bash_history                         crab.log                              private/
+.bash_profile                         crab_projects/                        pset_tutorial_analysis.py
+.bashrc                               .dbus/                                pset_tutorial_analysis.py~
+.cache/                               .fontconfig/                          pset_tutorial_analysis.pyc
+.config/                              .forward                              pset_tutorial_MC_generation.py
+.crab3                                .gconf/                               public/
+CRAB3-tutorial/                       .gconfd/                              .ssh/
+crabConfig_tutorial_Data_analysis.py  .globus/                              .ssh.pub
+crabConfig_tutorial_MC_analysis.py    .gnome2/                              .viminfo
+crabConfig_tutorial_MC_analysis.py~   .novaclient/                          .Xauthority
+crabConfig_tutorial_MC_analysis.pyc   .openrc                               
+crabConfig_tutorial_MC_generation.py  .openrc.swp                           
+[erupeika@mmascher-mon ~]$ cd /data/srv/current/apps/crabserver/data/html/
+[erupeika@mmascher-mon html]$ cd ../
+[erupeika@mmascher-mon data]$ ls -altr
+total 168
+-rwxr-xr-x.  1 _sw _sw  5626 Jul  2 11:37 gWMS-CMSRunAnalysis.sh
+-rwxr-xr-x.  1 _sw _sw  7602 Jul  2 11:37 dag_bootstrap_startup.sh
+-rwxr-xr-x.  1 _sw _sw  3164 Jul  2 11:37 dag_bootstrap.sh
+-rw-r--r--.  1 _sw _sw  5983 Jul  2 11:37 CMSRunAnalysis.sh
+-rwxr-xr-x.  1 _sw _sw 99016 Jul  2 11:37 cmscp.py
+-rw-r--r--.  1 _sw _sw 12510 Jul  2 11:37 AdjustSites.py
+drwxrwxr-x.  2 _sw _sw  4096 Jul  8 12:02 css
+drwxrwxr-x.  5 _sw _sw  4096 Jul  8 12:02 doc
+drwxrwxr-x.  5 _sw _sw  4096 Jul  8 12:02 html
+drwxrwxr-x.  6 _sw _sw  4096 Jul  8 12:02 .
+drwxrwxr-x.  8 _sw _sw  4096 Jul  8 12:02 script
+drwxrwxr-x. 10 _sw _sw  4096 Jul  8 12:02 ..
+[erupeika@mmascher-mon data]$ sudo mkdir test
+[erupeika@mmascher-mon data]$ ls -l
+total 164
+-rw-r--r--. 1 _sw  _sw  12510 Jul  2 11:37 AdjustSites.py
+-rwxr-xr-x. 1 _sw  _sw  99016 Jul  2 11:37 cmscp.py
+-rw-r--r--. 1 _sw  _sw   5983 Jul  2 11:37 CMSRunAnalysis.sh
+drwxrwxr-x. 2 _sw  _sw   4096 Jul  8 12:02 css
+-rwxr-xr-x. 1 _sw  _sw   3164 Jul  2 11:37 dag_bootstrap.sh
+-rwxr-xr-x. 1 _sw  _sw   7602 Jul  2 11:37 dag_bootstrap_startup.sh
+drwxrwxr-x. 5 _sw  _sw   4096 Jul  8 12:02 doc
+-rwxr-xr-x. 1 _sw  _sw   5626 Jul  2 11:37 gWMS-CMSRunAnalysis.sh
+drwxrwxr-x. 5 _sw  _sw   4096 Jul  8 12:02 html
+drwxrwxr-x. 8 _sw  _sw   4096 Jul  8 12:02 script
+drwxr-xr-x. 2 root root  4096 Jul  8 16:42 test
+[erupeika@mmascher-mon data]$ chown _sw:_sw test/\
+> ;
+chown: changing ownership of `test/': Operation not permitted
+[erupeika@mmascher-mon data]$ sudo chown _sw:_sw test/
+[erupeika@mmascher-mon data]$ ls -al
+total 172
+drwxrwxr-x.  7 _sw _sw  4096 Jul  8 16:42 .
+drwxrwxr-x. 10 _sw _sw  4096 Jul  8 12:02 ..
+-rw-r--r--.  1 _sw _sw 12510 Jul  2 11:37 AdjustSites.py
+-rwxr-xr-x.  1 _sw _sw 99016 Jul  2 11:37 cmscp.py
+-rw-r--r--.  1 _sw _sw  5983 Jul  2 11:37 CMSRunAnalysis.sh
+drwxrwxr-x.  2 _sw _sw  4096 Jul  8 12:02 css
+-rwxr-xr-x.  1 _sw _sw  3164 Jul  2 11:37 dag_bootstrap.sh
+-rwxr-xr-x.  1 _sw _sw  7602 Jul  2 11:37 dag_bootstrap_startup.sh
+drwxrwxr-x.  5 _sw _sw  4096 Jul  8 12:02 doc
+-rwxr-xr-x.  1 _sw _sw  5626 Jul  2 11:37 gWMS-CMSRunAnalysis.sh
+drwxrwxr-x.  5 _sw _sw  4096 Jul  8 12:02 html
+drwxrwxr-x.  8 _sw _sw  4096 Jul  8 12:02 script
+drwxr-xr-x.  2 _sw _sw  4096 Jul  8 16:42 test
+[erupeika@mmascher-mon data]$ sudo chmod 775 test/
+[erupeika@mmascher-mon data]$ cd test/
+[erupeika@mmascher-mon test]$ vim test.html
+[erupeika@mmascher-mon test]$ sudo vim test.html
+[erupeika@mmascher-mon test]$ ls ../script/
+ang  cacheJS  jquery  misc  monitor.js  searchJS  serverJS
+[erupeika@mmascher-mon test]$ ls -l ../script/
+total 28
+drwxrwxr-x. 4 _sw _sw 4096 Jul  8 12:02 ang
+drwxrwxr-x. 2 _sw _sw 4096 Jul  8 12:02 cacheJS
+drwxrwxr-x. 2 _sw _sw 4096 Jul  8 12:02 jquery
+drwxrwxr-x. 2 _sw _sw 4096 Jul  8 12:02 misc
+-rw-r--r--. 1 _sw _sw  507 Jul  2 11:37 monitor.js
+drwxrwxr-x. 2 _sw _sw 4096 Jul  8 12:02 searchJS
+drwxrwxr-x. 2 _sw _sw 4096 Jul  8 12:02 serverJS
+[erupeika@mmascher-mon test]$ ls -l ../html/
+total 24
+drwxrwxr-x. 2 _sw _sw  4096 Jul  8 12:02 cacheTemps
+-rw-r--r--. 1 _sw _sw 10094 Jul  2 11:37 index.html
+drwxrwxr-x. 2 _sw _sw  4096 Jul  8 12:02 searchTemps
+drwxrwxr-x. 2 _sw _sw  4096 Jul  8 12:02 serverTemps
+[erupeika@mmascher-mon test]$ ls -l ../html/cacheTemps/
+total 20
+-rw-r--r--. 1 _sw _sw 1015 Jul  2 11:37 log-view.html
+-rw-r--r--. 1 _sw _sw 1102 Jul  2 11:37 sandbox-view.html
+-rw-r--r--. 1 _sw _sw   34 Jul  2 11:37 summary-view.html
+-rw-r--r--. 1 _sw _sw 1698 Jul  2 11:37 task-view.html
+-rw-r--r--. 1 _sw _sw 1475 Jul  2 11:37 userlist-view.html
+[erupeika@mmascher-mon test]$ ls
+test.html
+[erupeika@mmascher-mon test]$ sudo c^C
+[erupeika@mmascher-mon test]$ ^C
+[erupeika@mmascher-mon test]$ sudo chown _sw:_sw test.html 
+[erupeika@mmascher-mon test]$ sudo chmod 775 test.html 
+(reverse-i-search)`': ^C
+[erupeika@mmascher-mon test]$ ^C
+[erupeika@mmascher-mon test]$ ^C
+[erupeika@mmascher-mon test]$ ^C
+[erupeika@mmascher-mon test]$ l^C-l
+(reverse-i-search)`': ^C
+[erupeika@mmascher-mon test]$ ^C
+[erupeika@mmascher-mon test]$ ^C
+[erupeika@mmascher-mon test]$ ls
+test.html
+[erupeika@mmascher-mon test]$ vim test.html 
+[erupeika@mmascher-mon test]$ cd .
+[erupeika@mmascher-mon test]$ cd ..
+[erupeika@mmascher-mon data]$ ls
+AdjustSites.py  cmscp.py  CMSRunAnalysis.sh  css  dag_bootstrap.sh  dag_bootstrap_startup.sh  doc  gWMS-CMSRunAnalysis.sh  html  script  test
+[erupeika@mmascher-mon data]$ ls^C
+[erupeika@mmascher-mon data]$ ^C
+[erupeika@mmascher-mon data]$ sudo vim /data/srv/current/apps/crabserver/lib/python2.6/site-packages/CRABInterface/Pages/FrontPage.py
+[erupeika@mmascher-mon data]$ vim ../
+bin/   data/  etc/   lib/   xbin/  xdata/ xdoc/  xlib/  
+[erupeika@mmascher-mon data]$ vim html/index.html 
+[erupeika@mmascher-mon data]$ sudo vim /data/srv/current/apps/crabserver/lib/python2.6/site-packages/CRABInterface/Pages/FrontPage.py
+[erupeika@mmascher-mon data]$ cd /data
+(reverse-i-search)`In': sudo vim /data/srv/current/apps/crabserver/lib/python2.6/site-packages/CRAB^Cterface/Pages/FrontPage.py
+[erupeika@mmascher-mon data]$ ^C
+[erupeika@mmascher-mon data]$ ^C
+[erupeika@mmascher-mon data]$ ^C
+(reverse-i-search)`In': sudo vim /data/srv/current/apps/crabserver/lib/python2.6/site-packages/CRAB^Cterface/Pages/FrontPage.py
+[erupeika@mmascher-mon data]$ ^C
+[erupeika@mmascher-mon data]$ whoami
+erupeika
+[erupeika@mmascher-mon data]$ sudo su mmascher
+bash: /afs/cern.ch/user/m/mmascher/.bashrc: Permission denied
+(reverse-i-search)`': ^C
+bash-4.1$ ^C
+bash-4.1$ exit
+[erupeika@mmascher-mon data]$ whoami
+erupeika
+[erupeika@mmascher-mon data]$ pwd
+/data
+[erupeika@mmascher-mon data]$ sudo -u mamscher cfg/
+acdcserver/      cmssls/          das/             dmwmmon/         gitweb/          phedex/          sreadiness/      victorweb/
+admin/           cmstc/           dbs/             downtimecal/     globalmon/       popdbweb/        ssb/             wmagent/
+alertscollector/ confdb/          dbsmigration/    dqmgui/          happyface/       reqmgr/          stagemanager/    wmclient/
+asyncstageout/   couchdb/         dbsweb/          esc/             lifecycle-das/   reqmgr2/         system/          wmcore/
+backend/         crabcache/       dcafpilot/       filemover/       mongodb/         reqmon/          t0_reqmon/       wmcore-auth/
+base/            crabhb/          Deploy           frontend/        mysql/           savannahsquad/   t0wmadatasvc/    workqueue/
+bigcouch/        crabserver/      dmwmbld/         .git/            overview/        sitedb/          tier0/           
+[erupeika@mmascher-mon data]$ sudo -u mamscher cfg/admin/InstallDev
+InstallDev     InstallDevSim  
+[erupeika@mmascher-mon data]$ sudo -u mamscher cfg/admin/InstallDev
+InstallDev     InstallDevSim  
+[erupeika@mmascher-mon data]$ sudo -u mamscher cfg/admin/InstallDev -s start
+sudo: unknown user: mamscher
+sudo: unable to initialize policy plugin
+[erupeika@mmascher-mon data]$ sudo -u mmascher cfg/admin/InstallDev -s start
++ cmd='/data/srv/current/config/crabcache/manage start '\''I did read documentation'\'''
++ case $MULTIACC in
++ sudo -H -u _crabcache bashs -lc '/data/srv/current/config/crabcache/manage start '\''I did read documentation'\'''
+stopping crabcache
+Removing stale pid file /data/srv/state/crabcache/pid
+starting crabcache
+crabcache not running, not killing
++ cmd='/data/srv/current/config/crabserver/manage start '\''I did read documentation'\'''
++ case $MULTIACC in
++ sudo -H -u _crabserver bashs -lc '/data/srv/current/config/crabserver/manage start '\''I did read documentation'\'''
+I did read documentation
+stopping crabserver
+Killing crabserver pgid 8048 .
+starting crabserver
+crabserver not running, not killing
++ cmd='/data/srv/current/config/frontend/manage start '\''I did read documentation'\'''
++ case $MULTIACC in
++ sudo -H -u root bashs -lc '/data/srv/current/config/frontend/manage start '\''I did read documentation'\'''
+Stopping httpd: [  OK  ]
+Starting httpd: [  OK  ]
+[erupeika@mmascher-mon data]$ ^C
+(reverse-i-search)`ta': sudo -u mamscher cfg/admin/InstallDev -s s^Crt
+[erupeika@mmascher-mon data]$ ^C
+[erupeika@mmascher-mon data]$ ^C
+[erupeika@mmascher-mon data]$ ^C
+[erupeika@mmascher-mon data]$ ^C
+[erupeika@mmascher-mon data]$ ^C
+(reverse-i-search)`ta': sudo -u mmascher cfg/admin/InstallDev -s s^Crt
+[erupeika@mmascher-mon data]$ ^C
+[erupeika@mmascher-mon data]$ ^C
+[erupeika@mmascher-mon data]$ tail -f /data/srv/logs/crabserver/
+CRAB-20150708.log        crabserver-20150708.log  
+[erupeika@mmascher-mon data]$ tail -f /data/srv/logs/crabserver/crabserver-20150708.log 
+[08/Jul/2015:16:51:00]  RESTSQL:KDeHSNfGwUdX (previously trMLvizYaSPh) connected, client: 11.2.0.3.0, server: 11.2.0.4.0, stmtcache: 50
+[08/Jul/2015:16:51:00]  RESTSQL:KDeHSNfGwUdX ping
+[08/Jul/2015:16:51:00]  RESTSQL:KDeHSNfGwUdX check [select sysdate from dual]
+[08/Jul/2015:16:51:00]  RESTSQL:KDeHSNfGwUdX connection established
+[08/Jul/2015:16:51:00]  Found user 'erupeika'
+[08/Jul/2015:16:51:00]  RESTSQL:KDeHSNfGwUdX prepare [SELECT tm_taskname,tm_task_status, tw_name,tm_user_dn tm_spliti_args FROM tasks WHERE tm_username=:username AND tm_start_time>TO_TIMESTAMP(:timestamp, 'YYYY-MM-DD')]
+[08/Jul/2015:16:51:00]  RESTSQL:KDeHSNfGwUdX execute: () {'username': 'mmascher', 'timestamp': '2014-06-01'}
+[08/Jul/2015:16:51:00] mmascher-mon 137.138.52.230 "GET /crabserver/dev/workflow?timestamp=2014-06-01&username=mmascher HTTP/1.1" 304 Not Modified [data: 4615 in - out 35771 us ] [auth: OK "/DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=erupeika/CN=775659/CN=Emilis Antanas Rupeika" "" ] [ref: "" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:38.0) Gecko/20100101 Firefox/38.0" ]
+[08/Jul/2015:16:51:00]  RESTSQL:KDeHSNfGwUdX release with rollback
+[08/Jul/2015:16:51:00]  RESTSQL:KDeHSNfGwUdX RELEASED crab_gwms@devdb11 timeout=300 inuse=0 idle=1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[08/Jul/2015:16:51:50]  RESTSQL:YXZLbmsopEJh ENTER crab_gwms@devdb11 CRABInterface.RESTBaseAPI.RESTBaseAPI (GET dev workflow) inuse=0 idle=1
+[08/Jul/2015:16:51:50]  RESTSQL:YXZLbmsopEJh (previously KDeHSNfGwUdX) connected, client: 11.2.0.3.0, server: 11.2.0.4.0, stmtcache: 50
+[08/Jul/2015:16:51:50]  RESTSQL:YXZLbmsopEJh ping
+[08/Jul/2015:16:51:50]  RESTSQL:YXZLbmsopEJh check [select sysdate from dual]
+[08/Jul/2015:16:51:50]  RESTSQL:YXZLbmsopEJh connection established
+[08/Jul/2015:16:51:50]  Found user 'erupeika'
+[08/Jul/2015:16:51:50]  RESTSQL:YXZLbmsopEJh prepare [SELECT tm_taskname,tm_task_status, tw_name,tm_user_dn tm_spliti_args FROM tasks WHERE tm_username=:username AND tm_start_time>TO_TIMESTAMP(:timestamp, 'YYYY-MM-DD')]
+[08/Jul/2015:16:51:50]  RESTSQL:YXZLbmsopEJh execute: () {'username': 'mmascher', 'timestamp': '2014-06-01'}
+[08/Jul/2015:16:51:50] mmascher-mon 137.138.52.230 "GET /crabserver/dev/workflow?timestamp=2014-06-01&username=mmascher HTTP/1.1" 304 Not Modified [data: 4615 in - out 36381 us ] [auth: OK "/DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=erupeika/CN=775659/CN=Emilis Antanas Rupeika" "" ] [ref: "" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:38.0) Gecko/20100101 Firefox/38.0" ]
+[08/Jul/2015:16:51:50]  RESTSQL:YXZLbmsopEJh release with rollback
+[08/Jul/2015:16:51:50]  RESTSQL:YXZLbmsopEJh RELEASED crab_gwms@devdb11 timeout=300 inuse=0 idle=1
+^C
+[erupeika@mmascher-mon data]$ sqlplus crab_gwms@devdb11
+-bash: sqlplus: command not found
+[erupeika@mmascher-mon data]$ vim srv/current/a
+apps/ auth/ 
+[erupeika@mmascher-mon data]$ vim srv/current/a
+apps/ auth/ 
+[erupeika@mmascher-mon data]$ vim srv/current/a
+apps/ auth/ 
+[erupeika@mmascher-mon data]$ vim srv/current/auth/
+admin/       crabserver/  frontend/    proxy/       wmcore-auth/ 
+[erupeika@mmascher-mon data]$ vim srv/current/auth/
+admin/       crabserver/  frontend/    proxy/       wmcore-auth/ 
+[erupeika@mmascher-mon data]$ sudo vim srv/current/auth/crabserver/
+[erupeika@mmascher-mon data]$ ^C
+[erupeika@mmascher-mon data]$ 
+
