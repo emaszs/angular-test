@@ -15,7 +15,6 @@ app.controller('TaskSearchController', ['$scope', '$http', function ($scope, $ht
     $scope.data = {};
     $scope.searchTaskInfo = function () {
         console.log("success");
-
         // Retrieves task information from the api.
         // In case of error (such as when something wasn't found), null the data and set receivedError to true
         if ($scope.searchPhrase) {
@@ -24,12 +23,12 @@ app.controller('TaskSearchController', ['$scope', '$http', function ($scope, $ht
                 $scope.data = data;
                 console.log(data.result[0]);
                 $scope.receivedError = false;
+                $scope.displayTable = true;
             }).
             error(function () {
                 $scope.data = {};
-                $scope.requestError = "Task not found";
                 $scope.receivedError = true;
-                $scope.status = $scope.data.status;
+                $scope.displayTable = false;
             });
             //        $http({
             //            url:'https://mmascher-mon.cern.ch/crabserver/dev/task?subresource=search&workflow='

@@ -2,26 +2,26 @@
 <html lang="en" ng-app="CRABMonitor">
 
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="icon" href="../../favicon.ico">
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+	<meta name="description" content="">
+	<meta name="author" content="">
+	<link rel="icon" href="../../favicon.ico">
 
-    <title>CRABMonitor</title>
+	<title>CRABMonitor</title>
 
-    <!-- Bootstrap core CSS -->
-    <link href="/crabserver/ui/static?css/bootstrap.min.css" rel="stylesheet">
-    <link href="/crabserver/ui/static?test/starter-template.css" rel="stylesheet">
-    <link href="/crabserver/ui/static?test/custom.css" rel="stylesheet">
+	<!-- Bootstrap core CSS -->
+	<link href="/crabserver/ui/static?css/bootstrap.min.css" rel="stylesheet">
+	<link href="/crabserver/ui/static?test/starter-template.css" rel="stylesheet">
+	<link href="/crabserver/ui/static?test/custom.css" rel="stylesheet">
 
-    <!-- Custom styles for this template -->
-    <link href="starter-template.css" rel="stylesheet">
+	<!-- Custom styles for this template -->
+	<link href="starter-template.css" rel="stylesheet">
 
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
+	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+	<!--[if lt IE 9]>
       <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
@@ -29,90 +29,114 @@
 
 <body>
 
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-        <div class="container">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="#">CRABMonitor</a>
-            </div>
-            <div id="navbar" class="collapse navbar-collapse">
-                <ul class="nav navbar-nav">
-                    <li class="active"><a href="#">Home</a>
-                    </li>
-                    <li><a href="#about">About</a>
-                    </li>
-                    <li><a href="#contact">Contact</a>
-                    </li>
-                </ul>
-            </div>
-            <!--/.nav-collapse -->
-        </div>
-    </nav>
+	<nav class="navbar navbar-inverse navbar-fixed-top">
+		<div class="container">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+					<span class="sr-only">Toggle navigation</span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+				<a class="navbar-brand" href="#">CRABMonitor</a>
+			</div>
+			<div id="navbar" class="collapse navbar-collapse">
+				<ul class="nav navbar-nav">
+					<li class="active"><a href="#">Home</a>
+					</li>
+					<li><a href="#about">About</a>
+					</li>
+					<li><a href="#contact">Contact</a>
+					</li>
+				</ul>
+			</div>
+			<!--/.nav-collapse -->
+		</div>
+	</nav>
 
-    <div class="container padded-form">
+	<div class="container padded-form" ng-controller="TaskSearchController as search">
+		<div class="col-lg-12" >
+			<div class="input-group">
+				<input type="text" class="form-control" ng-model="searchPhrase" placeholder="Enter task name...">
+				<span class="input-group-btn">
+        		<button class="btn btn-default" ng-click="searchTaskInfo()" type="button">Search</button>
+      			</span>
+			</div>
+			<!-- /input-group -->
+		</div>
+		<!-- /.col-lg-6 -->
 
-        <form name="searchForm" ng-submit="searchTaskInfo()" ng-controller="TaskSearchController as search">
-            <input ng-model="searchPhrase" />
-            <input type="submit" value="Search" />
-            <br/>
-            <div ng-hide="searchPhrase == null">
+		
+		<div class="col-lg-12">
+			<h2 ng-if="receivedError">Not found</h2>
+			<div ng-show="displayTable">
 
-                <div ng-if="receivedError">Not found</div>
+				<h2>Task Info</h2>
+				<table class="table">
+					<thead>
+						<th>Name</th>
+						<th>Value</th>
+					</thead>
+					<tr ng-repeat="columnName in data.desc.columns">
+						<td>{{ columnName }}</td>
+						<td>{{ data.result[$index] }}</td>
+					</tr>
+				</table>
+			</div>
 
-                <div ng-if="!receivedError">
 
 
-                    <!--
-                    <ul class="list-group">
-                        <li class="list-group-item" ng-repeat="columnName in data.desc.columns">
-                            <span class="column-name">{{ columnName }}</span>
-                            <span class="column-value">{{ data.result[$index] }}</span>
-                        </li>
-                    </ul>
+
+		</div>
+
+
+
+		<!--
+		<form name="searchForm" ng-submit="searchTaskInfo()" ng-controller="TaskSearchController as search">
+			<input ng-model="searchPhrase" />
+			<input type="submit" value="Search" />
+			<br/>
+			<div>
+				<div ng-if="receivedError">Not found</div>
+				<div ng-show="displayTable">
+				
+					<h2>Task Info</h2>
+					<table class="table">
+						<thead>
+							<th>Name</th>
+							<th>Value</th>
+						</thead>
+						<tr ng-repeat="columnName in data.desc.columns">
+							<td>{{ columnName }}</td>
+							<td>{{ data.result[$index] }}</td>
+						</tr>
+					</table>
+				</div>
+
+
+
+
+			</div>
+		</form>
 -->
-                    <h2>Task Info</h2>
-                    <table class="table">
-                        <th>
-                            <td>Name</td>
-                            <td>Value</td>
-                        </th>
-                        <tr ng-repeat="columnName in data.desc.columns">
-                            <td>{{ columnName }}</td>
-                            <td>{{ data.result[$index] }}</td>
-                        </tr>
-                    </table>
-                </div>
-
-
-
-
-            </div>
-        </form>
 
 
 
 
 
+	</div>
+	<!-- /.container -->
 
 
-    </div>
-    <!-- /.container -->
-
-
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="https://mmascher-mon.cern.ch/crabserver/ui/static?script/jquery/jquery.min.js"></script>
-    <script src="https://mmascher-mon.cern.ch/crabserver/ui/static?script/misc/bootstrap.min.js"></script>
-    <script src="https://mmascher-mon.cern.ch/crabserver/ui/static?script/ang/angular.min.js"></script>
-    <script type="text/javascript" src="/crabserver/ui/static?test/app.js"></script>
-    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-    <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
+	<!-- Bootstrap core JavaScript
+		================================================== -->
+	<!-- Placed at the end of the document so the pages load faster -->
+	<script src="https://mmascher-mon.cern.ch/crabserver/ui/static?script/jquery/jquery.min.js"></script>
+	<script src="https://mmascher-mon.cern.ch/crabserver/ui/static?script/misc/bootstrap.min.js"></script>
+	<script src="https://mmascher-mon.cern.ch/crabserver/ui/static?script/ang/angular.min.js"></script>
+	<script type="text/javascript" src="/crabserver/ui/static?test/app.js"></script>
+	<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+	<script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
 </body>
 
 </html>
