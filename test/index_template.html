@@ -55,15 +55,15 @@
 	</nav>
 
 	<div class="container padded-form" ng-controller="TaskSearchController as search">
-		<div class="col-lg-12" >
+		<form name="searchForm" ng-submit="searchTaskInfo()" class="col-lg-12" >
 			<div class="input-group">
 				<input type="text" class="form-control" ng-model="searchPhrase" placeholder="Enter task name...">
 				<span class="input-group-btn">
-        		<button class="btn btn-default" ng-click="searchTaskInfo()" type="button">Search</button>
+        		<button class="btn btn-default" type="submit">Search</button>
       			</span>
 			</div>
 			<!-- /input-group -->
-		</div>
+		</form>
 		<!-- /.col-lg-6 -->
 
 		
