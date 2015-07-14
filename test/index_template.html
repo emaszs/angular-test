@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" ng-app="CRABMonitor">
+<html lang="en">
 
 <head>
 	<meta charset="utf-8">
@@ -40,11 +40,11 @@
 				</button>
 				<a class="navbar-brand" href="#">CRABMonitor</a>
 			</div>
-			<div ng-controller="OtherViewController as other" id="navbar" class="collapse navbar-collapse">
+			<div id="navbar" class="collapse navbar-collapse">
 				<ul class="nav navbar-nav">
 					<li class="active"><a href="#">Task info</a>
 					</li>
-					<li><a href ng-click="showSomethingElse()">About</a>
+					<li><a href="/crabserver/ui/static?test/other_view.html">About</a>
 					</li>
 					<li><a href="#contact">Contact</a>
 					</li>
@@ -56,10 +56,10 @@
 
 	<div class="container-fluid">
 
-		<div class="container padded-form" ng-controller="TaskSearchController as search">
-			<form name="searchForm" ng-submit="searchTaskInfo()" class="col-lg-12">
+		<div class="container padded-form">
+			<form action="" id="task-search-form" name="searchForm" class="col-lg-12">
 				<div class="input-group">
-					<input type="text" class="form-control" ng-model="searchPhrase" autofocus="" placeholder="Enter task name...">
+					<input id="task-search-form-input" type="text" class="form-control" autofocus="" placeholder="Enter task name...">
 					<span class="input-group-btn">
         		<button class="btn btn-default" type="submit">Search</button>
       			</span>
@@ -70,64 +70,20 @@
 
 
 			<div class="col-lg-12">
-				<h2 ng-if="receivedError">Not found</h2>
-				<div ng-show="displayTable">
+				<div>
 
-					<h2>Task Info</h2>
-					<table class="table">
+					<table id="task-info-table" class="table">
+						<h2>Task Info</h2>
 						<thead>
 							<th>Name</th>
 							<th>Value</th>
 						</thead>
-						<tr ng-repeat="columnName in data.desc.columns">
-							<td>{{ columnName }}</td>
-							<td>{{ data.result[$index] }}</td>
-						</tr>
+						<tbody>
+						</tbody>
 					</table>
 				</div>
-
-
-
-
 			</div>
-
-
-
-			<!--
-		<form name="searchForm" ng-submit="searchTaskInfo()" ng-controller="TaskSearchController as search">
-			<input ng-model="searchPhrase" />
-			<input type="submit" value="Search" />
-			<br/>
-			<div>
-				<div ng-if="receivedError">Not found</div>
-				<div ng-show="displayTable">
-				
-					<h2>Task Info</h2>
-					<table class="table">
-						<thead>
-							<th>Name</th>
-							<th>Value</th>
-						</thead>
-						<tr ng-repeat="columnName in data.desc.columns">
-							<td>{{ columnName }}</td>
-							<td>{{ data.result[$index] }}</td>
-						</tr>
-					</table>
-				</div>
-
-
-
-
-			</div>
-		</form>
--->
-
-
-
-
-
 		</div>
-		<div id="work-pane" ng-view></div>
 	</div>
 
 
@@ -139,9 +95,14 @@
 	<!-- Placed at the end of the document so the pages load faster -->
 	<script src="https://mmascher-mon.cern.ch/crabserver/ui/static?script/jquery/jquery.min.js"></script>
 	<script src="https://mmascher-mon.cern.ch/crabserver/ui/static?script/misc/bootstrap.min.js"></script>
-	<script src="https://mmascher-mon.cern.ch/crabserver/ui/static?script/ang/angular.min.js"></script>
-	<script src="/crabserver/ui/static?script/ang/angular-route.js"></script>
-	<script type="text/javascript" src="/crabserver/ui/static?test/app.js"></script>
+
+	<!--
+<script src="https://mmascher-mon.cern.ch/crabserver/ui/static?script/ang/angular.min.js"></script>
+<script src="/crabserver/ui/static?script/ang/angular-route.js"></script>
+<script type="text/javascript" src="/crabserver/ui/static?test/app.js"></script>
+-->
+	<script type="text/javascript" src="/crabserver/ui/static?test/search.js"></script>
+
 	<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
 	<script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
 </body>

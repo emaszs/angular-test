@@ -1,3 +1,9 @@
 .column-value {
-    padding-left: 10em;
+	padding-left: 10em;
+}
+
+#task-info-table {
+	/* hiding table before there is any data to display */
+	
+	display: none;
 }
