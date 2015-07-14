@@ -1,0 +1,620 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>CRABInterface.RESTUserWorkflow &mdash; CRAB Server 3.3.1507.rc4</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '3.3.1507.rc4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="CRAB Server 3.3.1507.rc4" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for CRABInterface.RESTUserWorkflow</h1><div class="highlight"><pre>
+<span class="c"># WMCore dependecies here</span>
+<span class="kn">from</span> <span class="nn">WMCore.REST.Error</span> <span class="kn">import</span> <span class="n">ExecutionError</span><span class="p">,</span> <span class="n">InvalidParameter</span>
+<span class="kn">from</span> <span class="nn">WMCore.REST.Server</span> <span class="kn">import</span> <span class="n">RESTEntity</span><span class="p">,</span> <span class="n">restcall</span><span class="p">,</span> <span class="n">rows</span>
+<span class="kn">from</span> <span class="nn">WMCore.REST.Validation</span> <span class="kn">import</span> <span class="n">validate_str</span><span class="p">,</span> <span class="n">validate_strlist</span><span class="p">,</span> <span class="n">validate_num</span><span class="p">,</span> <span class="n">validate_numlist</span>
+<span class="kn">from</span> <span class="nn">WMCore.HTTPFrontEnd.RequestManager.ReqMgrWebTools</span> <span class="kn">import</span> <span class="n">allScramArchsAndVersions</span><span class="p">,</span> <span class="n">TAG_COLLECTOR_URL</span>
+<span class="kn">from</span> <span class="nn">WMCore.Lexicon</span> <span class="kn">import</span> <span class="n">userprocdataset</span><span class="p">,</span> <span class="n">userProcDSParts</span><span class="p">,</span> <span class="n">primdataset</span>
+
+<span class="c"># CRABServer dependecies here</span>
+<span class="kn">from</span> <span class="nn">CRABInterface.DataUserWorkflow</span> <span class="kn">import</span> <span class="n">DataUserWorkflow</span>
+<span class="kn">from</span> <span class="nn">CRABInterface.DataUserWorkflow</span> <span class="kn">import</span> <span class="n">DataWorkflow</span>
+<span class="kn">from</span> <span class="nn">CRABInterface.RESTExtensions</span> <span class="kn">import</span> <span class="n">authz_owner_match</span><span class="p">,</span> <span class="n">authz_login_valid</span>
+<span class="kn">from</span> <span class="nn">CRABInterface.Regexps</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">CRABInterface.Utils</span> <span class="kn">import</span> <span class="n">CMSSitesCache</span><span class="p">,</span> <span class="n">conn_handler</span><span class="p">,</span> <span class="n">getDBinstance</span>
+<span class="kn">from</span> <span class="nn">ServerUtilities</span> <span class="kn">import</span> <span class="n">checkOutLFN</span>
+
+<span class="c"># external dependecies here</span>
+<span class="kn">import</span> <span class="nn">cherrypy</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+
+<div class="viewcode-block" id="RESTUserWorkflow"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTUserWorkflow.RESTUserWorkflow">[docs]</a><span class="k">class</span> <span class="nc">RESTUserWorkflow</span><span class="p">(</span><span class="n">RESTEntity</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;REST entity for workflows from the user point of view and relative subresources&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">api</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">mount</span><span class="p">,</span> <span class="n">centralcfg</span><span class="p">):</span>
+        <span class="n">RESTEntity</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">api</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">mount</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&quot;CRABLogger.RESTUserWorkflow&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">userworkflowmgr</span> <span class="o">=</span> <span class="n">DataUserWorkflow</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allCMSNames</span> <span class="o">=</span> <span class="n">CMSSitesCache</span><span class="p">(</span><span class="n">cachetime</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sites</span><span class="o">=</span><span class="p">{})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allPNNNames</span> <span class="o">=</span> <span class="n">CMSSitesCache</span><span class="p">(</span><span class="n">cachetime</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sites</span><span class="o">=</span><span class="p">{})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">centralcfg</span> <span class="o">=</span> <span class="n">centralcfg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Task</span> <span class="o">=</span> <span class="n">getDBinstance</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s">&#39;TaskDB&#39;</span><span class="p">,</span> <span class="s">&#39;Task&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_expandSites</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sites</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check if there are sites cotaining the &#39;*&#39; wildcard and convert them in the corresponding list</span>
+<span class="sd">           Raise exception if any wildcard site does expand to an empty list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">sites</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s">&#39;*&#39;</span> <span class="ow">in</span> <span class="n">site</span><span class="p">:</span>
+                <span class="n">sitere</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">site</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;*&#39;</span><span class="p">,</span><span class="s">&#39;.*&#39;</span><span class="p">))</span>
+                <span class="n">expanded</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">filter</span><span class="p">(</span><span class="n">sitere</span><span class="o">.</span><span class="n">match</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">allCMSNames</span><span class="o">.</span><span class="n">sites</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Site </span><span class="si">%s</span><span class="s"> expanded to </span><span class="si">%s</span><span class="s"> during validate&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">site</span><span class="p">,</span> <span class="n">expanded</span><span class="p">))</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">expanded</span><span class="p">:</span>
+                    <span class="n">excasync</span> <span class="o">=</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Remote output data site not valid&quot;</span><span class="p">)</span>
+                    <span class="n">invalidp</span> <span class="o">=</span> <span class="n">InvalidParameter</span><span class="p">(</span><span class="s">&quot;Cannot expand site </span><span class="si">%s</span><span class="s"> to anything&quot;</span> <span class="o">%</span> <span class="n">site</span><span class="p">,</span> <span class="n">errobj</span> <span class="o">=</span> <span class="n">excasync</span><span class="p">)</span>
+                    <span class="nb">setattr</span><span class="p">(</span><span class="n">invalidp</span><span class="p">,</span> <span class="s">&#39;trace&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="n">invalidp</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">expanded</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_checkSite</span><span class="p">(</span><span class="n">site</span><span class="p">)</span>
+                <span class="n">res</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">site</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_checkOutLFN</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check the lfn parameter: it must start with &#39;/store/user/&lt;username&gt;/&#39;, &#39;/store/group/groupname/&#39; or &#39;/store/local/something/&#39;,</span>
+<span class="sd">           where username is the one registered in SiteDB (i.e. the one used in the CERN primary account).</span>
+<span class="sd">           If lfn is not there, default to &#39;/store/user/&lt;username&gt;/&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c">## This is the username registered in SiteDB.</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="n">cherrypy</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">[</span><span class="s">&#39;login&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;lfn&#39;</span><span class="p">]:</span>
+            <span class="c">## Default to &#39;/store/user/&lt;username&gt;/&#39; if the user did not specify the lfn parameter.</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;lfn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;/store/user/</span><span class="si">%s</span><span class="s">/&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">username</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span>  <span class="o">=</span> <span class="s">&quot;The parameter Data.outLFNDirBase in the CRAB configuration file must start with either&quot;</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s">&quot; &#39;/store/user/&lt;username&gt;/&#39; or &#39;/store/group/&lt;groupname&gt;/&#39;&quot;</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s">&quot; (or &#39;/store/local/&lt;something&gt;/&#39; if publication is off),&quot;</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s">&quot; where username is your username as registered in SiteDB&quot;</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s">&quot; (i.e. the username of your CERN primary account).&quot;</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">checkOutLFN</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;lfn&#39;</span><span class="p">],</span> <span class="n">username</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">InvalidParameter</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_checkPublishDataName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">outlfn</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Validate the (user specified part of the) output dataset name for publication</span>
+<span class="sd">        using the WMCore.Lexicon method userprocdataset(), which does the same</span>
+<span class="sd">        validation as DBS (see discussion with Yuyi Guo in following github CRABClient</span>
+<span class="sd">        issue: https://github.com/dmwm/CRABClient/issues/4257).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c">## These if statements should actually never evaluate to True, because</span>
+        <span class="c">## the client always defines kwargs[&#39;publishname&#39;] and kwargs[&#39;workflow&#39;].</span>
+        <span class="k">if</span> <span class="s">&#39;publishname&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">msg</span>  <span class="o">=</span> <span class="s">&quot;Server parameter &#39;publishname&#39; is not defined.&quot;</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s">&quot; Unable to validate the publication dataset name.&quot;</span>
+            <span class="k">raise</span> <span class="n">InvalidParameter</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;publishname&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;-&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="s">&#39;workflow&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">msg</span>  <span class="o">=</span> <span class="s">&quot;Server parameter &#39;workflow&#39; is not defined.&quot;</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s">&quot; Unable to validate the publication dataset name.&quot;</span>
+            <span class="k">raise</span> <span class="n">InvalidParameter</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="c">## The client defines kwargs[&#39;publishname&#39;] = &lt;Data.publishDataName&gt;-&lt;isbchecksum&gt;</span>
+        <span class="c">## if the user defines Data.publishDataName, and kwargs[&#39;publishname&#39;] = &lt;isbchecksum&gt; otherwise.</span>
+        <span class="c">## (The PostJob replaces then the isbchecksum by the psethash.)</span>
+        <span class="c">## In DataWorkflow.py, the publish_name column of the TaskDB is defined</span>
+        <span class="c">## in this way (without &quot;username-&quot;), and that&#39;s what is used later by</span>
+        <span class="c">## PostJob to define the output dataset name.</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;publishname&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;-&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">publishDataNameToCheck</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">-</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;workflow&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">,</span><span class="s">&#39;_&#39;</span><span class="p">),</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;publishname&#39;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">publishDataNameToCheck</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;publishname&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;publishgroupname&#39;</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">outlfn</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;/store/group/&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">outlfn</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)[</span><span class="mi">3</span><span class="p">]):</span>
+                <span class="n">msg</span>  <span class="o">=</span> <span class="s">&quot;Invalid CRAB configuration.&quot;</span>
+                <span class="n">msg</span> <span class="o">+=</span> <span class="s">&quot; Parameter Data.publishWithGroupName is True,&quot;</span>
+                <span class="n">msg</span> <span class="o">+=</span> <span class="s">&quot; but Data.outLFNDirBase does not start with &#39;/store/group/&lt;groupname&gt;&#39;.&quot;</span>
+                <span class="k">raise</span> <span class="n">InvalidParameter</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="n">group_user_prefix</span> <span class="o">=</span> <span class="n">outlfn</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">username</span> <span class="o">=</span> <span class="n">cherrypy</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">[</span><span class="s">&#39;login&#39;</span><span class="p">]</span>
+            <span class="n">group_user_prefix</span> <span class="o">=</span> <span class="n">username</span>
+        <span class="n">publishDataNameToCheck</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">-</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">group_user_prefix</span><span class="p">,</span> <span class="n">publishDataNameToCheck</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">userprocdataset</span><span class="p">(</span><span class="n">publishDataNameToCheck</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+            <span class="c">## The messages below are more descriptive than if we would use</span>
+            <span class="c">## the message from AssertionError exception.</span>
+            <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;publishname&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;-&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">param</span> <span class="o">=</span> <span class="s">&#39;General.requestName&#39;</span>
+                <span class="n">extrastr</span> <span class="o">=</span> <span class="s">&#39;crab_&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">param</span> <span class="o">=</span> <span class="s">&#39;Data.publishDataName&#39;</span>
+                <span class="n">extrastr</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+            <span class="n">msg</span>  <span class="o">=</span> <span class="s">&quot;Invalid CRAB configuration parameter </span><span class="si">%s</span><span class="s">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">param</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s">&quot; The combined string &#39;</span><span class="si">%s</span><span class="s">-</span><span class="si">%s</span><span class="s">&lt;</span><span class="si">%s</span><span class="s">&gt;&#39; should not have more than 166 characters&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">group_user_prefix</span><span class="p">,</span> <span class="n">extrastr</span><span class="p">,</span> <span class="n">param</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s">&quot; and should match the regular expression </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">userProcDSParts</span><span class="p">[</span><span class="s">&#39;publishdataname&#39;</span><span class="p">])</span>
+            <span class="k">raise</span> <span class="n">InvalidParameter</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_checkPrimaryDataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Validate the primary dataset name using the WMCore.Lexicon method primdataset(),</span>
+<span class="sd">        which does the same validation as DBS (see discussion with Yuyi Guo in following</span>
+<span class="sd">        github CRABClient issue: https://github.com/dmwm/CRABClient/issues/4257).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c">## This if statement should actually never evaluate to True, because</span>
+        <span class="c">## the client always defines kwargs[&#39;inputdata&#39;].</span>
+        <span class="k">if</span> <span class="s">&#39;inputdata&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">msg</span>  <span class="o">=</span> <span class="s">&quot;Server parameter &#39;inputdata&#39; is not defined.&quot;</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s">&quot; Unable to validate the primary dataset name.&quot;</span>
+            <span class="k">raise</span> <span class="n">InvalidParameter</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c">## The client defines kwargs[&#39;inputdata&#39;] = &quot;/&lt;primary-dataset-name&gt;&quot;,</span>
+            <span class="c">## i.e. it adds a &quot;/&quot; at the beginning, which we should remove if we</span>
+            <span class="c">## want to do the validation of the primary dataset name only.</span>
+            <span class="c">## (The client puts the primary dataset name in kwargs[&#39;inputdata&#39;],</span>
+            <span class="c">## because the PostJob extracts the primary dataset name from this</span>
+            <span class="c">## parameter splitting by &quot;/&quot; and taking the element 1, which is the</span>
+            <span class="c">## right thing to do when kwargs[&#39;inputdata&#39;] is the input dataset in</span>
+            <span class="c">## an analysis job type.)</span>
+            <span class="n">primdataset</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;inputdata&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">:])</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+            <span class="c">## This message is more descriptive than if we would use the message</span>
+            <span class="c">## from AssertionError exception, but I had to explicitely write the</span>
+            <span class="c">## regular expression [a-zA-Z][a-zA-Z0-9\-_]*, which is not nice.</span>
+            <span class="c">## The message from AssertionError exception would be:</span>
+            <span class="c">## &quot;&#39;&lt;kwargs[&#39;inputdata&#39;][1:]&gt;&#39; does not match regular expression [a-zA-Z0-9\.\-_]+&quot;.</span>
+            <span class="n">msg</span>  <span class="o">=</span> <span class="s">&quot;Invalid CRAB configuration parameter Data.primaryDataset.&quot;</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s">&quot; The parameter should not have more than 99 characters&quot;</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s">&quot; and should match the regular expression [a-zA-Z][a-zA-Z0-9\-_]*&quot;</span>
+            <span class="k">raise</span> <span class="n">InvalidParameter</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_checkASODestination</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_checkSite</span><span class="p">(</span><span class="n">site</span><span class="p">,</span> <span class="n">pnn</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">site</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">centralcfg</span><span class="o">.</span><span class="n">centralconfig</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;banned-out-destinations&#39;</span><span class="p">,</span> <span class="p">[]):</span>
+            <span class="n">excasync</span> <span class="o">=</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Remote output data site is banned&quot;</span><span class="p">)</span>
+            <span class="n">invalidp</span> <span class="o">=</span> <span class="n">InvalidParameter</span><span class="p">(</span><span class="s">&quot;The output site you specified in the Site.storageSite parameter (</span><span class="si">%s</span><span class="s">) is blacklisted (banned sites: </span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span>\
+                            <span class="p">(</span><span class="n">site</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">centralcfg</span><span class="o">.</span><span class="n">centralconfig</span><span class="p">[</span><span class="s">&#39;banned-out-destinations&#39;</span><span class="p">]),</span> <span class="n">errobj</span> <span class="o">=</span> <span class="n">excasync</span><span class="p">)</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">invalidp</span><span class="p">,</span> <span class="s">&#39;trace&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">invalidp</span>
+
+    <span class="k">def</span> <span class="nf">_checkSite</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">,</span> <span class="n">pnn</span> <span class="o">=</span> <span class="bp">False</span><span class="p">):</span>
+        <span class="n">sites</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">allPNNNames</span><span class="o">.</span><span class="n">sites</span> <span class="k">if</span> <span class="n">pnn</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">allCMSNames</span><span class="o">.</span><span class="n">sites</span>
+        <span class="k">if</span> <span class="n">site</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sites</span><span class="p">:</span>
+            <span class="n">excasync</span> <span class="o">=</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;A site name you specified is not valid&quot;</span><span class="p">)</span>
+            <span class="n">invalidp</span> <span class="o">=</span> <span class="n">InvalidParameter</span><span class="p">(</span><span class="s">&quot;The parameter </span><span class="si">%s</span><span class="s"> is not in the list of known CMS sites </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">site</span><span class="p">,</span> <span class="n">sites</span><span class="p">),</span> <span class="n">errobj</span> <span class="o">=</span> <span class="n">excasync</span><span class="p">)</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">invalidp</span><span class="p">,</span> <span class="s">&#39;trace&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">invalidp</span>
+
+    <span class="k">def</span> <span class="nf">_checkReleases</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jobarch</span><span class="p">,</span> <span class="n">jobsw</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Check if the software needed by the user is available in the tag collector</span>
+<span class="sd">            Uses allScramArchsAndVersions from WMCore. If an IOError is raised report an error message.</span>
+<span class="sd">            If the list of releases is empty (reason may be an ExpatError) then report an error message</span>
+<span class="sd">            If the asked released is not there then report an error message</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">goodReleases</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">goodReleases</span> <span class="o">=</span> <span class="n">allScramArchsAndVersions</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s">&quot;Error connecting to </span><span class="si">%s</span><span class="s"> and determine the list of available releases. &quot;</span> <span class="o">%</span> <span class="n">TAG_COLLECTOR_URL</span> <span class="o">+</span>\
+                  <span class="s">&quot;Skipping the check of the releases&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">goodReleases</span> <span class="o">==</span> <span class="p">{}:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s">&quot;The list of releases at </span><span class="si">%s</span><span class="s"> is empty. &quot;</span> <span class="o">%</span> <span class="n">TAG_COLLECTOR_URL</span> <span class="o">+</span>\
+                      <span class="s">&quot;Skipping the check of the releases&quot;</span>
+            <span class="k">elif</span> <span class="n">jobarch</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">goodReleases</span> <span class="ow">or</span> <span class="n">jobsw</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">goodReleases</span><span class="p">[</span><span class="n">jobarch</span><span class="p">]:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s">&quot;ERROR: </span><span class="si">%s</span><span class="s"> on </span><span class="si">%s</span><span class="s"> is not among supported releases&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">jobsw</span><span class="p">,</span> <span class="n">jobarch</span><span class="p">)</span>
+                <span class="n">msg</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">Use config.JobType.allowUndistributedCMSSW = True if you are sure of what you are doing&quot;</span>
+                <span class="n">excasync</span> <span class="o">=</span> <span class="s">&quot;ERROR: </span><span class="si">%s</span><span class="s"> on </span><span class="si">%s</span><span class="s"> is not among supported releases or an error occurred&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">jobsw</span><span class="p">,</span> <span class="n">jobarch</span><span class="p">)</span>
+                <span class="n">invalidp</span> <span class="o">=</span> <span class="n">InvalidParameter</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">errobj</span> <span class="o">=</span> <span class="n">excasync</span><span class="p">)</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">invalidp</span><span class="p">,</span> <span class="s">&#39;trace&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">invalidp</span>
+
+        <span class="k">if</span> <span class="n">msg</span><span class="p">:</span>
+            <span class="c">#Need to log the message in the db for the users</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="nd">@conn_handler</span><span class="p">(</span><span class="n">services</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;sitedb&#39;</span><span class="p">,</span> <span class="s">&#39;centralconfig&#39;</span><span class="p">])</span>
+<div class="viewcode-block" id="RESTUserWorkflow.validate"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTUserWorkflow.RESTUserWorkflow.validate">[docs]</a>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apiobj</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">api</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Validating all the input parameter as enforced by the WMCore.REST module&quot;&quot;&quot;</span>
+        <span class="c">#authz_login_valid()</span>
+
+        <span class="k">if</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;PUT&#39;</span><span class="p">]:</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;activity&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_ACTIVITY</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;jobtype&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_JOBTYPE</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            <span class="c"># TODO this should be changed to be non-optional</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;generator&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_GENERATOR</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;eventsperlumi&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_LUMIEVENTS</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;jobsw&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_CMSSW</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">validate_num</span><span class="p">(</span><span class="s">&quot;nonprodsw&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;jobarch&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_ARCH</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">safe</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&quot;nonprodsw&quot;</span><span class="p">]:</span> <span class="c">#if the user wants to allow non-production releases</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_checkReleases</span><span class="p">(</span><span class="n">safe</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;jobarch&#39;</span><span class="p">],</span> <span class="n">safe</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;jobsw&#39;</span><span class="p">])</span>
+            <span class="n">jobtype</span> <span class="o">=</span> <span class="n">safe</span><span class="o">.</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;jobtype&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="n">validate_num</span><span class="p">(</span><span class="s">&quot;useparent&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_strlist</span><span class="p">(</span><span class="s">&quot;siteblacklist&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_CMSSITE</span><span class="p">)</span>
+            <span class="n">safe</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;siteblacklist&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expandSites</span><span class="p">(</span><span class="n">safe</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;siteblacklist&#39;</span><span class="p">])</span>
+            <span class="n">validate_strlist</span><span class="p">(</span><span class="s">&quot;sitewhitelist&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_CMSSITE</span><span class="p">)</span>
+            <span class="n">safe</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;sitewhitelist&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expandSites</span><span class="p">(</span><span class="n">safe</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;sitewhitelist&#39;</span><span class="p">])</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;splitalgo&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_SPLIT</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">validate_num</span><span class="p">(</span><span class="s">&quot;algoargs&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">validate_num</span><span class="p">(</span><span class="s">&quot;totalunits&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;cachefilename&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_CACHENAME</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;cacheurl&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_CACHEURL</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;lfn&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_LFN</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_checkOutLFN</span><span class="p">(</span><span class="n">safe</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">validate_strlist</span><span class="p">(</span><span class="s">&quot;addoutputfiles&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_ADDFILE</span><span class="p">)</span>
+            <span class="n">validate_strlist</span><span class="p">(</span><span class="s">&quot;userfiles&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_USERFILE</span><span class="p">)</span>
+            <span class="n">validate_num</span><span class="p">(</span><span class="s">&quot;savelogsflag&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">validate_num</span><span class="p">(</span><span class="s">&quot;saveoutput&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_num</span><span class="p">(</span><span class="s">&quot;faillimit&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_num</span><span class="p">(</span><span class="s">&quot;ignorelocality&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">safe</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;ignorelocality&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">centralcfg</span><span class="o">.</span><span class="n">centralconfig</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;ign-locality-blacklist&#39;</span><span class="p">,</span> <span class="p">[]):</span>
+                <span class="n">safe</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;siteblacklist&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expandSites</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">centralcfg</span><span class="o">.</span><span class="n">centralconfig</span><span class="p">[</span><span class="s">&#39;ign-locality-blacklist&#39;</span><span class="p">])</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;vorole&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_VOPARAMS</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;vogroup&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_VOPARAMS</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_num</span><span class="p">(</span><span class="s">&quot;publication&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;publishdbsurl&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_DBSURL</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="p">(</span><span class="ow">not</span> <span class="nb">bool</span><span class="p">(</span><span class="n">safe</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;publication&#39;</span><span class="p">])))</span>
+            <span class="c">## Validations needed in case publication is on.</span>
+            <span class="k">if</span> <span class="n">safe</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;publication&#39;</span><span class="p">]:</span>
+                <span class="c">## The (user specified part of the) publication dataset name must be</span>
+                <span class="c">## specified and must pass DBS validation. Since this is the correct</span>
+                <span class="c">## validation function, it must be done before the</span>
+                <span class="c">## validate_str(&quot;workflow&quot;, ...) and validate_str(&quot;publishname&quot;, ...)</span>
+                <span class="c">## we have below. Not sure why RX_PUBLISH was introduced in CRAB, but</span>
+                <span class="c">## it is not the correct regular expression for publication dataset</span>
+                <span class="c">## name validation.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_checkPublishDataName</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">safe</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;lfn&#39;</span><span class="p">])</span>
+                <span class="c">## &#39;publishname&#39; was already validated above in _checkPublishDataName().</span>
+                <span class="c">## But I am not sure if we can skip the validate_str(&#39;publishname&#39;, ...)</span>
+                <span class="c">## or we need it so that all parameters are moved from param to safe.</span>
+                <span class="c">## Therefore, I didn&#39;t remove the validate_str(&#39;publishname&#39;, ...),</span>
+                <span class="c">## but only changed RX_PUBLISH -&gt; RX_ANYTHING.</span>
+                <span class="n">validate_str</span><span class="p">(</span><span class="s">&#39;publishname&#39;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_ANYTHING</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+                <span class="c">## If this is a MC generation job type, the primary dataset name will</span>
+                <span class="c">## be used to define the primary dataset field in the publication</span>
+                <span class="c">## dataset name. Therefore, the primary dataset name must pass DBS</span>
+                <span class="c">## validation. Since in a MC generation job type the primary dataset</span>
+                <span class="c">## name is saved in &#39;inputdata&#39;, _checkPrimaryDataset() actually</span>
+                <span class="c">## validates &#39;inputdata&#39;. Therefore, this function must come before</span>
+                <span class="c">## the validate_str(&#39;inputdata&#39;, ...) we have below. OTOH, matching</span>
+                <span class="c">## &#39;inputdata&#39; agains RX_DATASET is not the correct validation for</span>
+                <span class="c">## the primary dataset name.</span>
+                <span class="k">if</span> <span class="n">jobtype</span> <span class="o">==</span> <span class="s">&#39;PrivateMC&#39;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_checkPrimaryDataset</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c">## Not sure if we need to match publishname against RX_PUBLISH...</span>
+                <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;publishname&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_PUBLISH</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">validate_num</span><span class="p">(</span><span class="s">&quot;publishgroupname&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="c">## This line must come after _checkPublishDataName()</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;workflow&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_WORKFLOW</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">jobtype</span> <span class="o">==</span> <span class="s">&#39;Analysis&#39;</span><span class="p">:</span>
+                <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;inputdata&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_DATASET</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            <span class="c">## Added this if, because in this case &#39;inputdata&#39; was already validated</span>
+            <span class="c">## above in _checkPrimaryDataset(), and I am not sure if we can skip the</span>
+            <span class="c">## validate_str(&#39;inputdata&#39;, ...) or we need it so that all parameters</span>
+            <span class="c">## are moved from param to safe.</span>
+            <span class="k">elif</span> <span class="n">jobtype</span> <span class="o">==</span> <span class="s">&#39;PrivateMC&#39;</span> <span class="ow">and</span> <span class="n">safe</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;publication&#39;</span><span class="p">]:</span>
+                <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;inputdata&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_ANYTHING</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;inputdata&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_DATASET</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_num</span><span class="p">(</span><span class="s">&quot;nonvaliddata&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="c">#if one and only one between publishDataName and publishDbsUrl is set raise an error (we need both or none of them)</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;asyncdest&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_CMSSITE</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_checkASODestination</span><span class="p">(</span><span class="n">safe</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;asyncdest&#39;</span><span class="p">])</span>
+            <span class="c"># We no longer use this attribute, but keep it around for older client compatibility</span>
+            <span class="n">validate_num</span><span class="p">(</span><span class="s">&quot;blacklistT1&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_num</span><span class="p">(</span><span class="s">&quot;oneEventMode&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_num</span><span class="p">(</span><span class="s">&quot;priority&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_num</span><span class="p">(</span><span class="s">&quot;maxjobruntime&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_num</span><span class="p">(</span><span class="s">&quot;numcores&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_num</span><span class="p">(</span><span class="s">&quot;maxmemory&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;dbsurl&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_DBSURL</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">validate_strlist</span><span class="p">(</span><span class="s">&quot;tfileoutfiles&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_OUTFILES</span><span class="p">)</span>
+            <span class="n">validate_strlist</span><span class="p">(</span><span class="s">&quot;edmoutfiles&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_OUTFILES</span><span class="p">)</span>
+            <span class="n">validate_strlist</span><span class="p">(</span><span class="s">&quot;runs&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_RUNS</span><span class="p">)</span>
+            <span class="n">validate_strlist</span><span class="p">(</span><span class="s">&quot;lumis&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_LUMIRANGE</span><span class="p">)</span>
+            <span class="c">#validate_str(&quot;scheduler&quot;, param, safe, RX_SCHEDULER)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">safe</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&quot;runs&quot;</span><span class="p">])</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">safe</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&quot;lumis&quot;</span><span class="p">]):</span>
+                <span class="k">raise</span> <span class="n">InvalidParameter</span><span class="p">(</span><span class="s">&quot;The number of runs and the number of lumis lists are different&quot;</span><span class="p">)</span>
+            <span class="n">validate_strlist</span><span class="p">(</span><span class="s">&quot;adduserfiles&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_ADDFILE</span><span class="p">)</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;asourl&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_ASOURL</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;scriptexe&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_ADDFILE</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_strlist</span><span class="p">(</span><span class="s">&quot;scriptargs&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_SCRIPTARGS</span><span class="p">)</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;scheddname&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_SCHEDD_NAME</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;collector&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_COLLECTOR</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_strlist</span><span class="p">(</span><span class="s">&quot;extrajdl&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_SCRIPTARGS</span><span class="p">)</span>
+            <span class="n">validate_num</span><span class="p">(</span><span class="s">&quot;dryrun&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;POST&#39;</span><span class="p">]:</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;workflow&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_UNIQUEWF</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;subresource&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_SUBRESTAT</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="c">## In a resubmission, the site black- and whitelists need to be interpreted</span>
+            <span class="c">## differently than in an initial task submission. If there is no site black-</span>
+            <span class="c">## or whitelist, set it to None and DataWorkflow will use the corresponding</span>
+            <span class="c">## list defined in the initial task submission. If the site black- or whitelist</span>
+            <span class="c">## is equal to the string &#39;empty&#39;, set it to an empty list and don&#39;t call</span>
+            <span class="c">## validate_strlist as it would fail.</span>
+            <span class="k">if</span> <span class="s">&#39;siteblacklist&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">param</span><span class="o">.</span><span class="n">kwargs</span><span class="p">:</span>
+                <span class="n">safe</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;siteblacklist&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">elif</span> <span class="n">param</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;siteblacklist&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;empty&#39;</span><span class="p">:</span>
+                <span class="n">safe</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;siteblacklist&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">del</span> <span class="n">param</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;siteblacklist&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">validate_strlist</span><span class="p">(</span><span class="s">&quot;siteblacklist&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_CMSSITE</span><span class="p">)</span>
+                <span class="n">safe</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;siteblacklist&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expandSites</span><span class="p">(</span><span class="n">safe</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;siteblacklist&#39;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="s">&#39;sitewhitelist&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">param</span><span class="o">.</span><span class="n">kwargs</span><span class="p">:</span>
+                <span class="n">safe</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;sitewhitelist&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">elif</span> <span class="n">param</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;sitewhitelist&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;empty&#39;</span><span class="p">:</span>
+                <span class="n">safe</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;sitewhitelist&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">del</span> <span class="n">param</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;sitewhitelist&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">validate_strlist</span><span class="p">(</span><span class="s">&quot;sitewhitelist&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_CMSSITE</span><span class="p">)</span>
+                <span class="n">safe</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;sitewhitelist&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expandSites</span><span class="p">(</span><span class="n">safe</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;sitewhitelist&#39;</span><span class="p">])</span>
+            <span class="n">validate_numlist</span><span class="p">(</span><span class="s">&#39;jobids&#39;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">)</span>
+            <span class="n">validate_num</span><span class="p">(</span><span class="s">&quot;priority&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_num</span><span class="p">(</span><span class="s">&quot;maxjobruntime&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_num</span><span class="p">(</span><span class="s">&quot;numcores&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_num</span><span class="p">(</span><span class="s">&quot;maxmemory&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_num</span><span class="p">(</span><span class="s">&quot;force&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;GET&#39;</span><span class="p">]:</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;workflow&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_UNIQUEWF</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&#39;subresource&#39;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_SUBRESTAT</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_USERNAME</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&#39;timestamp&#39;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_DATE</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="c">## inserted by eric</span>
+
+            <span class="c">## Used to determine how much information to return to the client for status.</span>
+            <span class="c">## also used by report to determine if it has to check job states</span>
+            <span class="n">validate_num</span><span class="p">(</span><span class="s">&quot;verbose&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+            <span class="c">## used by get log, get data</span>
+            <span class="n">validate_num</span><span class="p">(</span><span class="s">&#39;limit&#39;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_num</span><span class="p">(</span><span class="s">&#39;exitcode&#39;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_numlist</span><span class="p">(</span><span class="s">&#39;jobids&#39;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">)</span>
+
+            <span class="c">## used by errors and report (short format in report means we do not query DBS)</span>
+            <span class="n">validate_num</span><span class="p">(</span><span class="s">&#39;shortformat&#39;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+            <span class="c">## validation parameters</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">safe</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;workflow&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">safe</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;subresource&#39;</span><span class="p">]:</span>
+                <span class="k">raise</span> <span class="n">InvalidParameter</span><span class="p">(</span><span class="s">&quot;Invalid input parameters&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">safe</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;subresource&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">,</span> <span class="s">&#39;logs&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">safe</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;limit&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">safe</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;jobids&#39;</span><span class="p">]:</span>
+                <span class="k">raise</span> <span class="n">InvalidParameter</span><span class="p">(</span><span class="s">&quot;You need to specify the number of jobs to retrieve or their ids.&quot;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;DELETE&#39;</span><span class="p">]:</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;workflow&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_UNIQUEWF</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">validate_num</span><span class="p">(</span><span class="s">&quot;force&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_numlist</span><span class="p">(</span><span class="s">&#39;jobids&#39;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">)</span>
+
+</div>
+    <span class="nd">@restcall</span>
+    <span class="c">#@getUserCert(headers=cherrypy.request.headers)</span>
+<div class="viewcode-block" id="RESTUserWorkflow.put"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTUserWorkflow.RESTUserWorkflow.put">[docs]</a>    <span class="k">def</span> <span class="nf">put</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow</span><span class="p">,</span> <span class="n">activity</span><span class="p">,</span> <span class="n">jobtype</span><span class="p">,</span> <span class="n">jobsw</span><span class="p">,</span> <span class="n">jobarch</span><span class="p">,</span> <span class="n">inputdata</span><span class="p">,</span> <span class="n">nonvaliddata</span><span class="p">,</span> <span class="n">useparent</span><span class="p">,</span> <span class="n">generator</span><span class="p">,</span> <span class="n">eventsperlumi</span><span class="p">,</span> \
+                <span class="n">siteblacklist</span><span class="p">,</span> <span class="n">sitewhitelist</span><span class="p">,</span> <span class="n">splitalgo</span><span class="p">,</span> <span class="n">algoargs</span><span class="p">,</span> <span class="n">cachefilename</span><span class="p">,</span> <span class="n">cacheurl</span><span class="p">,</span> <span class="n">addoutputfiles</span><span class="p">,</span>\
+                <span class="n">savelogsflag</span><span class="p">,</span> <span class="n">publication</span><span class="p">,</span> <span class="n">publishname</span><span class="p">,</span> <span class="n">publishgroupname</span><span class="p">,</span> <span class="n">asyncdest</span><span class="p">,</span> <span class="n">dbsurl</span><span class="p">,</span> <span class="n">publishdbsurl</span><span class="p">,</span> <span class="n">vorole</span><span class="p">,</span> <span class="n">vogroup</span><span class="p">,</span> <span class="n">tfileoutfiles</span><span class="p">,</span> <span class="n">edmoutfiles</span><span class="p">,</span> <span class="n">runs</span><span class="p">,</span> <span class="n">lumis</span><span class="p">,</span>\
+                <span class="n">totalunits</span><span class="p">,</span> <span class="n">adduserfiles</span><span class="p">,</span> <span class="n">oneEventMode</span><span class="p">,</span> <span class="n">maxjobruntime</span><span class="p">,</span> <span class="n">numcores</span><span class="p">,</span> <span class="n">maxmemory</span><span class="p">,</span> <span class="n">priority</span><span class="p">,</span> <span class="n">blacklistT1</span><span class="p">,</span> <span class="n">nonprodsw</span><span class="p">,</span> <span class="n">lfn</span><span class="p">,</span> <span class="n">saveoutput</span><span class="p">,</span>
+                <span class="n">faillimit</span><span class="p">,</span> <span class="n">ignorelocality</span><span class="p">,</span> <span class="n">userfiles</span><span class="p">,</span> <span class="n">asourl</span><span class="p">,</span> <span class="n">scriptexe</span><span class="p">,</span> <span class="n">scriptargs</span><span class="p">,</span> <span class="n">scheddname</span><span class="p">,</span> <span class="n">extrajdl</span><span class="p">,</span> <span class="n">collector</span><span class="p">,</span> <span class="n">dryrun</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Perform the workflow injection</span>
+
+<span class="sd">           :arg str workflow: workflow name requested by the user;</span>
+<span class="sd">           :arg str activity: workflow activity type, default None;</span>
+<span class="sd">           :arg str jobtype: job type of the workflow, usually Analysis;</span>
+<span class="sd">           :arg str jobsw: software requirement;</span>
+<span class="sd">           :arg str jobarch: software architecture (=SCRAM_ARCH);</span>
+<span class="sd">           :arg str inputdata: input dataset;</span>
+<span class="sd">           :arg str nonvaliddata: allow invalid input dataset;</span>
+<span class="sd">           :arg int useparent: add the parent dataset as secondary input;</span>
+<span class="sd">           :arg str generator: event generator for MC production;</span>
+<span class="sd">           :arg str eventsperlumi: how many events to generate per lumi;</span>
+<span class="sd">           :arg str list siteblacklist: black list of sites, with CMS name;</span>
+<span class="sd">           :arg str list sitewhitelist: white list of sites, with CMS name;</span>
+<span class="sd">           :arg str splitalgo: algorithm to be used for the workflow splitting;</span>
+<span class="sd">           :arg str algoargs: argument to be used by the splitting algorithm;</span>
+<span class="sd">           :arg str cachefilename: name of the file inside the cache</span>
+<span class="sd">           :arg str cacheurl: URL of the cache</span>
+<span class="sd">           :arg str list addoutputfiles: list of additional output files;</span>
+<span class="sd">           :arg int savelogsflag: archive the log files? 0 no, everything else yes;</span>
+<span class="sd">           :arg str userdn: DN of user doing the request;</span>
+<span class="sd">           :arg str userhn: hyper new name of the user doing the request;</span>
+<span class="sd">           :arg int publication: flag enabling or disabling data publication;</span>
+<span class="sd">           :arg str publishname: name to use for data publication;</span>
+<span class="sd">           :arg str publishgroupname: add groupname or username to publishname;</span>
+<span class="sd">           :arg str asyncdest: CMS site name for storage destination of the output files;</span>
+<span class="sd">           :arg str dbsurl: dbs url where the input dataset is published;</span>
+<span class="sd">           :arg str publishdbsurl: dbs url where the output data has to be published;</span>
+<span class="sd">           :arg str vorole: user vo role</span>
+<span class="sd">           :arg str vogroup: user vo group</span>
+<span class="sd">           :arg str tfileoutfiles: list of t-output files</span>
+<span class="sd">           :arg str edmoutfiles: list of edm output files</span>
+<span class="sd">           :arg str list runs: list of run numbers</span>
+<span class="sd">           :arg str list lumis: list of lumi section numbers</span>
+<span class="sd">           :arg str scheduler: Which scheduler to use, can be &#39;panda&#39; or &#39;condor&#39;</span>
+<span class="sd">           :arg int totalunits: number of MC event to be generated</span>
+<span class="sd">           :arg int adduserfiles: additional user file to be copied in the cmsRun directory</span>
+<span class="sd">           :arg int oneEventMode: flag enabling oneEventMode</span>
+<span class="sd">           :arg int maxjobruntime: max job runtime, in minutes</span>
+<span class="sd">           :arg int numcores: number of CPU cores required by job</span>
+<span class="sd">           :arg int maxmemory: maximum amount of RAM required, in MB</span>
+<span class="sd">           :arg int priority: priority of this task</span>
+<span class="sd">           :arg int saveoutput: whether to perform stageout for a given output file</span>
+<span class="sd">           :arg int faillimit: the maximum number of failed jobs which triggers a workflow abort.</span>
+<span class="sd">           :arg int ignorelocality: whether to ignore file locality in favor of the whitelist.</span>
+<span class="sd">           :arg str userfiles: The files to process instead of a DBS-based dataset.</span>
+<span class="sd">           :arg str asourl: ASO url to be used in place of the one in the ext configuration.</span>
+<span class="sd">           :arg str scriptexe: script to execute in place of cmsrun.</span>
+<span class="sd">           :arg str scriptargs: arguments to be passed to the scriptexe script.</span>
+<span class="sd">           :arg str scheddname: Schedd Name used for debugging.</span>
+<span class="sd">           :arg str extrajdl: extra Job Description Language parameters to be added.</span>
+<span class="sd">           :arg str collector: Collector Name used for debugging.</span>
+<span class="sd">           :arg int dryrun: enable dry run mode (initialize but do not submit request).</span>
+<span class="sd">           :returns: a dict which contaians details of the request&quot;&quot;&quot;</span>
+
+        <span class="c">#print &#39;cherrypy headers: %s&#39; % cherrypy.request.headers[&#39;Ssl-Client-Cert&#39;]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">userworkflowmgr</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">workflow</span><span class="o">=</span><span class="n">workflow</span><span class="p">,</span> <span class="n">activity</span><span class="o">=</span><span class="n">activity</span><span class="p">,</span> <span class="n">jobtype</span><span class="o">=</span><span class="n">jobtype</span><span class="p">,</span> <span class="n">jobsw</span><span class="o">=</span><span class="n">jobsw</span><span class="p">,</span> <span class="n">jobarch</span><span class="o">=</span><span class="n">jobarch</span><span class="p">,</span>
+                                       <span class="n">inputdata</span><span class="o">=</span><span class="n">inputdata</span><span class="p">,</span> <span class="n">nonvaliddata</span><span class="o">=</span><span class="n">nonvaliddata</span><span class="p">,</span> <span class="n">use_parent</span><span class="o">=</span><span class="n">useparent</span><span class="p">,</span> <span class="n">generator</span><span class="o">=</span><span class="n">generator</span><span class="p">,</span> <span class="n">events_per_lumi</span><span class="o">=</span><span class="n">eventsperlumi</span><span class="p">,</span>
+                                       <span class="n">siteblacklist</span><span class="o">=</span><span class="n">siteblacklist</span><span class="p">,</span> <span class="n">sitewhitelist</span><span class="o">=</span><span class="n">sitewhitelist</span><span class="p">,</span> <span class="n">splitalgo</span><span class="o">=</span><span class="n">splitalgo</span><span class="p">,</span> <span class="n">algoargs</span><span class="o">=</span><span class="n">algoargs</span><span class="p">,</span>
+                                       <span class="n">cachefilename</span><span class="o">=</span><span class="n">cachefilename</span><span class="p">,</span> <span class="n">cacheurl</span><span class="o">=</span><span class="n">cacheurl</span><span class="p">,</span>
+                                       <span class="n">addoutputfiles</span><span class="o">=</span><span class="n">addoutputfiles</span><span class="p">,</span> <span class="n">userdn</span><span class="o">=</span><span class="n">cherrypy</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">[</span><span class="s">&#39;dn&#39;</span><span class="p">],</span>
+                                       <span class="n">userhn</span><span class="o">=</span><span class="n">cherrypy</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">[</span><span class="s">&#39;login&#39;</span><span class="p">],</span> <span class="n">savelogsflag</span><span class="o">=</span><span class="n">savelogsflag</span><span class="p">,</span> <span class="n">vorole</span><span class="o">=</span><span class="n">vorole</span><span class="p">,</span> <span class="n">vogroup</span><span class="o">=</span><span class="n">vogroup</span><span class="p">,</span>
+                                       <span class="n">publication</span><span class="o">=</span><span class="n">publication</span><span class="p">,</span> <span class="n">publishname</span><span class="o">=</span><span class="n">publishname</span><span class="p">,</span> <span class="n">publishgroupname</span><span class="o">=</span><span class="n">publishgroupname</span><span class="p">,</span> <span class="n">asyncdest</span><span class="o">=</span><span class="n">asyncdest</span><span class="p">,</span>
+                                       <span class="n">dbsurl</span><span class="o">=</span><span class="n">dbsurl</span><span class="p">,</span> <span class="n">publishdbsurl</span><span class="o">=</span><span class="n">publishdbsurl</span><span class="p">,</span> <span class="n">tfileoutfiles</span><span class="o">=</span><span class="n">tfileoutfiles</span><span class="p">,</span>
+                                       <span class="n">edmoutfiles</span><span class="o">=</span><span class="n">edmoutfiles</span><span class="p">,</span> <span class="n">runs</span><span class="o">=</span><span class="n">runs</span><span class="p">,</span> <span class="n">lumis</span><span class="o">=</span><span class="n">lumis</span><span class="p">,</span> <span class="n">totalunits</span><span class="o">=</span><span class="n">totalunits</span><span class="p">,</span> <span class="n">adduserfiles</span><span class="o">=</span><span class="n">adduserfiles</span><span class="p">,</span> <span class="n">oneEventMode</span><span class="o">=</span><span class="n">oneEventMode</span><span class="p">,</span>
+                                       <span class="n">maxjobruntime</span><span class="o">=</span><span class="n">maxjobruntime</span><span class="p">,</span> <span class="n">numcores</span><span class="o">=</span><span class="n">numcores</span><span class="p">,</span> <span class="n">maxmemory</span><span class="o">=</span><span class="n">maxmemory</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="n">priority</span><span class="p">,</span> <span class="n">lfn</span><span class="o">=</span><span class="n">lfn</span><span class="p">,</span>
+                                       <span class="n">ignorelocality</span><span class="o">=</span><span class="n">ignorelocality</span><span class="p">,</span> <span class="n">saveoutput</span><span class="o">=</span><span class="n">saveoutput</span><span class="p">,</span> <span class="n">faillimit</span><span class="o">=</span><span class="n">faillimit</span><span class="p">,</span> <span class="n">userfiles</span><span class="o">=</span><span class="n">userfiles</span><span class="p">,</span> <span class="n">asourl</span><span class="o">=</span><span class="n">asourl</span><span class="p">,</span>
+                                       <span class="n">scriptexe</span><span class="o">=</span><span class="n">scriptexe</span><span class="p">,</span> <span class="n">scriptargs</span><span class="o">=</span><span class="n">scriptargs</span><span class="p">,</span> <span class="n">scheddname</span><span class="o">=</span><span class="n">scheddname</span><span class="p">,</span> <span class="n">extrajdl</span><span class="o">=</span><span class="n">extrajdl</span><span class="p">,</span> <span class="n">collector</span><span class="o">=</span><span class="n">collector</span><span class="p">,</span> <span class="n">dryrun</span><span class="o">=</span><span class="n">dryrun</span><span class="p">)</span>
+</div>
+    <span class="nd">@restcall</span>
+<div class="viewcode-block" id="RESTUserWorkflow.post"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTUserWorkflow.RESTUserWorkflow.post">[docs]</a>    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow</span><span class="p">,</span> <span class="n">subresource</span><span class="p">,</span> <span class="n">siteblacklist</span><span class="p">,</span> <span class="n">sitewhitelist</span><span class="p">,</span> <span class="n">jobids</span><span class="p">,</span> <span class="n">maxjobruntime</span><span class="p">,</span> <span class="n">numcores</span><span class="p">,</span> <span class="n">maxmemory</span><span class="p">,</span> <span class="n">priority</span><span class="p">,</span> <span class="n">force</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Resubmit or continue an existing workflow. The caller needs to be a CMS user owner of the workflow.</span>
+
+<span class="sd">           :arg str workflow: unique name identifier of the workflow;</span>
+<span class="sd">           :arg str list siteblacklist: black list of sites, with CMS name;</span>
+<span class="sd">           :arg str list sitewhitelist: white list of sites, with CMS name.&quot;&quot;&quot;</span>
+        <span class="c"># strict check on authz: only the workflow owner can modify it</span>
+        <span class="n">authz_owner_match</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="p">,</span> <span class="p">[</span><span class="n">workflow</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">subresource</span> <span class="ow">or</span> <span class="n">subresource</span> <span class="o">==</span> <span class="s">&#39;resubmit&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">userworkflowmgr</span><span class="o">.</span><span class="n">resubmit</span><span class="p">(</span><span class="n">workflow</span><span class="o">=</span><span class="n">workflow</span><span class="p">,</span> \
+                                                 <span class="n">siteblacklist</span><span class="o">=</span><span class="n">siteblacklist</span><span class="p">,</span> <span class="n">sitewhitelist</span><span class="o">=</span><span class="n">sitewhitelist</span><span class="p">,</span> <span class="n">jobids</span><span class="o">=</span><span class="n">jobids</span><span class="p">,</span> \
+                                                 <span class="n">maxjobruntime</span><span class="o">=</span><span class="n">maxjobruntime</span><span class="p">,</span> <span class="n">numcores</span><span class="o">=</span><span class="n">numcores</span><span class="p">,</span> <span class="n">maxmemory</span><span class="o">=</span><span class="n">maxmemory</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="n">priority</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">,</span> \
+                                                 <span class="n">userdn</span><span class="o">=</span><span class="n">cherrypy</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s">&#39;Cms-Authn-Dn&#39;</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">subresource</span> <span class="o">==</span> <span class="s">&#39;proceed&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">userworkflowmgr</span><span class="o">.</span><span class="n">proceed</span><span class="p">(</span><span class="n">workflow</span><span class="o">=</span><span class="n">workflow</span><span class="p">)</span>
+</div>
+    <span class="nd">@restcall</span>
+<div class="viewcode-block" id="RESTUserWorkflow.get"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTUserWorkflow.RESTUserWorkflow.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow</span><span class="p">,</span> <span class="n">subresource</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">limit</span><span class="p">,</span> <span class="n">shortformat</span><span class="p">,</span> <span class="n">exitcode</span><span class="p">,</span> <span class="n">jobids</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Retrieves the workflow information, like a status summary, in case the workflow unique name is specified.</span>
+<span class="sd">           Otherwise returns all workflows since (now - age) for which the user is the owner.</span>
+<span class="sd">           The caller needs to be a valid CMS user.</span>
+<span class="sd">           :arg str workflow: unique name identifier of workflow;</span>
+<span class="sd">		   :arg str timestamp: max workflow age in hours;</span>
+<span class="sd">           :arg str subresource: the specific workflow information to be accessed;</span>
+<span class="sd">           :arg int limit: limit of return entries for some specific subresource;</span>
+<span class="sd">           :arg int exitcode: exitcode for which the specific subresource is needed (eg log file of a job with that exitcode)</span>
+<span class="sd">           :retrun: workflow with the relative status summary in case of per user request; or</span>
+<span class="sd">                    the requested subresource.&quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">workflow</span><span class="p">:</span>
+            <span class="n">userdn</span> <span class="o">=</span> <span class="n">cherrypy</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s">&#39;Cms-Authn-Dn&#39;</span><span class="p">]</span>
+            <span class="c"># if have the wf then retrieve the wf status summary</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">subresource</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">userworkflowmgr</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">userdn</span><span class="o">=</span><span class="n">userdn</span><span class="p">)</span>
+            <span class="c"># if have a subresource then it should be one of these</span>
+            <span class="k">elif</span> <span class="n">subresource</span> <span class="o">==</span> <span class="s">&#39;logs&#39;</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">userworkflowmgr</span><span class="o">.</span><span class="n">logs</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">limit</span><span class="p">,</span> <span class="n">exitcode</span><span class="p">,</span> <span class="n">jobids</span><span class="p">,</span> <span class="n">userdn</span><span class="o">=</span><span class="n">userdn</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">subresource</span> <span class="o">==</span> <span class="s">&#39;data&#39;</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">userworkflowmgr</span><span class="o">.</span><span class="n">output</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">limit</span><span class="p">,</span> <span class="n">jobids</span><span class="p">,</span> <span class="n">userdn</span><span class="o">=</span><span class="n">userdn</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">subresource</span> <span class="o">==</span> <span class="s">&#39;errors&#39;</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">userworkflowmgr</span><span class="o">.</span><span class="n">errors</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">shortformat</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">subresource</span> <span class="o">==</span> <span class="s">&#39;report&#39;</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">userworkflowmgr</span><span class="o">.</span><span class="n">report</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">userdn</span><span class="o">=</span><span class="n">userdn</span><span class="p">,</span> <span class="n">usedbs</span><span class="o">=</span><span class="n">shortformat</span><span class="p">)</span>
+            <span class="c"># if here means that no valid subresource has been requested</span>
+            <span class="c"># flow should never pass through here since validation restrict this</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="s">&quot;Validation or method error&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># retrieve the information about latest worfklows for that user</span>
+            <span class="c"># age can have a default: 1 week ?</span>
+            <span class="n">cherrypy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s">&quot;Found user &#39;</span><span class="si">%s</span><span class="s">&#39;&quot;</span> <span class="o">%</span> <span class="n">cherrypy</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">[</span><span class="s">&#39;login&#39;</span><span class="p">])</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">userworkflowmgr</span><span class="o">.</span><span class="n">getLatests</span><span class="p">(</span><span class="n">username</span> <span class="ow">or</span> <span class="n">cherrypy</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">[</span><span class="s">&#39;login&#39;</span><span class="p">],</span> <span class="n">timestamp</span><span class="p">)</span>     <span class="c">#eric added timestamp to match username</span>
+
+        <span class="k">return</span> <span class="n">result</span>
+</div>
+    <span class="nd">@restcall</span>
+<div class="viewcode-block" id="RESTUserWorkflow.delete"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTUserWorkflow.RESTUserWorkflow.delete">[docs]</a>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow</span><span class="p">,</span> <span class="n">force</span><span class="p">,</span> <span class="n">jobids</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Aborts a workflow. The user needs to be a CMS owner of the workflow.</span>
+
+<span class="sd">           :arg str list workflow: list of unique name identifiers of workflows;</span>
+<span class="sd">           :arg int force: force to delete the workflows in any case; 0 no, everything else yes;</span>
+<span class="sd">           :return: nothing&quot;&quot;&quot;</span>
+
+        <span class="c"># strict check on authz: only the workflow owner can modify it</span>
+        <span class="n">authz_owner_match</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="p">,</span> <span class="p">[</span><span class="n">workflow</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">userworkflowmgr</span><span class="o">.</span><span class="n">kill</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">force</span><span class="p">,</span> <span class="n">jobids</span><span class="p">,</span> <span class="n">userdn</span><span class="o">=</span><span class="n">cherrypy</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s">&#39;Cms-Authn-Dn&#39;</span><span class="p">])</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright CERN, INFN and Fermilab.
+      Last updated on Jul 02, 2015.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

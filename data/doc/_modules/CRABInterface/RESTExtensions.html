@@ -1,0 +1,156 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>CRABInterface.RESTExtensions &mdash; CRAB Server 3.3.1507.rc4</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '3.3.1507.rc4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="CRAB Server 3.3.1507.rc4" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for CRABInterface.RESTExtensions</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module aims to contain the method specific to the REST interface.</span>
+<span class="sd">These are extensions which are not directly contained in WMCore.REST module</span>
+<span class="sd">and it shouldn&#39;t have any other dependencies a part of that and cherrypy.</span>
+
+<span class="sd">Currently authz_owner_match uses a WMCore.Database.CMSCouch method</span>
+<span class="sd">but in next versions it should be dropped, as from the CRABInterface.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">WMCore.REST.Error</span> <span class="kn">import</span> <span class="n">MissingObject</span>
+
+<span class="kn">import</span> <span class="nn">cherrypy</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+
+
+<div class="viewcode-block" id="authz_operator"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTExtensions.authz_operator">[docs]</a><span class="k">def</span> <span class="nf">authz_operator</span><span class="p">(</span><span class="n">username</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Check if the the user who is trying to access this resource (i.e.: cherrypy.request.user[&#39;login&#39;], the cert username) is the</span>
+<span class="sd">        same as username. If not check if the user is a CRAB3 operator. {... &#39;operator&#39;: {&#39;group&#39;: set([&#39;crab3&#39;]) ... in the cherrypy roles}</span>
+<span class="sd">        If the username is not passed just check role</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">cherrypy</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">[</span><span class="s">&#39;login&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">username</span> <span class="ow">and</span>\
+       <span class="s">&#39;crab3&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cherrypy</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;roles&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;operator&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;group&#39;</span><span class="p">,</span> <span class="nb">set</span><span class="p">()):</span>
+        <span class="k">raise</span> <span class="n">cherrypy</span><span class="o">.</span><span class="n">HTTPError</span><span class="p">(</span><span class="mi">403</span><span class="p">,</span> <span class="s">&quot;You are not allowed to access this resource. You need to be a CRAB3 operator in sitedb to perform this action&quot;</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="authz_owner_match"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTExtensions.authz_owner_match">[docs]</a><span class="k">def</span> <span class="nf">authz_owner_match</span><span class="p">(</span><span class="n">dbapi</span><span class="p">,</span> <span class="n">workflows</span><span class="p">,</span> <span class="n">Task</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Match user against authorisation requirements to modify an existing resource.</span>
+<span class="sd">       Allows to cache couchdb fetched documents if the caller needs them.</span>
+
+<span class="sd">       :arg WMCore.CMSCouch.Database database: database connection to retrieve the docs</span>
+<span class="sd">       :arg str list workflows: a list of workflows unique name as positive check</span>
+<span class="sd">       :return: in case retrieve_docs is not false the list of couchdb documents.&quot;&quot;&quot;</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">cherrypy</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">cherrypy</span><span class="o">.</span><span class="n">log</span>
+
+    <span class="n">alldocs</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">wf</span> <span class="ow">in</span> <span class="n">workflows</span><span class="p">:</span>
+        <span class="n">wfrow</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">wfrow</span> <span class="o">=</span> <span class="n">dbapi</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">Task</span><span class="o">.</span><span class="n">GetUserFromID_sql</span><span class="p">,</span> <span class="n">taskname</span> <span class="o">=</span> <span class="n">wf</span><span class="p">)</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="n">excauthz</span> <span class="o">=</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;The document &#39;</span><span class="si">%s</span><span class="s">&#39; is not retrievable &#39;</span><span class="si">%s</span><span class="s">&#39;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">wf</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ex</span><span class="p">)))</span>
+            <span class="k">raise</span> <span class="n">MissingObject</span><span class="p">(</span><span class="s">&quot;The resource requested does not exist&quot;</span><span class="p">,</span> <span class="n">trace</span><span class="o">=</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">(),</span> <span class="n">errobj</span> <span class="o">=</span> <span class="n">excauthz</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">wfrow</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cherrypy</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">[</span><span class="s">&#39;login&#39;</span><span class="p">]:</span>
+            <span class="n">alldocs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">wfrow</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="n">log</span><span class="p">(</span><span class="s">&quot;ERROR: authz denied for user &#39;</span><span class="si">%s</span><span class="s">&#39; to the resource &#39;</span><span class="si">%s</span><span class="s">. Resource belong to </span><span class="si">%s</span><span class="s">&#39;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">wf</span><span class="p">,</span> <span class="n">wfrow</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="k">raise</span> <span class="n">cherrypy</span><span class="o">.</span><span class="n">HTTPError</span><span class="p">(</span><span class="mi">403</span><span class="p">,</span> <span class="s">&quot;You are not allowed to access this resource.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">workflows</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">alldocs</span><span class="p">):</span>
+        <span class="n">log</span><span class="p">(</span><span class="s">&quot;DEBUG: authz user </span><span class="si">%s</span><span class="s"> to access resources </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">workflows</span><span class="p">))</span>
+        <span class="k">return</span>
+
+    <span class="n">log</span><span class="p">(</span><span class="s">&quot;ERROR: authz denied for user &#39;</span><span class="si">%s</span><span class="s">&#39; to resource &#39;</span><span class="si">%s</span><span class="s">&#39;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">workflows</span><span class="p">)))</span>
+    <span class="k">raise</span> <span class="n">cherrypy</span><span class="o">.</span><span class="n">HTTPError</span><span class="p">(</span><span class="mi">403</span><span class="p">,</span> <span class="s">&quot;You are not allowed to access this resource.&quot;</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="authz_login_valid"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTExtensions.authz_login_valid">[docs]</a><span class="k">def</span> <span class="nf">authz_login_valid</span><span class="p">():</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">cherrypy</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">[</span><span class="s">&#39;login&#39;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="n">cherrypy</span><span class="o">.</span><span class="n">HTTPError</span><span class="p">(</span><span class="mi">403</span><span class="p">,</span> <span class="s">&quot;You are not allowed to access this resource. Please check: https://twiki.cern.ch/twiki/bin/viewauth/CMS/SiteDBForCRAB&quot;</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright CERN, INFN and Fermilab.
+      Last updated on Jul 02, 2015.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

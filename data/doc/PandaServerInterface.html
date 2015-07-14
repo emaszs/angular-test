@@ -1,0 +1,195 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>PandaServerInterface Module &mdash; CRAB Server 3.3.1507.rc4</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '3.3.1507.rc4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="CRAB Server 3.3.1507.rc4" href="index.html" />
+    <link rel="up" title="Project Modules" href="modules.html" />
+    <link rel="next" title="ServerUtilities Module" href="ServerUtilities.html" />
+    <link rel="prev" title="HTCondorUtils Module" href="HTCondorUtils.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ServerUtilities.html" title="ServerUtilities Module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="HTCondorUtils.html" title="HTCondorUtils Module"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="modules.html" accesskey="U">Project Modules</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">PandaServerInterface Module</a><ul>
+<li><a class="reference internal" href="#id1"><tt class="docutils literal"><span class="pre">PandaServerInterface</span></tt> Module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="HTCondorUtils.html"
+                        title="previous chapter">HTCondorUtils Module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="ServerUtilities.html"
+                        title="next chapter">ServerUtilities Module</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="pandaserverinterface-module">
+<h1>PandaServerInterface Module<a class="headerlink" href="#pandaserverinterface-module" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2><a class="reference internal" href="#module-PandaServerInterface" title="PandaServerInterface"><tt class="xref py py-mod docutils literal"><span class="pre">PandaServerInterface</span></tt></a> Module<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-PandaServerInterface"></span><dl class="exception">
+<dt id="PandaServerInterface.PanDAException">
+<em class="property">exception </em><tt class="descclassname">PandaServerInterface.</tt><tt class="descname">PanDAException</tt><a class="reference internal" href="_modules/PandaServerInterface.html#PanDAException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PandaServerInterface.PanDAException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></tt></p>
+<p>Specific errors coming from interaction with PanDa</p>
+<dl class="attribute">
+<dt id="PandaServerInterface.PanDAException.exitcode">
+<tt class="descname">exitcode</tt><em class="property"> = 3100</em><a class="headerlink" href="#PandaServerInterface.PanDAException.exitcode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="PandaServerInterface.getCloudSpecs">
+<tt class="descclassname">PandaServerInterface.</tt><tt class="descname">getCloudSpecs</tt><big>(</big><em>baseURL</em>, <em>sslCert</em>, <em>sslKey</em><big>)</big><a class="reference internal" href="_modules/PandaServerInterface.html#getCloudSpecs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PandaServerInterface.getCloudSpecs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="PandaServerInterface.getFullJobStatus">
+<tt class="descclassname">PandaServerInterface.</tt><tt class="descname">getFullJobStatus</tt><big>(</big><em>baseURLSSL</em>, <em>ids</em>, <em>proxy</em>, <em>verbose=False</em><big>)</big><a class="reference internal" href="_modules/PandaServerInterface.html#getFullJobStatus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PandaServerInterface.getFullJobStatus" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="PandaServerInterface.getPandIDsWithJobID">
+<tt class="descclassname">PandaServerInterface.</tt><tt class="descname">getPandIDsWithJobID</tt><big>(</big><em>baseURLSSL</em>, <em>jobID</em>, <em>dn=None</em>, <em>nJobs=0</em>, <em>verbose=False</em>, <em>userproxy=None</em>, <em>credpath=None</em><big>)</big><a class="reference internal" href="_modules/PandaServerInterface.html#getPandIDsWithJobID"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PandaServerInterface.getPandIDsWithJobID" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="PandaServerInterface.getSite">
+<tt class="descclassname">PandaServerInterface.</tt><tt class="descname">getSite</tt><big>(</big><em>sitename</em><big>)</big><a class="reference internal" href="_modules/PandaServerInterface.html#getSite"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PandaServerInterface.getSite" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="PandaServerInterface.getSiteSpecs">
+<tt class="descclassname">PandaServerInterface.</tt><tt class="descname">getSiteSpecs</tt><big>(</big><em>baseURL</em>, <em>sslCert</em>, <em>sslKey</em>, <em>siteType=None</em><big>)</big><a class="reference internal" href="_modules/PandaServerInterface.html#getSiteSpecs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PandaServerInterface.getSiteSpecs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="PandaServerInterface.killJobs">
+<tt class="descclassname">PandaServerInterface.</tt><tt class="descname">killJobs</tt><big>(</big><em>baseURLSSL</em>, <em>ids</em>, <em>proxy</em>, <em>code=None</em>, <em>verbose=True</em>, <em>useMailAsID=False</em><big>)</big><a class="reference internal" href="_modules/PandaServerInterface.html#killJobs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PandaServerInterface.killJobs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="PandaServerInterface.putFile">
+<tt class="descclassname">PandaServerInterface.</tt><tt class="descname">putFile</tt><big>(</big><em>baseURL</em>, <em>baseURLCSRVSSL</em>, <em>file</em>, <em>checksum</em>, <em>verbose=False</em>, <em>reuseSandbox=False</em><big>)</big><a class="reference internal" href="_modules/PandaServerInterface.html#putFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PandaServerInterface.putFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="PandaServerInterface.refreshSpecs">
+<tt class="descclassname">PandaServerInterface.</tt><tt class="descname">refreshSpecs</tt><big>(</big><em>baseURL</em>, <em>proxy</em><big>)</big><a class="reference internal" href="_modules/PandaServerInterface.html#refreshSpecs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PandaServerInterface.refreshSpecs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="PandaServerInterface.runBrokerage">
+<tt class="descclassname">PandaServerInterface.</tt><tt class="descname">runBrokerage</tt><big>(</big><em>baseURLSSL</em>, <em>sites</em>, <em>proxy</em>, <em>atlasRelease=None</em>, <em>cmtConfig=None</em>, <em>verbose=False</em>, <em>trustIS=False</em>, <em>cacheVer=''</em>, <em>processingType=''</em>, <em>loggingFlag=False</em>, <em>memorySize=0</em>, <em>useDirectIO=False</em>, <em>siteGroup=None</em>, <em>maxCpuCount=-1</em><big>)</big><a class="reference internal" href="_modules/PandaServerInterface.html#runBrokerage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PandaServerInterface.runBrokerage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="PandaServerInterface.submitJobs">
+<tt class="descclassname">PandaServerInterface.</tt><tt class="descname">submitJobs</tt><big>(</big><em>baseURLSSL</em>, <em>jobs</em>, <em>proxy</em>, <em>verbose=False</em><big>)</big><a class="reference internal" href="_modules/PandaServerInterface.html#submitJobs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PandaServerInterface.submitJobs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="PandaServerInterface.wrappedUuidGen">
+<tt class="descclassname">PandaServerInterface.</tt><tt class="descname">wrappedUuidGen</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/PandaServerInterface.html#wrappedUuidGen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PandaServerInterface.wrappedUuidGen" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ServerUtilities.html" title="ServerUtilities Module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="HTCondorUtils.html" title="HTCondorUtils Module"
+             >previous</a> |</li>
+        <li><a href="index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="modules.html" >Project Modules</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright CERN, INFN and Fermilab.
+      Last updated on Jul 02, 2015.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

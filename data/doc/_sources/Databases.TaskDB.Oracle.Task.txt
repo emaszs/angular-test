@@ -1,0 +1,19 @@
+Task Package
+============
+
+:mod:`Task` Package
+-------------------
+
+.. automodule:: Databases.TaskDB.Oracle.Task
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`Task` Module
+------------------
+
+.. automodule:: Databases.TaskDB.Oracle.Task.Task
+    :members:
+    :undoc-members:
+    :show-inheritance:
+

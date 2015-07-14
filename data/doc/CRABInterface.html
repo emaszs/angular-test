@@ -1,0 +1,1870 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>CRABInterface Package &mdash; CRAB Server 3.3.1507.rc4</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '3.3.1507.rc4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="CRAB Server 3.3.1507.rc4" href="index.html" />
+    <link rel="up" title="Project Modules" href="modules.html" />
+    <link rel="next" title="Pages Package" href="CRABInterface.Pages.html" />
+    <link rel="prev" title="Project Modules" href="modules.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="CRABInterface.Pages.html" title="Pages Package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="modules.html" title="Project Modules"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="modules.html" accesskey="U">Project Modules</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">CRABInterface Package</a><ul>
+<li><a class="reference internal" href="#id1"><tt class="docutils literal"><span class="pre">CRABInterface</span></tt> Package</a></li>
+<li><a class="reference internal" href="#module-CRABInterface.Attrib"><tt class="docutils literal"><span class="pre">Attrib</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-CRABInterface.CRABServerBase"><tt class="docutils literal"><span class="pre">CRABServerBase</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-CRABInterface.DataCampaign"><tt class="docutils literal"><span class="pre">DataCampaign</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-CRABInterface.DataFileMetadata"><tt class="docutils literal"><span class="pre">DataFileMetadata</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-CRABInterface.DataUserWorkflow"><tt class="docutils literal"><span class="pre">DataUserWorkflow</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-CRABInterface.DataWorkflow"><tt class="docutils literal"><span class="pre">DataWorkflow</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-CRABInterface.HTCondorDataWorkflow"><tt class="docutils literal"><span class="pre">HTCondorDataWorkflow</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-CRABInterface.PandaDataWorkflow"><tt class="docutils literal"><span class="pre">PandaDataWorkflow</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-CRABInterface.RESTBaseAPI"><tt class="docutils literal"><span class="pre">RESTBaseAPI</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-CRABInterface.RESTCampaign"><tt class="docutils literal"><span class="pre">RESTCampaign</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-CRABInterface.RESTExtensions"><tt class="docutils literal"><span class="pre">RESTExtensions</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-CRABInterface.RESTFileMetadata"><tt class="docutils literal"><span class="pre">RESTFileMetadata</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-CRABInterface.RESTServerInfo"><tt class="docutils literal"><span class="pre">RESTServerInfo</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-CRABInterface.RESTTask"><tt class="docutils literal"><span class="pre">RESTTask</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-CRABInterface.RESTUserWorkflow"><tt class="docutils literal"><span class="pre">RESTUserWorkflow</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-CRABInterface.RESTWorkerWorkflow"><tt class="docutils literal"><span class="pre">RESTWorkerWorkflow</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-CRABInterface.Regexps"><tt class="docutils literal"><span class="pre">Regexps</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-CRABInterface.Utils"><tt class="docutils literal"><span class="pre">Utils</span></tt> Module</a></li>
+<li><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="modules.html"
+                        title="previous chapter">Project Modules</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="CRABInterface.Pages.html"
+                        title="next chapter">Pages Package</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="crabinterface-package">
+<h1>CRABInterface Package<a class="headerlink" href="#crabinterface-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2><a class="reference internal" href="#module-CRABInterface" title="CRABInterface"><tt class="xref py py-mod docutils literal"><span class="pre">CRABInterface</span></tt></a> Package<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-CRABInterface"></span><p>_RestInterface_</p>
+<p>RestInterface component</p>
+</div>
+<div class="section" id="module-CRABInterface.Attrib">
+<span id="attrib-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">Attrib</span></tt> Module<a class="headerlink" href="#module-CRABInterface.Attrib" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>Attrib - a quick reimplementation of the nose test attrib stuff</dt>
+<dd>here so that nose doesn&#8217;t have to be installed to get
+things to work</dd>
+</dl>
+<dl class="function">
+<dt id="CRABInterface.Attrib.attr">
+<tt class="descclassname">CRABInterface.Attrib.</tt><tt class="descname">attr</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/Attrib.html#attr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.Attrib.attr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator that adds attributes to classes or functions
+for use with the Attribute (-a) plugin.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-CRABInterface.CRABServerBase">
+<span id="crabserverbase-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">CRABServerBase</span></tt> Module<a class="headerlink" href="#module-CRABInterface.CRABServerBase" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>CRABServerBase.py</dt>
+<dd>Helper function to find the base of the CRABServer install</dd>
+</dl>
+<dl class="function">
+<dt id="CRABInterface.CRABServerBase.getCRABServerBase">
+<tt class="descclassname">CRABInterface.CRABServerBase.</tt><tt class="descname">getCRABServerBase</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/CRABInterface/CRABServerBase.html#getCRABServerBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.CRABServerBase.getCRABServerBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns the root of CRABServer install</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-CRABInterface.DataCampaign">
+<span id="datacampaign-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">DataCampaign</span></tt> Module<a class="headerlink" href="#module-CRABInterface.DataCampaign" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="CRABInterface.DataCampaign.DataCampaign">
+<em class="property">class </em><tt class="descclassname">CRABInterface.DataCampaign.</tt><tt class="descname">DataCampaign</tt><big>(</big><em>config</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataCampaign.html#DataCampaign"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataCampaign.DataCampaign" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></a></p>
+<p>Entity that allows to operate on campaign resources.
+DataCampaign is a container on a set of workflows which have not strict relation
+a part of being part of the same campaign container.
+An operations on a campaign implies to act in all the workflows
+it contains.</p>
+<dl class="docutils">
+<dt>CAMPAIGN-UNIQUE-NAME</dt>
+<dd><div class="first line-block">
+<div class="line"><br /></div>
+</div>
+<p class="last"><a href="#id2"><span class="problematic" id="id3">|</span></a>_workflow-1.0__workflow-<a href="#id12"><span class="problematic" id="id13">1.1__</span></a>....
+|
+<a href="#id4"><span class="problematic" id="id5">|</span></a>_workflow-2.0__workflow-2.1__workflow-<a href="#id12"><span class="problematic" id="id14">2.2__</span></a>....
+|
+<a href="#id6"><span class="problematic" id="id7">|</span></a>_workflow-<a href="#id12"><span class="problematic" id="id15">3.0__</span></a>....</p>
+</dd>
+</dl>
+<p>This class does not provide any aggregation of the workflows in the campaign,
+and it returns a list of workflows. Aggregation of workflows which have a hierarchical
+relationship (e.g. resubmission) is left to the DataUserWorkflow class.
+This means that it shows information of the first column of the schema above,
+where the first column aggregates the row information (thanks to DataUserWorkflow).</p>
+<p>In the current implementation DataUserWorkflow just mirror DataWorkflow and therefore
+workflow-1.1, workflow-2.1, workflow-2.2 ... are not there</p>
+<dl class="method">
+<dt id="CRABInterface.DataCampaign.DataCampaign.campaignSummary">
+<tt class="descname">campaignSummary</tt><big>(</big><em>campaign</em>, <em>workflows=None</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataCampaign.html#DataCampaign.campaignSummary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataCampaign.DataCampaign.campaignSummary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provide the campaign status summary. This method iterates on all the workflows
+part of the campaign starting from the oldest one, and counts the number of
+jobs in each state. Then it returns a list where the first element is the
+campaign name, the second element is the campaign status, the third is a dict
+where keys are the &#8216;main&#8217; states and values are number of jobs, the fourth is
+the breakdown of the &#8216;main&#8217; states, and finally a dict containing the same
+information grouped by site</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>campaign</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; the unique campaign name</li>
+<li><strong>str workflows</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; the list of workflows part of the campaign</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the campaign status summary</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.DataCampaign.DataCampaign.create">
+<tt class="descname">create</tt><big>(</big><em>campaign</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataCampaign.html#DataCampaign.create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataCampaign.DataCampaign.create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a campaign object with an unique name.
+This can be a simple call to ReqMgr python API.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>campaign</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; the campaign name received from the client</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">unique campaign name</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.DataCampaign.DataCampaign.getCampaignWorkflows">
+<tt class="descname">getCampaignWorkflows</tt><big>(</big><em>campaign</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataCampaign.html#DataCampaign.getCampaignWorkflows"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataCampaign.DataCampaign.getCampaignWorkflows" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the list of workflow names part of the campaign.
+This considers only top level workflows and not their resubmissions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>campaign</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; the unique campaign name</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list of workflows</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.DataCampaign.DataCampaign.injectWorkflow">
+<tt class="descname">injectWorkflow</tt><big>(</big><em>campaign</em>, <em>wfs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataCampaign.html#DataCampaign.injectWorkflow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataCampaign.DataCampaign.injectWorkflow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Insert a workflow into the ReqMgr. It uses the <cite>DataUserWorkflow</cite> object.
+To create the campaign and to get the unique campaign name refer to
+<cite>create</cite> method.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>campaign</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; the unique campaign name</li>
+<li><strong>list wfs</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; the list of workflows to create</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the workflows unique names.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.DataCampaign.DataCampaign.kill">
+<tt class="descname">kill</tt><big>(</big><em>campaign</em>, <em>force</em>, <em>workflows=None</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataCampaign.html#DataCampaign.kill"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataCampaign.DataCampaign.kill" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cancel all the unfinished workflows in the campaign.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>campaign</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; the unique campaign name</li>
+<li><strong>force</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; in case the workflow has to be forced when deleted</li>
+<li><strong>str workflows</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; the list of workflows part of the campaign</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">potentially nothing</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.DataCampaign.DataCampaign.logs">
+<tt class="descname">logs</tt><big>(</big><em>campaign</em>, <em>limit</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataCampaign.html#DataCampaign.logs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataCampaign.DataCampaign.logs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the campaign log archive PFN. It takes care of the LFN - PFN conversion too.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>campaign</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; a campaign name</li>
+<li><strong>limit</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; the limit on the number of PFN to return</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">an object with the list of log pfns</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.DataCampaign.DataCampaign.output">
+<tt class="descname">output</tt><big>(</big><em>campaign</em>, <em>limit</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataCampaign.html#DataCampaign.output"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataCampaign.DataCampaign.output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the campaign output PFN. It takes care of the LFN - PFN conversion too.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>campaign</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; a campaign name</li>
+<li><strong>limit</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; the limit on the number of PFN to return</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">an object with the list of output pfns</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.DataCampaign.DataCampaign.resubmit">
+<tt class="descname">resubmit</tt><big>(</big><em>campaign</em>, <em>workflows=None</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataCampaign.html#DataCampaign.resubmit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataCampaign.DataCampaign.resubmit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resubmit all the unfinished workflows in the campaign.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>campaign</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; the unique campaign name</li>
+<li><strong>str workflows</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; the list of workflows part of the campaign</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the workflows unique names.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.DataCampaign.DataCampaign.retrieveRecent">
+<tt class="descname">retrieveRecent</tt><big>(</big><em>user</em>, <em>since</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataCampaign.html#DataCampaign.retrieveRecent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataCampaign.DataCampaign.retrieveRecent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query the monitoring db to retrieve the latest user campaigns.
+It can include the campaign status.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>user</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; the user hn login name (or the DN?)</li>
+<li><strong>since</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; timestamp in second to not retrieve campaigns older then this</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the list of campaign-staus objects.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-CRABInterface.DataFileMetadata">
+<span id="datafilemetadata-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">DataFileMetadata</span></tt> Module<a class="headerlink" href="#module-CRABInterface.DataFileMetadata" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="CRABInterface.DataFileMetadata.DataFileMetadata">
+<em class="property">class </em><tt class="descclassname">CRABInterface.DataFileMetadata.</tt><tt class="descname">DataFileMetadata</tt><big>(</big><em>config</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataFileMetadata.html#DataFileMetadata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataFileMetadata.DataFileMetadata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></a></p>
+<dl class="method">
+<dt id="CRABInterface.DataFileMetadata.DataFileMetadata.changeState">
+<tt class="descname">changeState</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataFileMetadata.html#DataFileMetadata.changeState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataFileMetadata.DataFileMetadata.changeState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.DataFileMetadata.DataFileMetadata.delete">
+<tt class="descname">delete</tt><big>(</big><em>taskname</em>, <em>hours</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataFileMetadata.html#DataFileMetadata.delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataFileMetadata.DataFileMetadata.delete" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.DataFileMetadata.DataFileMetadata.getFiles">
+<tt class="descname">getFiles</tt><big>(</big><em>taskname</em>, <em>filetype</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataFileMetadata.html#DataFileMetadata.getFiles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataFileMetadata.DataFileMetadata.getFiles" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="CRABInterface.DataFileMetadata.DataFileMetadata.globalinit">
+<em class="property">static </em><tt class="descname">globalinit</tt><big>(</big><em>dbapi</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataFileMetadata.html#DataFileMetadata.globalinit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataFileMetadata.DataFileMetadata.globalinit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.DataFileMetadata.DataFileMetadata.inject">
+<tt class="descname">inject</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataFileMetadata.html#DataFileMetadata.inject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataFileMetadata.DataFileMetadata.inject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-CRABInterface.DataUserWorkflow">
+<span id="datauserworkflow-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">DataUserWorkflow</span></tt> Module<a class="headerlink" href="#module-CRABInterface.DataUserWorkflow" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="CRABInterface.DataUserWorkflow.DataUserWorkflow">
+<em class="property">class </em><tt class="descclassname">CRABInterface.DataUserWorkflow.</tt><tt class="descname">DataUserWorkflow</tt><a class="reference internal" href="_modules/CRABInterface/DataUserWorkflow.html#DataUserWorkflow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataUserWorkflow.DataUserWorkflow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></a></p>
+<dl class="method">
+<dt id="CRABInterface.DataUserWorkflow.DataUserWorkflow.errors">
+<tt class="descname">errors</tt><big>(</big><em>workflow</em>, <em>shortformat</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataUserWorkflow.html#DataUserWorkflow.errors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataUserWorkflow.DataUserWorkflow.errors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves the sets of errors for a specific workflow</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>workflow</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; a workflow name</li>
+<li><strong>shortformat</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; a flag indicating if the user is asking for detailed
+information about sites and list of errors</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a list of errors grouped by exit code, error reason, site</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.DataUserWorkflow.DataUserWorkflow.getLatests">
+<tt class="descname">getLatests</tt><big>(</big><em>username</em>, <em>timestamp</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataUserWorkflow.html#DataUserWorkflow.getLatests"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataUserWorkflow.DataUserWorkflow.getLatests" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrives the latest workflows for the user</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>user</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; a valid user hn login name</li>
+<li><strong>limit</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; the maximum number of workflows to return
+(this should probably have a default!)</li>
+<li><strong>limit</strong> &#8211; limit on the workflow age</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a list of workflows</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="CRABInterface.DataUserWorkflow.DataUserWorkflow.globalinit">
+<em class="property">static </em><tt class="descname">globalinit</tt><big>(</big><em>config</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataUserWorkflow.html#DataUserWorkflow.globalinit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataUserWorkflow.DataUserWorkflow.globalinit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.DataUserWorkflow.DataUserWorkflow.kill">
+<tt class="descname">kill</tt><big>(</big><em>workflow</em>, <em>force</em>, <em>jobids</em>, <em>userdn</em>, <em>userproxy=None</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataUserWorkflow.html#DataUserWorkflow.kill"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataUserWorkflow.DataUserWorkflow.kill" title="Permalink to this definition">¶</a></dt>
+<dd><p>Request to Abort a workflow.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>workflow</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; a workflow name</li>
+<li><strong>force</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; a flag to know if kill should be brutal</li>
+<li><strong>userproxy</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; the user proxy retrieved by <cite>retrieveUserCert</cite></li>
+<li><strong>force</strong> &#8211; force to delete the workflows in any case; 0 no, everything else yes</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.DataUserWorkflow.DataUserWorkflow.logs">
+<tt class="descname">logs</tt><big>(</big><em>workflow</em>, <em>howmany</em>, <em>exitcode</em>, <em>jobids</em>, <em>userdn</em>, <em>userproxy=None</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataUserWorkflow.html#DataUserWorkflow.logs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataUserWorkflow.DataUserWorkflow.logs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the workflow logs PFN. It takes care of the LFN - PFN conversion too.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>workflow</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; a workflow name</li>
+<li><strong>howmany</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; the limit on the number of PFN to return</li>
+<li><strong>exitcode</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; the log has to be of a job ended with this exit_code</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a generator of list of logs pfns</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.DataUserWorkflow.DataUserWorkflow.output">
+<tt class="descname">output</tt><big>(</big><em>workflow</em>, <em>howmany</em>, <em>jobids</em>, <em>userdn</em>, <em>userproxy=None</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataUserWorkflow.html#DataUserWorkflow.output"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataUserWorkflow.DataUserWorkflow.output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the workflow output PFN. It takes care of the LFN - PFN conversion too.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>list workflow</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; a workflow name</li>
+<li><strong>howmany</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; the limit on the number of PFN to return</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a generator of list of output pfns</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.DataUserWorkflow.DataUserWorkflow.proceed">
+<tt class="descname">proceed</tt><big>(</big><em>workflow</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataUserWorkflow.html#DataUserWorkflow.proceed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataUserWorkflow.DataUserWorkflow.proceed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Continue a task initialized with &#8216;crab submit &#8211;dryrun&#8217;.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>workflow</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; a workflow name</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.DataUserWorkflow.DataUserWorkflow.report">
+<tt class="descname">report</tt><big>(</big><em>workflow</em>, <em>userdn</em>, <em>usedbs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataUserWorkflow.html#DataUserWorkflow.report"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataUserWorkflow.DataUserWorkflow.report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves the quality of the workflow in term of what has been processed
+(eg: good lumis). This can call a different function depending on the jobtype.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>workflow</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; a workflow name</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">what?</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.DataUserWorkflow.DataUserWorkflow.resubmit">
+<tt class="descname">resubmit</tt><big>(</big><em>workflow</em>, <em>siteblacklist</em>, <em>sitewhitelist</em>, <em>jobids</em>, <em>maxjobruntime</em>, <em>numcores</em>, <em>maxmemory</em>, <em>priority</em>, <em>force</em>, <em>userdn</em>, <em>userproxy=None</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataUserWorkflow.html#DataUserWorkflow.resubmit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataUserWorkflow.DataUserWorkflow.resubmit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Request to Resubmit a workflow.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>workflow</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; a workflow name</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.DataUserWorkflow.DataUserWorkflow.status">
+<tt class="descname">status</tt><big>(</big><em>workflow</em>, <em>userdn</em>, <em>userproxy=None</em>, <em>verbose=False</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataUserWorkflow.html#DataUserWorkflow.status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataUserWorkflow.DataUserWorkflow.status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the status of the workflow</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>workflow</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; a valid workflow name</li>
+<li><strong>userdn</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; the user dn makind the request</li>
+<li><strong>userproxy</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; the user proxy retrieved by <cite>retrieveUserCert</cite></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a generator of workflow states</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.DataUserWorkflow.DataUserWorkflow.submit">
+<tt class="descname">submit</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataUserWorkflow.html#DataUserWorkflow.submit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataUserWorkflow.DataUserWorkflow.submit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform the workflow injection</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>workflow</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; workflow name requested by the user;</li>
+<li><strong>activity</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; workflow activity type, usually analysis;</li>
+<li><strong>jobtype</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; job type of the workflow, usually Analysis;</li>
+<li><strong>jobsw</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; software requirement;</li>
+<li><strong>jobarch</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; software architecture (=SCRAM_ARCH);</li>
+<li><strong>inputdata</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; input dataset;</li>
+<li><strong>nonvaliddata</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; allow invalid input dataset;</li>
+<li><strong>use_parent</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; add the parent dataset as secondary input;</li>
+<li><strong>generator</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; event generator for MC production;</li>
+<li><strong>events_per_lumi</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; events to generate per lumi;</li>
+<li><strong>list siteblacklist</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; black list of sites, with CMS name;</li>
+<li><strong>list sitewhitelist</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; white list of sites, with CMS name;</li>
+<li><strong>splitalgo</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; algorithm to be used for the workflow splitting;</li>
+<li><strong>algoargs</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; argument to be used by the splitting algorithm;</li>
+<li><strong>cachefilename</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; name of the file inside the cache</li>
+<li><strong>cacheurl</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; URL of the cache</li>
+<li><strong>list addoutputfiles</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; list of additional output files;</li>
+<li><strong>userdn</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; DN of user doing the request;</li>
+<li><strong>userhn</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; hyper new name of the user doing the request;</li>
+<li><strong>savelogsflag</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; archive the log files? 0 no, everything else yes;</li>
+<li><strong>publication</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; flag enabling or disabling data publication;</li>
+<li><strong>publishname</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; name to use for data publication;</li>
+<li><strong>publishgroupname</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; add groupname or username to publishname;</li>
+<li><strong>asyncdest</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; CMS site name for storage destination of the output files;</li>
+<li><strong>dbsurl</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; dbs url where the input dataset is published;</li>
+<li><strong>publishdbsurl</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; dbs url where the output data has to be published;</li>
+<li><strong>vorole</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; user vo role</li>
+<li><strong>vogroup</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; user vo group</li>
+<li><strong>tfileoutfiles</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; list of t-output files</li>
+<li><strong>edmoutfiles</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; list of edm output files</li>
+<li><strong>list runs</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; list of run numbers</li>
+<li><strong>list lumis</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; list of lumi section numbers</li>
+<li><strong>totalunits</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; number of MC event to be generated</li>
+<li><strong>list adduserfiles</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; list of additional user input files</li>
+<li><strong>oneEventMode</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; enables oneEventMode</li>
+<li><strong>maxjobruntime</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; max job runtime, in minutes</li>
+<li><strong>numcores</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; number of CPU cores required by job</li>
+<li><strong>maxmemory</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; maximum amount of RAM required, in MB</li>
+<li><strong>priority</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; priority of this task</li>
+<li><strong>lfn</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; lfn used to store output files.</li>
+<li><strong>saveoutput</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; whether to perform ASO on job output.</li>
+<li><strong>faillimit</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; the maximum number of failed jobs allowed before workflow is aborted</li>
+<li><strong>ignorelocality</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; ignore data locality.</li>
+<li><strong>list userfiles</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The files to process instead of a DBS-based dataset.</li>
+<li><strong>scheddname</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Schedd name used for debugging.</li>
+<li><strong>collector</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Collector name used for debugging.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a dict which contaians details of the request</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-CRABInterface.DataWorkflow">
+<span id="dataworkflow-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">DataWorkflow</span></tt> Module<a class="headerlink" href="#module-CRABInterface.DataWorkflow" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="CRABInterface.DataWorkflow.DataWorkflow">
+<em class="property">class </em><tt class="descclassname">CRABInterface.DataWorkflow.</tt><tt class="descname">DataWorkflow</tt><big>(</big><em>config</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataWorkflow.html#DataWorkflow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataWorkflow.DataWorkflow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></a></p>
+<p>Entity that allows to operate on workflow resources.
+No aggregation of workflows provided here.</p>
+<dl class="method">
+<dt id="CRABInterface.DataWorkflow.DataWorkflow.errors">
+<tt class="descname">errors</tt><big>(</big><em>workflow</em>, <em>shortformat</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataWorkflow.html#DataWorkflow.errors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataWorkflow.DataWorkflow.errors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves the sets of errors for a specific workflow</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>workflow</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; a workflow name</li>
+<li><strong>shortformat</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; a flag indicating if the user is asking for detailed
+information about sites and list of errors</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a list of errors grouped by exit code, error reason, site</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.DataWorkflow.DataWorkflow.getLatests">
+<tt class="descname">getLatests</tt><big>(</big><em>username</em>, <em>timestamp</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataWorkflow.html#DataWorkflow.getLatests"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataWorkflow.DataWorkflow.getLatests" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrives the latest workflows for the user</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>user</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; a valid user hn login name</li>
+<li><strong>limit</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; the maximum number of workflows to return
+(this should probably have a default!)</li>
+<li><strong>limit</strong> &#8211; limit on the workflow age</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a list of workflows</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="CRABInterface.DataWorkflow.DataWorkflow.globalinit">
+<em class="property">static </em><tt class="descname">globalinit</tt><big>(</big><em>dbapi</em>, <em>phedexargs=None</em>, <em>credpath='/tmp'</em>, <em>centralcfg=None</em>, <em>config=None</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataWorkflow.html#DataWorkflow.globalinit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataWorkflow.DataWorkflow.globalinit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.DataWorkflow.DataWorkflow.kill">
+<tt class="descname">kill</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataWorkflow.html#DataWorkflow.kill"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataWorkflow.DataWorkflow.kill" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.DataWorkflow.DataWorkflow.logs">
+<tt class="descname">logs</tt><big>(</big><em>workflow</em>, <em>howmany</em>, <em>exitcode</em>, <em>jobids</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataWorkflow.html#DataWorkflow.logs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataWorkflow.DataWorkflow.logs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the workflow logs PFN. It takes care of the LFN - PFN conversion too.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>workflow</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; a workflow name</li>
+<li><strong>howmany</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; the limit on the number of PFN to return</li>
+<li><strong>exitcode</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; the log has to be of a job ended with this exit_code</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">(a generator of?) a list of logs pfns</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.DataWorkflow.DataWorkflow.output">
+<tt class="descname">output</tt><big>(</big><em>workflow</em>, <em>howmany</em>, <em>jobids</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataWorkflow.html#DataWorkflow.output"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataWorkflow.DataWorkflow.output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves the output PFN aggregating output in final and temporary locations.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>workflow</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; the unique workflow name
+:arg int howmany: the limit on the number of PFN to return
+:return: a generator of list of outputs</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.DataWorkflow.DataWorkflow.proceed">
+<tt class="descname">proceed</tt><big>(</big><em>workflow</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataWorkflow.html#DataWorkflow.proceed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataWorkflow.DataWorkflow.proceed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Continue a task which was initialized with &#8216;crab submit &#8211;dryrun&#8217;.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>workflow</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; a workflow name</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.DataWorkflow.DataWorkflow.report">
+<tt class="descname">report</tt><big>(</big><em>workflow</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataWorkflow.html#DataWorkflow.report"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataWorkflow.DataWorkflow.report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves the quality of the workflow in term of what has been processed
+(eg: good lumis)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>workflow</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; a workflow name</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">what?</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.DataWorkflow.DataWorkflow.resubmit">
+<tt class="descname">resubmit</tt><big>(</big><em>workflow</em>, <em>siteblacklist</em>, <em>sitewhitelist</em>, <em>jobids</em>, <em>maxjobruntime</em>, <em>numcores</em>, <em>maxmemory</em>, <em>priority</em>, <em>force</em>, <em>userdn</em>, <em>userproxy</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataWorkflow.html#DataWorkflow.resubmit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataWorkflow.DataWorkflow.resubmit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Request to reprocess what the workflow hasn&#8217;t finished to reprocess.
+This needs to create a new workflow in the same campaign</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>workflow</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; a valid workflow name</li>
+<li><strong>list siteblacklist</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; black list of sites, with CMS name;</li>
+<li><strong>list sitewhitelist</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; white list of sites, with CMS name.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.DataWorkflow.DataWorkflow.schema">
+<tt class="descname">schema</tt><big>(</big><em>workflow</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataWorkflow.html#DataWorkflow.schema"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataWorkflow.DataWorkflow.schema" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the workflow schema parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>workflow</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; a workflow name</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a json corresponding to the workflow schema</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.DataWorkflow.DataWorkflow.status">
+<tt class="descname">status</tt><big>(</big><em>workflow</em>, <em>userdn</em>, <em>userproxy=None</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataWorkflow.html#DataWorkflow.status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataWorkflow.DataWorkflow.status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the status of the workflow.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>workflow</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; a valid workflow name</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a workflow status summary document</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.DataWorkflow.DataWorkflow.submit">
+<tt class="descname">submit</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataWorkflow.html#DataWorkflow.submit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataWorkflow.DataWorkflow.submit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.DataWorkflow.DataWorkflow.updateRequest">
+<tt class="descname">updateRequest</tt><big>(</big><em>workflow</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/DataWorkflow.html#DataWorkflow.updateRequest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.DataWorkflow.DataWorkflow.updateRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provide the implementing class a chance to rename the workflow
+before it is committed to the DB.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-CRABInterface.HTCondorDataWorkflow">
+<span id="htcondordataworkflow-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">HTCondorDataWorkflow</span></tt> Module<a class="headerlink" href="#module-CRABInterface.HTCondorDataWorkflow" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow">
+<em class="property">class </em><tt class="descclassname">CRABInterface.HTCondorDataWorkflow.</tt><tt class="descname">HTCondorDataWorkflow</tt><big>(</big><em>config</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/HTCondorDataWorkflow.html#HTCondorDataWorkflow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#CRABInterface.DataWorkflow.DataWorkflow" title="CRABInterface.DataWorkflow.DataWorkflow"><tt class="xref py py-class docutils literal"><span class="pre">CRABInterface.DataWorkflow.DataWorkflow</span></tt></a></p>
+<p>HTCondor implementation of the status command.</p>
+<dl class="method">
+<dt id="CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.chooseScheduler">
+<tt class="descname">chooseScheduler</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/HTCondorDataWorkflow.html#HTCondorDataWorkflow.chooseScheduler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.chooseScheduler" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.cleanTempFileAndBuff">
+<tt class="descname">cleanTempFileAndBuff</tt><big>(</big><em>fp</em>, <em>hbuf</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/HTCondorDataWorkflow.html#HTCondorDataWorkflow.cleanTempFileAndBuff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.cleanTempFileAndBuff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Go to the beginning of temp file
+Truncate buffer and file and return</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.cpu_re">
+<tt class="descname">cpu_re</tt><em class="property"> = &lt;_sre.SRE_Pattern object at 0x41622b0&gt;</em><a class="headerlink" href="#CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.cpu_re" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.failedList">
+<tt class="descname">failedList</tt><em class="property"> = ['failed']</em><a class="headerlink" href="#CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.failedList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.getFiles">
+<tt class="descname">getFiles</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/HTCondorDataWorkflow.html#HTCondorDataWorkflow.getFiles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.getFiles" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.getRootTasks">
+<tt class="descname">getRootTasks</tt><big>(</big><em>workflow</em>, <em>schedd</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/HTCondorDataWorkflow.html#HTCondorDataWorkflow.getRootTasks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.getRootTasks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.insertCpu">
+<tt class="descname">insertCpu</tt><big>(</big><em>event</em>, <em>info</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/HTCondorDataWorkflow.html#HTCondorDataWorkflow.insertCpu"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.insertCpu" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.job_name_re">
+<tt class="descname">job_name_re</tt><em class="property"> = &lt;_sre.SRE_Pattern object at 0x41075d0&gt;</em><a class="headerlink" href="#CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.job_name_re" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.job_re">
+<tt class="descname">job_re</tt><em class="property"> = &lt;_sre.SRE_Pattern object at 0x4162440&gt;</em><a class="headerlink" href="#CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.job_re" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.logs">
+<tt class="descname">logs</tt><big>(</big><em>workflow</em>, <em>howmany</em>, <em>exitcode</em>, <em>jobids</em>, <em>userdn</em>, <em>userproxy=None</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/HTCondorDataWorkflow.html#HTCondorDataWorkflow.logs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.logs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.node_name2_re">
+<tt class="descname">node_name2_re</tt><em class="property"> = &lt;_sre.SRE_Pattern object at 0x41075d0&gt;</em><a class="headerlink" href="#CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.node_name2_re" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.node_name_re">
+<tt class="descname">node_name_re</tt><em class="property"> = &lt;_sre.SRE_Pattern object at 0x402d120&gt;</em><a class="headerlink" href="#CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.node_name_re" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.output">
+<tt class="descname">output</tt><big>(</big><em>workflow</em>, <em>howmany</em>, <em>jobids</em>, <em>userdn</em>, <em>userproxy=None</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/HTCondorDataWorkflow.html#HTCondorDataWorkflow.output"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.output" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.parseASOState">
+<tt class="descname">parseASOState</tt><big>(</big><em>fp</em>, <em>nodes</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/HTCondorDataWorkflow.html#HTCondorDataWorkflow.parseASOState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.parseASOState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.parseErrorReport">
+<tt class="descname">parseErrorReport</tt><big>(</big><em>fp</em>, <em>nodes</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/HTCondorDataWorkflow.html#HTCondorDataWorkflow.parseErrorReport"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.parseErrorReport" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.parseJobLog">
+<tt class="descname">parseJobLog</tt><big>(</big><em>fp</em>, <em>nodes</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/HTCondorDataWorkflow.html#HTCondorDataWorkflow.parseJobLog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.parseJobLog" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.parseNodeState">
+<tt class="descname">parseNodeState</tt><big>(</big><em>fp</em>, <em>nodes</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/HTCondorDataWorkflow.html#HTCondorDataWorkflow.parseNodeState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.parseNodeState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.parseNodeStateV2">
+<tt class="descname">parseNodeStateV2</tt><big>(</big><em>fp</em>, <em>nodes</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/HTCondorDataWorkflow.html#HTCondorDataWorkflow.parseNodeStateV2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.parseNodeStateV2" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTCondor 8.1.6 updated the node state file to be classad-based.
+This is a more flexible format that allows future extensions but, unfortunately,
+also requires a separate parser.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.parseSiteAd">
+<tt class="descname">parseSiteAd</tt><big>(</big><em>fp</em>, <em>task_ad</em>, <em>nodes</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/HTCondorDataWorkflow.html#HTCondorDataWorkflow.parseSiteAd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.parseSiteAd" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.post_failure_re">
+<tt class="descname">post_failure_re</tt><em class="property"> = &lt;_sre.SRE_Pattern object at 0x416a130&gt;</em><a class="headerlink" href="#CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.post_failure_re" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.prepareCurl">
+<tt class="descname">prepareCurl</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/CRABInterface/HTCondorDataWorkflow.html#HTCondorDataWorkflow.prepareCurl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.prepareCurl" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.publicationStatus">
+<tt class="descname">publicationStatus</tt><big>(</big><em>workflow</em>, <em>asourl</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/HTCondorDataWorkflow.html#HTCondorDataWorkflow.publicationStatus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.publicationStatus" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.report">
+<tt class="descname">report</tt><big>(</big><em>workflow</em>, <em>userdn</em>, <em>usedbs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/HTCondorDataWorkflow.html#HTCondorDataWorkflow.report"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the report for workflow. If usedbs is used also query DBS and return information about the input and output datasets</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.status">
+<tt class="descname">status</tt><big>(</big><em>*args</em>, <em>**kw</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/HTCondorDataWorkflow.html#HTCondorDataWorkflow.status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.status" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.successList">
+<tt class="descname">successList</tt><em class="property"> = ['finished']</em><a class="headerlink" href="#CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.successList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.taskWebStatus">
+<tt class="descname">taskWebStatus</tt><big>(</big><em>task_ad</em>, <em>verbose</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/HTCondorDataWorkflow.html#HTCondorDataWorkflow.taskWebStatus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.HTCondorDataWorkflow.HTCondorDataWorkflow.taskWebStatus" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="CRABInterface.HTCondorDataWorkflow.MissingNodeStatus">
+<em class="property">exception </em><tt class="descclassname">CRABInterface.HTCondorDataWorkflow.</tt><tt class="descname">MissingNodeStatus</tt><big>(</big><em>info=None</em>, <em>errobj=None</em>, <em>trace=None</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/HTCondorDataWorkflow.html#MissingNodeStatus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.HTCondorDataWorkflow.MissingNodeStatus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">WMCore.REST.Error.ExecutionError</span></tt></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-CRABInterface.PandaDataWorkflow">
+<span id="pandadataworkflow-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">PandaDataWorkflow</span></tt> Module<a class="headerlink" href="#module-CRABInterface.PandaDataWorkflow" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="CRABInterface.PandaDataWorkflow.PandaDataWorkflow">
+<em class="property">class </em><tt class="descclassname">CRABInterface.PandaDataWorkflow.</tt><tt class="descname">PandaDataWorkflow</tt><big>(</big><em>config</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/PandaDataWorkflow.html#PandaDataWorkflow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.PandaDataWorkflow.PandaDataWorkflow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#CRABInterface.DataWorkflow.DataWorkflow" title="CRABInterface.DataWorkflow.DataWorkflow"><tt class="xref py py-class docutils literal"><span class="pre">CRABInterface.DataWorkflow.DataWorkflow</span></tt></a></p>
+<p>Panda implementation of the status command.</p>
+<dl class="attribute">
+<dt id="CRABInterface.PandaDataWorkflow.PandaDataWorkflow.failedList">
+<tt class="descname">failedList</tt><em class="property"> = ['cancelled', 'failed']</em><a class="headerlink" href="#CRABInterface.PandaDataWorkflow.PandaDataWorkflow.failedList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.PandaDataWorkflow.PandaDataWorkflow.getFiles">
+<tt class="descname">getFiles</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/PandaDataWorkflow.html#PandaDataWorkflow.getFiles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.PandaDataWorkflow.PandaDataWorkflow.getFiles" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.PandaDataWorkflow.PandaDataWorkflow.logs">
+<tt class="descname">logs</tt><big>(</big><em>workflow</em>, <em>howmany</em>, <em>exitcode</em>, <em>jobids</em>, <em>userdn</em>, <em>userproxy=None</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/PandaDataWorkflow.html#PandaDataWorkflow.logs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.PandaDataWorkflow.PandaDataWorkflow.logs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.PandaDataWorkflow.PandaDataWorkflow.output">
+<tt class="descname">output</tt><big>(</big><em>workflow</em>, <em>howmany</em>, <em>jobids</em>, <em>userdn</em>, <em>userproxy=None</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/PandaDataWorkflow.html#PandaDataWorkflow.output"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.PandaDataWorkflow.PandaDataWorkflow.output" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.PandaDataWorkflow.PandaDataWorkflow.report">
+<tt class="descname">report</tt><big>(</big><em>workflow</em>, <em>userdn</em>, <em>userproxy=None</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/PandaDataWorkflow.html#PandaDataWorkflow.report"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.PandaDataWorkflow.PandaDataWorkflow.report" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.PandaDataWorkflow.PandaDataWorkflow.status">
+<tt class="descname">status</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/PandaDataWorkflow.html#PandaDataWorkflow.status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.PandaDataWorkflow.PandaDataWorkflow.status" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="CRABInterface.PandaDataWorkflow.PandaDataWorkflow.successList">
+<tt class="descname">successList</tt><em class="property"> = ['finished']</em><a class="headerlink" href="#CRABInterface.PandaDataWorkflow.PandaDataWorkflow.successList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-CRABInterface.RESTBaseAPI">
+<span id="restbaseapi-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">RESTBaseAPI</span></tt> Module<a class="headerlink" href="#module-CRABInterface.RESTBaseAPI" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="CRABInterface.RESTBaseAPI.NullHandler">
+<em class="property">class </em><tt class="descclassname">CRABInterface.RESTBaseAPI.</tt><tt class="descname">NullHandler</tt><big>(</big><em>level=0</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTBaseAPI.html#NullHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTBaseAPI.NullHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">logging.Handler</span></tt></p>
+<p>Initializes the instance - basically setting the formatter to None
+and the filter list to empty.</p>
+<dl class="method">
+<dt id="CRABInterface.RESTBaseAPI.NullHandler.emit">
+<tt class="descname">emit</tt><big>(</big><em>record</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTBaseAPI.html#NullHandler.emit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTBaseAPI.NullHandler.emit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="CRABInterface.RESTBaseAPI.RESTBaseAPI">
+<em class="property">class </em><tt class="descclassname">CRABInterface.RESTBaseAPI.</tt><tt class="descname">RESTBaseAPI</tt><big>(</big><em>app</em>, <em>config</em>, <em>mount</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTBaseAPI.html#RESTBaseAPI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTBaseAPI.RESTBaseAPI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">WMCore.REST.Server.DatabaseRESTApi</span></tt></p>
+<p>The CRABServer REST API modules</p>
+<dl class="method">
+<dt id="CRABInterface.RESTBaseAPI.RESTBaseAPI.modifynocheck">
+<tt class="descname">modifynocheck</tt><big>(</big><em>sql</em>, <em>*binds</em>, <em>**kwbinds</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTBaseAPI.html#RESTBaseAPI.modifynocheck"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTBaseAPI.RESTBaseAPI.modifynocheck" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the same as <cite>WMCore.REST.Server</cite>:modify method but
+not implementing any kind of checks on the number of modified</p>
+<blockquote>
+<div>rows.</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sql</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; SQL modify statement.</li>
+<li><strong>binds</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; Bind variables by position: list of dictionaries.</li>
+<li><strong>kwbinds</strong> (<a class="reference external" href="http://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; Bind variables by keyword: dictionary of lists.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Result :</th><td class="field-body"><p class="first last">See <tt class="xref py py-meth docutils literal"><span class="pre">rowstatus()</span></tt> and description in <cite>WMCore.REST.Server</cite>.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-CRABInterface.RESTCampaign">
+<span id="restcampaign-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">RESTCampaign</span></tt> Module<a class="headerlink" href="#module-CRABInterface.RESTCampaign" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="CRABInterface.RESTCampaign.RESTCampaign">
+<em class="property">class </em><tt class="descclassname">CRABInterface.RESTCampaign.</tt><tt class="descname">RESTCampaign</tt><big>(</big><em>app</em>, <em>api</em>, <em>config</em>, <em>mount</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTCampaign.html#RESTCampaign"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTCampaign.RESTCampaign" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">WMCore.REST.Server.RESTEntity</span></tt></p>
+<p>REST entity for campaigns allows to handle a set of workflows all together</p>
+<dl class="method">
+<dt id="CRABInterface.RESTCampaign.RESTCampaign.delete">
+<tt class="descname">delete</tt><big>(</big><em>campaign</em>, <em>force</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTCampaign.html#RESTCampaign.delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTCampaign.RESTCampaign.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aborts a campaign. The user needs to be a CMS owner of the campaign.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>list campaign</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; list of unique name identifiers of campaigns;</li>
+<li><strong>force</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; force to delete the campaigns in any case; 0 no, everything else yes;</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">nothing?</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTCampaign.RESTCampaign.get">
+<tt class="descname">get</tt><big>(</big><em>campaign</em>, <em>age</em>, <em>subresource</em>, <em>limit</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTCampaign.html#RESTCampaign.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTCampaign.RESTCampaign.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves the campaigns information, like a status summary, in case the campaign unique name is specified.
+Otherwise returns all campaigns since (now - age) for which the user is the owner.
+The caller needs to be a CMS user owner of the campaign.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>campaign</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; list of unique name identifiers of campaigns;</li>
+<li><strong>age</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; max campaigns age in days;</li>
+<li><strong>subresource</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; the campaign sub-resource to retrieve</li>
+<li><strong>limit</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; limit of sub-resource elements to retrieve</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Retrun :</th><td class="field-body"><p class="first last">the list of campaigns with the relative status summary or (the list of) sub-resource(s)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTCampaign.RESTCampaign.post">
+<tt class="descname">post</tt><big>(</big><em>campaign</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTCampaign.html#RESTCampaign.post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTCampaign.RESTCampaign.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resubmit an existing campaign. The caller needs to be a CMS user owner of the campaign.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>campaign</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; unique name identifier of the campaign;</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the list of modified field</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTCampaign.RESTCampaign.put">
+<tt class="descname">put</tt><big>(</big><em>campaign</em>, <em>workflow</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTCampaign.html#RESTCampaign.put"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTCampaign.RESTCampaign.put" title="Permalink to this definition">¶</a></dt>
+<dd><p>Insert a new campaign  and eventually adds a set of workflows to the campaign.
+The caller needs to be a CMS user with a valid CMS x509 cert/proxy.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>campaign</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; campaign name requested by the user;</li>
+<li><strong>list workflow</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; workflow names requested by the user;</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the campaign name with the relative workflow names.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTCampaign.RESTCampaign.validate">
+<tt class="descname">validate</tt><big>(</big><em>apiobj</em>, <em>method</em>, <em>api</em>, <em>param</em>, <em>safe</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTCampaign.html#RESTCampaign.validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTCampaign.RESTCampaign.validate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validating all the input parameter as enforced by the WMCore.REST module</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-CRABInterface.RESTExtensions">
+<span id="restextensions-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">RESTExtensions</span></tt> Module<a class="headerlink" href="#module-CRABInterface.RESTExtensions" title="Permalink to this headline">¶</a></h2>
+<p>This module aims to contain the method specific to the REST interface.
+These are extensions which are not directly contained in WMCore.REST module
+and it shouldn&#8217;t have any other dependencies a part of that and cherrypy.</p>
+<p>Currently authz_owner_match uses a WMCore.Database.CMSCouch method
+but in next versions it should be dropped, as from the CRABInterface.</p>
+<dl class="function">
+<dt id="CRABInterface.RESTExtensions.authz_login_valid">
+<tt class="descclassname">CRABInterface.RESTExtensions.</tt><tt class="descname">authz_login_valid</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTExtensions.html#authz_login_valid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTExtensions.authz_login_valid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="CRABInterface.RESTExtensions.authz_operator">
+<tt class="descclassname">CRABInterface.RESTExtensions.</tt><tt class="descname">authz_operator</tt><big>(</big><em>username=None</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTExtensions.html#authz_operator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTExtensions.authz_operator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if the the user who is trying to access this resource (i.e.: cherrypy.request.user[&#8216;login&#8217;], the cert username) is the
+same as username. If not check if the user is a CRAB3 operator. {... &#8216;operator&#8217;: {&#8216;group&#8217;: set([&#8216;crab3&#8217;]) ... in the cherrypy roles}
+If the username is not passed just check role</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="CRABInterface.RESTExtensions.authz_owner_match">
+<tt class="descclassname">CRABInterface.RESTExtensions.</tt><tt class="descname">authz_owner_match</tt><big>(</big><em>dbapi</em>, <em>workflows</em>, <em>Task</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTExtensions.html#authz_owner_match"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTExtensions.authz_owner_match" title="Permalink to this definition">¶</a></dt>
+<dd><p>Match user against authorisation requirements to modify an existing resource.
+Allows to cache couchdb fetched documents if the caller needs them.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>database</strong> (<em>WMCore.CMSCouch.Database</em>) &#8211; database connection to retrieve the docs</li>
+<li><strong>list workflows</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; a list of workflows unique name as positive check</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">in case retrieve_docs is not false the list of couchdb documents.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-CRABInterface.RESTFileMetadata">
+<span id="restfilemetadata-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">RESTFileMetadata</span></tt> Module<a class="headerlink" href="#module-CRABInterface.RESTFileMetadata" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="CRABInterface.RESTFileMetadata.RESTFileMetadata">
+<em class="property">class </em><tt class="descclassname">CRABInterface.RESTFileMetadata.</tt><tt class="descname">RESTFileMetadata</tt><big>(</big><em>app</em>, <em>api</em>, <em>config</em>, <em>mount</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTFileMetadata.html#RESTFileMetadata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTFileMetadata.RESTFileMetadata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">WMCore.REST.Server.RESTEntity</span></tt></p>
+<p>REST entity to handle job metadata information</p>
+<dl class="method">
+<dt id="CRABInterface.RESTFileMetadata.RESTFileMetadata.delete">
+<tt class="descname">delete</tt><big>(</big><em>taskname</em>, <em>hours</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTFileMetadata.html#RESTFileMetadata.delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTFileMetadata.RESTFileMetadata.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deletes an existing job metadata information</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTFileMetadata.RESTFileMetadata.get">
+<tt class="descname">get</tt><big>(</big><em>taskname</em>, <em>filetype</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTFileMetadata.html#RESTFileMetadata.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTFileMetadata.RESTFileMetadata.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves a specific job metadata information.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>taskname</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; unique name identifier of the task;</li>
+<li><strong>filetype</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; filter the file type to return;</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Retrun :</th><td class="field-body"><p class="first last">generator looping through the resulting db rows.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTFileMetadata.RESTFileMetadata.post">
+<tt class="descname">post</tt><big>(</big><em>taskname</em>, <em>outlfn</em>, <em>filestate</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTFileMetadata.html#RESTFileMetadata.post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTFileMetadata.RESTFileMetadata.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>Modifies and existing job metadata information</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTFileMetadata.RESTFileMetadata.put">
+<tt class="descname">put</tt><big>(</big><em>taskname</em>, <em>outfilelumis</em>, <em>inparentlfns</em>, <em>globalTag</em>, <em>outfileruns</em>, <em>pandajobid</em>, <em>outsize</em>, <em>publishdataname</em>, <em>appver</em>, <em>outtype</em>, <em>checksummd5</em>, <em>checksumcksum</em>, <em>checksumadler32</em>, <em>outlocation</em>, <em>outtmplocation</em>, <em>outdatasetname</em>, <em>acquisitionera</em>, <em>outlfn</em>, <em>events</em>, <em>filestate</em>, <em>directstageout</em>, <em>outtmplfn</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTFileMetadata.html#RESTFileMetadata.put"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTFileMetadata.RESTFileMetadata.put" title="Permalink to this definition">¶</a></dt>
+<dd><p>Insert a new job metadata information</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTFileMetadata.RESTFileMetadata.validate">
+<tt class="descname">validate</tt><big>(</big><em>apiobj</em>, <em>method</em>, <em>api</em>, <em>param</em>, <em>safe</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTFileMetadata.html#RESTFileMetadata.validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTFileMetadata.RESTFileMetadata.validate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validating all the input parameter as enforced by the WMCore.REST module</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-CRABInterface.RESTServerInfo">
+<span id="restserverinfo-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">RESTServerInfo</span></tt> Module<a class="headerlink" href="#module-CRABInterface.RESTServerInfo" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="CRABInterface.RESTServerInfo.RESTServerInfo">
+<em class="property">class </em><tt class="descclassname">CRABInterface.RESTServerInfo.</tt><tt class="descname">RESTServerInfo</tt><big>(</big><em>app</em>, <em>api</em>, <em>config</em>, <em>mount</em>, <em>serverdn</em>, <em>centralcfg</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTServerInfo.html#RESTServerInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTServerInfo.RESTServerInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">WMCore.REST.Server.RESTEntity</span></tt></p>
+<p>REST entity for workflows and relative subresources</p>
+<dl class="method">
+<dt id="CRABInterface.RESTServerInfo.RESTServerInfo.backendurls">
+<tt class="descname">backendurls</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTServerInfo.html#RESTServerInfo.backendurls"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTServerInfo.RESTServerInfo.backendurls" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTServerInfo.RESTServerInfo.bannedoutdest">
+<tt class="descname">bannedoutdest</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTServerInfo.html#RESTServerInfo.bannedoutdest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTServerInfo.RESTServerInfo.bannedoutdest" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTServerInfo.RESTServerInfo.delegatedn">
+<tt class="descname">delegatedn</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTServerInfo.html#RESTServerInfo.delegatedn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTServerInfo.RESTServerInfo.delegatedn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTServerInfo.RESTServerInfo.get">
+<tt class="descname">get</tt><big>(</big><em>subresource</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTServerInfo.html#RESTServerInfo.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTServerInfo.RESTServerInfo.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves the server information, like delegateDN, filecacheurls ...
+:arg str subresource: the specific server information to be accessed;</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTServerInfo.RESTServerInfo.ignlocalityblacklist">
+<tt class="descname">ignlocalityblacklist</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTServerInfo.html#RESTServerInfo.ignlocalityblacklist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTServerInfo.RESTServerInfo.ignlocalityblacklist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTServerInfo.RESTServerInfo.scheddaddress">
+<tt class="descname">scheddaddress</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTServerInfo.html#RESTServerInfo.scheddaddress"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTServerInfo.RESTServerInfo.scheddaddress" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTServerInfo.RESTServerInfo.validate">
+<tt class="descname">validate</tt><big>(</big><em>apiobj</em>, <em>method</em>, <em>api</em>, <em>param</em>, <em>safe</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTServerInfo.html#RESTServerInfo.validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTServerInfo.RESTServerInfo.validate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validating all the input parameter as enforced by the WMCore.REST module</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTServerInfo.RESTServerInfo.version">
+<tt class="descname">version</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTServerInfo.html#RESTServerInfo.version"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTServerInfo.RESTServerInfo.version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-CRABInterface.RESTTask">
+<span id="resttask-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">RESTTask</span></tt> Module<a class="headerlink" href="#module-CRABInterface.RESTTask" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="CRABInterface.RESTTask.RESTTask">
+<em class="property">class </em><tt class="descclassname">CRABInterface.RESTTask.</tt><tt class="descname">RESTTask</tt><big>(</big><em>app</em>, <em>api</em>, <em>config</em>, <em>mount</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTTask.html#RESTTask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTTask.RESTTask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">WMCore.REST.Server.RESTEntity</span></tt></p>
+<p>REST entity to handle interactions between CAFTaskWorker and TaskManager database</p>
+<dl class="method">
+<dt id="CRABInterface.RESTTask.RESTTask.addoutputdatasets">
+<tt class="descname">addoutputdatasets</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTTask.html#RESTTask.addoutputdatasets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTTask.RESTTask.addoutputdatasets" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTTask.RESTTask.addwarning">
+<tt class="descname">addwarning</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTTask.html#RESTTask.addwarning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTTask.RESTTask.addwarning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a warning to the wraning column in the database. Can be tested with:
+curl -X POST <a class="reference external" href="https://mmascher-poc.cern.ch/crabserver/dev/task">https://mmascher-poc.cern.ch/crabserver/dev/task</a> -k &#8211;key /tmp/x509up_u8440 &#8211;cert /tmp/x509up_u8440                     -d &#8216;subresource=addwarning&amp;workflow=140710_233424_crab3test-5:mmascher_crab_HCprivate12&amp;warning=blahblah&#8217; -v</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTTask.RESTTask.addwebdir">
+<tt class="descname">addwebdir</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTTask.html#RESTTask.addwebdir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTTask.RESTTask.addwebdir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add web directory to web_dir column in the database. Can be tested with:
+curl -X POST <a class="reference external" href="https://balcas-crab.cern.ch/crabserver/dev/task">https://balcas-crab.cern.ch/crabserver/dev/task</a> -k &#8211;key $X509_USER_PROXY &#8211;cert $X509_USER_PROXY                     -d &#8216;subresource=addwebdir&amp;workflow=140710_233424_crab3test-5:mmascher_crab_HCprivate12&amp;webdirurl=http://cmsweb.cern.ch/crabserver/testtask&#8217; -v</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTTask.RESTTask.allinfo">
+<tt class="descname">allinfo</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTTask.html#RESTTask.allinfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTTask.RESTTask.allinfo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTTask.RESTTask.allusers">
+<tt class="descname">allusers</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTTask.html#RESTTask.allusers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTTask.RESTTask.allusers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTTask.RESTTask.counttasksbystatus">
+<tt class="descname">counttasksbystatus</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTTask.html#RESTTask.counttasksbystatus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTTask.RESTTask.counttasksbystatus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves all jobs of the specified user with the specified status
+curl -X GET &#8216;<a class="reference external" href="https://mmascher-dev6.cern.ch/crabserver/dev/task?subresource=counttasksbystatus&amp;minutes=100">https://mmascher-dev6.cern.ch/crabserver/dev/task?subresource=counttasksbystatus&amp;minutes=100</a>&#8216;                        -k &#8211;key /tmp/x509up_u8440 &#8211;cert /tmp/x509up_u8440 -v</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTTask.RESTTask.get">
+<tt class="descname">get</tt><big>(</big><em>subresource</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTTask.html#RESTTask.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTTask.RESTTask.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves the server information, like delegateDN, filecacheurls ...
+:arg str subresource: the specific server information to be accessed;</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTTask.RESTTask.lastfailures">
+<tt class="descname">lastfailures</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTTask.html#RESTTask.lastfailures"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTTask.RESTTask.lastfailures" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves all jobs of the specified user with the specified status
+curl -X GET &#8216;<a class="reference external" href="https://mmascher-dev6.cern.ch/crabserver/dev/task?subresource=lastfailures&amp;minutes=100">https://mmascher-dev6.cern.ch/crabserver/dev/task?subresource=lastfailures&amp;minutes=100</a>&#8216;                        -k &#8211;key /tmp/x509up_u8440 &#8211;cert /tmp/x509up_u8440 -v</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTTask.RESTTask.post">
+<tt class="descname">post</tt><big>(</big><em>subresource</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTTask.html#RESTTask.post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTTask.RESTTask.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates task information</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTTask.RESTTask.search">
+<tt class="descname">search</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTTask.html#RESTTask.search"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTTask.RESTTask.search" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves all the columns of a task in the task table (select * from task ...)
+The API is (only?) used in the monitor for operator.
+curl -X GET &#8216;<a class="reference external" href="https://mmascher-dev6.cern.ch/crabserver/dev/task?subresource=search&amp;workflow=150224_230633:mmascher_crab_testecmmascher-dev6_3">https://mmascher-dev6.cern.ch/crabserver/dev/task?subresource=search&amp;workflow=150224_230633:mmascher_crab_testecmmascher-dev6_3</a>&#8216;                         -k &#8211;key /tmp/x509up_u8440 &#8211;cert /tmp/x509up_u8440 -v</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTTask.RESTTask.summary">
+<tt class="descname">summary</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTTask.html#RESTTask.summary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTTask.RESTTask.summary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves the data for list all users</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTTask.RESTTask.taskbystatus">
+<tt class="descname">taskbystatus</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTTask.html#RESTTask.taskbystatus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTTask.RESTTask.taskbystatus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves all jobs of the specified user with the specified status</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTTask.RESTTask.updateschedd">
+<tt class="descname">updateschedd</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTTask.html#RESTTask.updateschedd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTTask.RESTTask.updateschedd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change scheduler for task submission.
+curl -X POST <a class="reference external" href="https://balcas-crab.cern.ch/crabserver/dev/task">https://balcas-crab.cern.ch/crabserver/dev/task</a> -ks &#8211;key $X509_USER_PROXY &#8211;cert $X509_USER_PROXY &#8211;cacert $X509_USER_PROXY                  -d &#8216;subresource=updateschedd&amp;workflow=150316_221646:jbalcas_crab_test_submit-5-274334&amp;scheddname=vocms095.asdadasdasdacern.ch&#8217; -v</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTTask.RESTTask.validate">
+<tt class="descname">validate</tt><big>(</big><em>apiobj</em>, <em>method</em>, <em>api</em>, <em>param</em>, <em>safe</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTTask.html#RESTTask.validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTTask.RESTTask.validate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validating all the input parameter as enforced by the WMCore.REST module</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTTask.RESTTask.webdir">
+<tt class="descname">webdir</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTTask.html#RESTTask.webdir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTTask.RESTTask.webdir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-CRABInterface.RESTUserWorkflow">
+<span id="restuserworkflow-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">RESTUserWorkflow</span></tt> Module<a class="headerlink" href="#module-CRABInterface.RESTUserWorkflow" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="CRABInterface.RESTUserWorkflow.RESTUserWorkflow">
+<em class="property">class </em><tt class="descclassname">CRABInterface.RESTUserWorkflow.</tt><tt class="descname">RESTUserWorkflow</tt><big>(</big><em>app</em>, <em>api</em>, <em>config</em>, <em>mount</em>, <em>centralcfg</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTUserWorkflow.html#RESTUserWorkflow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTUserWorkflow.RESTUserWorkflow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">WMCore.REST.Server.RESTEntity</span></tt></p>
+<p>REST entity for workflows from the user point of view and relative subresources</p>
+<dl class="method">
+<dt id="CRABInterface.RESTUserWorkflow.RESTUserWorkflow.delete">
+<tt class="descname">delete</tt><big>(</big><em>workflow</em>, <em>force</em>, <em>jobids</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTUserWorkflow.html#RESTUserWorkflow.delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTUserWorkflow.RESTUserWorkflow.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aborts a workflow. The user needs to be a CMS owner of the workflow.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>list workflow</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; list of unique name identifiers of workflows;</li>
+<li><strong>force</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; force to delete the workflows in any case; 0 no, everything else yes;</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">nothing</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTUserWorkflow.RESTUserWorkflow.get">
+<tt class="descname">get</tt><big>(</big><em>workflow</em>, <em>subresource</em>, <em>username</em>, <em>limit</em>, <em>shortformat</em>, <em>exitcode</em>, <em>jobids</em>, <em>verbose</em>, <em>timestamp</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTUserWorkflow.html#RESTUserWorkflow.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTUserWorkflow.RESTUserWorkflow.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves the workflow information, like a status summary, in case the workflow unique name is specified.
+Otherwise returns all workflows since (now - age) for which the user is the owner.
+The caller needs to be a valid CMS user.
+:arg str workflow: unique name identifier of workflow;</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">arg str timestamp:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">max workflow age in hours;</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>subresource</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; the specific workflow information to be accessed;</li>
+<li><strong>limit</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; limit of return entries for some specific subresource;</li>
+<li><strong>exitcode</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; exitcode for which the specific subresource is needed (eg log file of a job with that exitcode)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Retrun :</th><td class="field-body"><p class="first last">workflow with the relative status summary in case of per user request; or
+the requested subresource.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTUserWorkflow.RESTUserWorkflow.post">
+<tt class="descname">post</tt><big>(</big><em>workflow</em>, <em>subresource</em>, <em>siteblacklist</em>, <em>sitewhitelist</em>, <em>jobids</em>, <em>maxjobruntime</em>, <em>numcores</em>, <em>maxmemory</em>, <em>priority</em>, <em>force</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTUserWorkflow.html#RESTUserWorkflow.post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTUserWorkflow.RESTUserWorkflow.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resubmit or continue an existing workflow. The caller needs to be a CMS user owner of the workflow.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>workflow</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; unique name identifier of the workflow;</li>
+<li><strong>list siteblacklist</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; black list of sites, with CMS name;</li>
+<li><strong>list sitewhitelist</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; white list of sites, with CMS name.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTUserWorkflow.RESTUserWorkflow.put">
+<tt class="descname">put</tt><big>(</big><em>workflow</em>, <em>activity</em>, <em>jobtype</em>, <em>jobsw</em>, <em>jobarch</em>, <em>inputdata</em>, <em>nonvaliddata</em>, <em>useparent</em>, <em>generator</em>, <em>eventsperlumi</em>, <em>siteblacklist</em>, <em>sitewhitelist</em>, <em>splitalgo</em>, <em>algoargs</em>, <em>cachefilename</em>, <em>cacheurl</em>, <em>addoutputfiles</em>, <em>savelogsflag</em>, <em>publication</em>, <em>publishname</em>, <em>publishgroupname</em>, <em>asyncdest</em>, <em>dbsurl</em>, <em>publishdbsurl</em>, <em>vorole</em>, <em>vogroup</em>, <em>tfileoutfiles</em>, <em>edmoutfiles</em>, <em>runs</em>, <em>lumis</em>, <em>totalunits</em>, <em>adduserfiles</em>, <em>oneEventMode</em>, <em>maxjobruntime</em>, <em>numcores</em>, <em>maxmemory</em>, <em>priority</em>, <em>blacklistT1</em>, <em>nonprodsw</em>, <em>lfn</em>, <em>saveoutput</em>, <em>faillimit</em>, <em>ignorelocality</em>, <em>userfiles</em>, <em>asourl</em>, <em>scriptexe</em>, <em>scriptargs</em>, <em>scheddname</em>, <em>extrajdl</em>, <em>collector</em>, <em>dryrun</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTUserWorkflow.html#RESTUserWorkflow.put"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTUserWorkflow.RESTUserWorkflow.put" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform the workflow injection</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>workflow</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; workflow name requested by the user;</li>
+<li><strong>activity</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; workflow activity type, default None;</li>
+<li><strong>jobtype</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; job type of the workflow, usually Analysis;</li>
+<li><strong>jobsw</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; software requirement;</li>
+<li><strong>jobarch</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; software architecture (=SCRAM_ARCH);</li>
+<li><strong>inputdata</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; input dataset;</li>
+<li><strong>nonvaliddata</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; allow invalid input dataset;</li>
+<li><strong>useparent</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; add the parent dataset as secondary input;</li>
+<li><strong>generator</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; event generator for MC production;</li>
+<li><strong>eventsperlumi</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; how many events to generate per lumi;</li>
+<li><strong>list siteblacklist</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; black list of sites, with CMS name;</li>
+<li><strong>list sitewhitelist</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; white list of sites, with CMS name;</li>
+<li><strong>splitalgo</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; algorithm to be used for the workflow splitting;</li>
+<li><strong>algoargs</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; argument to be used by the splitting algorithm;</li>
+<li><strong>cachefilename</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; name of the file inside the cache</li>
+<li><strong>cacheurl</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; URL of the cache</li>
+<li><strong>list addoutputfiles</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; list of additional output files;</li>
+<li><strong>savelogsflag</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; archive the log files? 0 no, everything else yes;</li>
+<li><strong>userdn</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; DN of user doing the request;</li>
+<li><strong>userhn</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; hyper new name of the user doing the request;</li>
+<li><strong>publication</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; flag enabling or disabling data publication;</li>
+<li><strong>publishname</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; name to use for data publication;</li>
+<li><strong>publishgroupname</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; add groupname or username to publishname;</li>
+<li><strong>asyncdest</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; CMS site name for storage destination of the output files;</li>
+<li><strong>dbsurl</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; dbs url where the input dataset is published;</li>
+<li><strong>publishdbsurl</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; dbs url where the output data has to be published;</li>
+<li><strong>vorole</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; user vo role</li>
+<li><strong>vogroup</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; user vo group</li>
+<li><strong>tfileoutfiles</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; list of t-output files</li>
+<li><strong>edmoutfiles</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; list of edm output files</li>
+<li><strong>list runs</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; list of run numbers</li>
+<li><strong>list lumis</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; list of lumi section numbers</li>
+<li><strong>scheduler</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Which scheduler to use, can be &#8216;panda&#8217; or &#8216;condor&#8217;</li>
+<li><strong>totalunits</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; number of MC event to be generated</li>
+<li><strong>adduserfiles</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; additional user file to be copied in the cmsRun directory</li>
+<li><strong>oneEventMode</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; flag enabling oneEventMode</li>
+<li><strong>maxjobruntime</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; max job runtime, in minutes</li>
+<li><strong>numcores</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; number of CPU cores required by job</li>
+<li><strong>maxmemory</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; maximum amount of RAM required, in MB</li>
+<li><strong>priority</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; priority of this task</li>
+<li><strong>saveoutput</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; whether to perform stageout for a given output file</li>
+<li><strong>faillimit</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; the maximum number of failed jobs which triggers a workflow abort.</li>
+<li><strong>ignorelocality</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; whether to ignore file locality in favor of the whitelist.</li>
+<li><strong>userfiles</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The files to process instead of a DBS-based dataset.</li>
+<li><strong>asourl</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; ASO url to be used in place of the one in the ext configuration.</li>
+<li><strong>scriptexe</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; script to execute in place of cmsrun.</li>
+<li><strong>scriptargs</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; arguments to be passed to the scriptexe script.</li>
+<li><strong>scheddname</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Schedd Name used for debugging.</li>
+<li><strong>extrajdl</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; extra Job Description Language parameters to be added.</li>
+<li><strong>collector</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Collector Name used for debugging.</li>
+<li><strong>dryrun</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; enable dry run mode (initialize but do not submit request).</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a dict which contaians details of the request</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTUserWorkflow.RESTUserWorkflow.validate">
+<tt class="descname">validate</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTUserWorkflow.html#RESTUserWorkflow.validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTUserWorkflow.RESTUserWorkflow.validate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-CRABInterface.RESTWorkerWorkflow">
+<span id="restworkerworkflow-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">RESTWorkerWorkflow</span></tt> Module<a class="headerlink" href="#module-CRABInterface.RESTWorkerWorkflow" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="CRABInterface.RESTWorkerWorkflow.RESTWorkerWorkflow">
+<em class="property">class </em><tt class="descclassname">CRABInterface.RESTWorkerWorkflow.</tt><tt class="descname">RESTWorkerWorkflow</tt><big>(</big><em>app</em>, <em>api</em>, <em>config</em>, <em>mount</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTWorkerWorkflow.html#RESTWorkerWorkflow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTWorkerWorkflow.RESTWorkerWorkflow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">WMCore.REST.Server.RESTEntity</span></tt></p>
+<p>REST entity to handle interactions between CAFTaskWorker and TaskManager database</p>
+<dl class="method">
+<dt id="CRABInterface.RESTWorkerWorkflow.RESTWorkerWorkflow.delete">
+<tt class="descname">delete</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTWorkerWorkflow.html#RESTWorkerWorkflow.delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTWorkerWorkflow.RESTWorkerWorkflow.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete a task from the DB</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTWorkerWorkflow.RESTWorkerWorkflow.get">
+<tt class="descname">get</tt><big>(</big><em>workername</em>, <em>getstatus</em>, <em>limit</em>, <em>subresource</em>, <em>subjobdef</em>, <em>subuser</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTWorkerWorkflow.html#RESTWorkerWorkflow.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTWorkerWorkflow.RESTWorkerWorkflow.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve all columns for a specified task or
+tasks which are in a particular status with
+particular conditions</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTWorkerWorkflow.RESTWorkerWorkflow.post">
+<tt class="descname">post</tt><big>(</big><em>workflow</em>, <em>status</em>, <em>subresource</em>, <em>jobset</em>, <em>failure</em>, <em>resubmittedjobs</em>, <em>getstatus</em>, <em>workername</em>, <em>limit</em>, <em>runs</em>, <em>lumis</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTWorkerWorkflow.html#RESTWorkerWorkflow.post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTWorkerWorkflow.RESTWorkerWorkflow.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates task information</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTWorkerWorkflow.RESTWorkerWorkflow.put">
+<tt class="descname">put</tt><big>(</big><em>workflow</em>, <em>subjobdef</em>, <em>substatus</em>, <em>subblocks</em>, <em>subfailure</em>, <em>subuser</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTWorkerWorkflow.html#RESTWorkerWorkflow.put"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTWorkerWorkflow.RESTWorkerWorkflow.put" title="Permalink to this definition">¶</a></dt>
+<dd><p>Insert a new jobgroup in the task</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTWorkerWorkflow.RESTWorkerWorkflow.setLumiMask">
+<tt class="descname">setLumiMask</tt><big>(</big><em>runs</em>, <em>lumis</em>, <em>**binds</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTWorkerWorkflow.html#RESTWorkerWorkflow.setLumiMask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTWorkerWorkflow.RESTWorkerWorkflow.setLumiMask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the old splitargs, convert it into the corresponding dict, and change runs and lumis
+accordingly to what the TaskWorker provided</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.RESTWorkerWorkflow.RESTWorkerWorkflow.validate">
+<tt class="descname">validate</tt><big>(</big><em>apiobj</em>, <em>method</em>, <em>api</em>, <em>param</em>, <em>safe</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTWorkerWorkflow.html#RESTWorkerWorkflow.validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTWorkerWorkflow.RESTWorkerWorkflow.validate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validating all the input parameter as enforced by the WMCore.REST module</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="CRABInterface.RESTWorkerWorkflow.Task">
+<em class="property">class </em><tt class="descclassname">CRABInterface.RESTWorkerWorkflow.</tt><tt class="descname">Task</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTWorkerWorkflow.html#Task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTWorkerWorkflow.Task" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">dict</span></tt></a></p>
+<p>Main object of work. This will be passed from a class to another.
+This will collect all task parameters contained in the DB, but
+living only in memory.</p>
+<dl class="docutils">
+<dt>NB: this can be reviewd and expanded in order to implement</dt>
+<dd>the needed methods to work with the database.</dd>
+</dl>
+<p>Initializer of the task object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>*args/**kwargs</strong> &#8211; <p>key/value pairs to update the dictionary.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="CRABInterface.RESTWorkerWorkflow.Task.deserialize">
+<tt class="descname">deserialize</tt><big>(</big><em>task</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/RESTWorkerWorkflow.html#Task.deserialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.RESTWorkerWorkflow.Task.deserialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deserialize a task from a list format to the self Task dictionary.
+It depends on the order of elements, as they are returned from the DB.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>object task</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; the list of task attributes retrieved from the db.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-CRABInterface.Regexps">
+<span id="regexps-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">Regexps</span></tt> Module<a class="headerlink" href="#module-CRABInterface.Regexps" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-CRABInterface.Utils">
+<span id="utils-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">Utils</span></tt> Module<a class="headerlink" href="#module-CRABInterface.Utils" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="CRABInterface.Utils.CMSSitesCache">
+<em class="property">class </em><tt class="descclassname">CRABInterface.Utils.</tt><tt class="descname">CMSSitesCache</tt><a class="headerlink" href="#CRABInterface.Utils.CMSSitesCache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">tuple</span></tt></p>
+<p>CMSSitesCache(cachetime, sites)</p>
+<dl class="attribute">
+<dt id="CRABInterface.Utils.CMSSitesCache.cachetime">
+<tt class="descname">cachetime</tt><a class="headerlink" href="#CRABInterface.Utils.CMSSitesCache.cachetime" title="Permalink to this definition">¶</a></dt>
+<dd><p>itemgetter(item, ...) &#8211;&gt; itemgetter object</p>
+<p>Return a callable object that fetches the given item(s) from its operand.
+After, f=itemgetter(2), the call f(r) returns r[2].
+After, g=itemgetter(2,5,3), the call g(r) returns (r[2], r[5], r[3])</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="CRABInterface.Utils.CMSSitesCache.sites">
+<tt class="descname">sites</tt><a class="headerlink" href="#CRABInterface.Utils.CMSSitesCache.sites" title="Permalink to this definition">¶</a></dt>
+<dd><p>itemgetter(item, ...) &#8211;&gt; itemgetter object</p>
+<p>Return a callable object that fetches the given item(s) from its operand.
+After, f=itemgetter(2), the call f(r) returns r[2].
+After, g=itemgetter(2,5,3), the call g(r) returns (r[2], r[5], r[3])</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="CRABInterface.Utils.ConfigCache">
+<em class="property">class </em><tt class="descclassname">CRABInterface.Utils.</tt><tt class="descname">ConfigCache</tt><a class="headerlink" href="#CRABInterface.Utils.ConfigCache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">tuple</span></tt></p>
+<p>ConfigCache(cachetime, centralconfig)</p>
+<dl class="attribute">
+<dt id="CRABInterface.Utils.ConfigCache.cachetime">
+<tt class="descname">cachetime</tt><a class="headerlink" href="#CRABInterface.Utils.ConfigCache.cachetime" title="Permalink to this definition">¶</a></dt>
+<dd><p>itemgetter(item, ...) &#8211;&gt; itemgetter object</p>
+<p>Return a callable object that fetches the given item(s) from its operand.
+After, f=itemgetter(2), the call f(r) returns r[2].
+After, g=itemgetter(2,5,3), the call g(r) returns (r[2], r[5], r[3])</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="CRABInterface.Utils.ConfigCache.centralconfig">
+<tt class="descname">centralconfig</tt><a class="headerlink" href="#CRABInterface.Utils.ConfigCache.centralconfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>itemgetter(item, ...) &#8211;&gt; itemgetter object</p>
+<p>Return a callable object that fetches the given item(s) from its operand.
+After, f=itemgetter(2), the call f(r) returns r[2].
+After, g=itemgetter(2,5,3), the call g(r) returns (r[2], r[5], r[3])</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="CRABInterface.Utils.UserThrottle">
+<em class="property">class </em><tt class="descclassname">CRABInterface.Utils.</tt><tt class="descname">UserThrottle</tt><big>(</big><em>limit=3</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/Utils.html#UserThrottle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.Utils.UserThrottle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></a></p>
+<dl class="method">
+<dt id="CRABInterface.Utils.UserThrottle.getLimit">
+<tt class="descname">getLimit</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/CRABInterface/Utils.html#UserThrottle.getLimit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.Utils.UserThrottle.getLimit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.Utils.UserThrottle.make_throttled">
+<tt class="descname">make_throttled</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/CRABInterface/Utils.html#UserThrottle.make_throttled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.Utils.UserThrottle.make_throttled" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="CRABInterface.Utils.UserThrottle.throttleContext">
+<tt class="descname">throttleContext</tt><big>(</big><em>user</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/Utils.html#UserThrottle.throttleContext"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.Utils.UserThrottle.throttleContext" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="CRABInterface.Utils.conn_handler">
+<tt class="descclassname">CRABInterface.Utils.</tt><tt class="descname">conn_handler</tt><big>(</big><em>services</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/Utils.html#conn_handler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.Utils.conn_handler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator to be used among REST resources to optimize connections to other services
+as CouchDB and SiteDB, PhEDEx, WMStats monitoring</p>
+<dl class="docutils">
+<dt>arg str list services: list of string telling which service connections</dt>
+<dd>should be started; currently availables are
+&#8216;monitor&#8217; and &#8216;asomonitor&#8217;.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="CRABInterface.Utils.execute_command">
+<tt class="descclassname">CRABInterface.Utils.</tt><tt class="descname">execute_command</tt><big>(</big><em>command</em>, <em>logger</em>, <em>timeout</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/Utils.html#execute_command"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.Utils.execute_command" title="Permalink to this definition">¶</a></dt>
+<dd><p>_execute_command_
+Funtion to manage commands.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="CRABInterface.Utils.getCentralConfig">
+<tt class="descclassname">CRABInterface.Utils.</tt><tt class="descname">getCentralConfig</tt><big>(</big><em>extconfigurl</em>, <em>mode</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/Utils.html#getCentralConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.Utils.getCentralConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Utility to retrieve the central configuration to be used for dynamic variables</p>
+<p>arg str extconfigurl: the url pointing to the exteranl configuration parameter
+arg str mode: also known as the variant of the rest (prod, preprod, dev, private)
+return: the dictionary containing the external configuration for the selected mode.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="CRABInterface.Utils.getDBinstance">
+<tt class="descclassname">CRABInterface.Utils.</tt><tt class="descname">getDBinstance</tt><big>(</big><em>config</em>, <em>namespace</em>, <em>name</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/Utils.html#getDBinstance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.Utils.getDBinstance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="CRABInterface.Utils.globalinit">
+<tt class="descclassname">CRABInterface.Utils.</tt><tt class="descname">globalinit</tt><big>(</big><em>serverkey</em>, <em>servercert</em>, <em>serverdn</em>, <em>credpath</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/Utils.html#globalinit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.Utils.globalinit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="CRABInterface.Utils.retrieveUserCert">
+<tt class="descclassname">CRABInterface.Utils.</tt><tt class="descname">retrieveUserCert</tt><big>(</big><em>func</em><big>)</big><a class="reference internal" href="_modules/CRABInterface/Utils.html#retrieveUserCert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CRABInterface.Utils.retrieveUserCert" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="CRABInterface.Pages.html">Pages Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="CRABInterface.Pages.html#module-CRABInterface.Pages.FrontPage"><tt class="docutils literal"><span class="pre">FrontPage</span></tt> Module</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="CRABInterface.Pages.html" title="Pages Package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="modules.html" title="Project Modules"
+             >previous</a> |</li>
+        <li><a href="index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="modules.html" >Project Modules</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright CERN, INFN and Fermilab.
+      Last updated on Jul 02, 2015.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

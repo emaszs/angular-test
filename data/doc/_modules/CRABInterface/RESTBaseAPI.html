@@ -1,0 +1,195 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>CRABInterface.RESTBaseAPI &mdash; CRAB Server 3.3.1507.rc4</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '3.3.1507.rc4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="CRAB Server 3.3.1507.rc4" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for CRABInterface.RESTBaseAPI</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">cherrypy</span>
+<span class="kn">from</span> <span class="nn">commands</span> <span class="kn">import</span> <span class="n">getstatusoutput</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">mktime</span><span class="p">,</span> <span class="n">gmtime</span>
+
+<span class="c"># WMCore dependecies here</span>
+<span class="kn">from</span> <span class="nn">WMCore.REST.Server</span> <span class="kn">import</span> <span class="n">DatabaseRESTApi</span><span class="p">,</span> <span class="n">rows</span>
+<span class="kn">from</span> <span class="nn">WMCore.REST.Format</span> <span class="kn">import</span> <span class="n">JSONFormat</span>
+<span class="kn">from</span> <span class="nn">WMCore.REST.Error</span> <span class="kn">import</span> <span class="n">ExecutionError</span>
+
+<span class="c"># CRABServer dependecies here</span>
+<span class="kn">import</span> <span class="nn">Utils</span>
+<span class="kn">from</span> <span class="nn">CRABInterface.RESTUserWorkflow</span> <span class="kn">import</span> <span class="n">RESTUserWorkflow</span>
+<span class="kn">from</span> <span class="nn">CRABInterface.RESTTask</span> <span class="kn">import</span> <span class="n">RESTTask</span>
+<span class="kn">from</span> <span class="nn">CRABInterface.RESTCampaign</span> <span class="kn">import</span> <span class="n">RESTCampaign</span>
+<span class="kn">from</span> <span class="nn">CRABInterface.RESTServerInfo</span> <span class="kn">import</span> <span class="n">RESTServerInfo</span>
+<span class="kn">from</span> <span class="nn">CRABInterface.RESTFileMetadata</span> <span class="kn">import</span> <span class="n">RESTFileMetadata</span>
+<span class="kn">from</span> <span class="nn">CRABInterface.RESTWorkerWorkflow</span> <span class="kn">import</span> <span class="n">RESTWorkerWorkflow</span>
+<span class="kn">from</span> <span class="nn">CRABInterface.DataFileMetadata</span> <span class="kn">import</span> <span class="n">DataFileMetadata</span>
+<span class="kn">from</span> <span class="nn">CRABInterface.DataWorkflow</span> <span class="kn">import</span> <span class="n">DataWorkflow</span>
+<span class="kn">from</span> <span class="nn">CRABInterface.DataUserWorkflow</span> <span class="kn">import</span> <span class="n">DataUserWorkflow</span>
+<span class="kn">from</span> <span class="nn">CRABInterface.DataCampaign</span> <span class="kn">import</span> <span class="n">DataCampaign</span>
+
+<span class="c">#In case the log level is not specified in the configuration we use the NullHandler and we do not print messages</span>
+<span class="c">#The NullHandler is included as of python 3.1</span>
+<div class="viewcode-block" id="NullHandler"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTBaseAPI.NullHandler">[docs]</a><span class="k">class</span> <span class="nc">NullHandler</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Handler</span><span class="p">):</span>
+<div class="viewcode-block" id="NullHandler.emit"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTBaseAPI.NullHandler.emit">[docs]</a>    <span class="k">def</span> <span class="nf">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+        <span class="k">pass</span>
+</div></div>
+<div class="viewcode-block" id="RESTBaseAPI"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTBaseAPI.RESTBaseAPI">[docs]</a><span class="k">class</span> <span class="nc">RESTBaseAPI</span><span class="p">(</span><span class="n">DatabaseRESTApi</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The CRABServer REST API modules&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">mount</span><span class="p">):</span>
+        <span class="n">DatabaseRESTApi</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">mount</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">formats</span> <span class="o">=</span> <span class="p">[</span> <span class="p">(</span><span class="s">&#39;application/json&#39;</span><span class="p">,</span> <span class="n">JSONFormat</span><span class="p">())</span> <span class="p">]</span>
+
+        <span class="n">status</span><span class="p">,</span> <span class="n">serverdn</span> <span class="o">=</span> <span class="n">getstatusoutput</span><span class="p">(</span><span class="s">&#39;openssl x509 -noout -subject -in </span><span class="si">%s</span><span class="s"> | cut -f2- -d\ &#39;</span> <span class="o">%</span> <span class="n">config</span><span class="o">.</span><span class="n">serverhostcert</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">status</span> <span class="ow">is</span> <span class="ow">not</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="s">&quot;Internal issue when retrieving crabserver service DN.&quot;</span><span class="p">)</span>
+
+        <span class="n">extconfig</span> <span class="o">=</span> <span class="n">Utils</span><span class="o">.</span><span class="n">ConfigCache</span><span class="p">(</span><span class="n">centralconfig</span><span class="o">=</span><span class="n">Utils</span><span class="o">.</span><span class="n">getCentralConfig</span><span class="p">(</span><span class="n">extconfigurl</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">extconfigurl</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">mode</span><span class="p">),</span>
+                                      <span class="n">cachetime</span><span class="o">=</span><span class="n">mktime</span><span class="p">(</span><span class="n">gmtime</span><span class="p">()))</span>
+
+        <span class="c">#Global initialization of Data objects. Parameters coming from the config should go here</span>
+        <span class="n">DataUserWorkflow</span><span class="o">.</span><span class="n">globalinit</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="n">DataWorkflow</span><span class="o">.</span><span class="n">globalinit</span><span class="p">(</span><span class="n">dbapi</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">phedexargs</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;endpoint&#39;</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">phedexurl</span><span class="p">},</span>\
+                                <span class="n">credpath</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">credpath</span><span class="p">,</span> <span class="n">centralcfg</span><span class="o">=</span><span class="n">extconfig</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+        <span class="n">DataFileMetadata</span><span class="o">.</span><span class="n">globalinit</span><span class="p">(</span><span class="n">dbapi</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+        <span class="n">Utils</span><span class="o">.</span><span class="n">globalinit</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">serverhostkey</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">serverhostcert</span><span class="p">,</span> <span class="n">serverdn</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">credpath</span><span class="p">)</span>
+
+        <span class="c">## TODO need a check to verify the format depending on the resource</span>
+        <span class="c">##      the RESTFileMetadata has the specifc requirement of getting xml reports</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add</span><span class="p">(</span> <span class="p">{</span><span class="s">&#39;workflow&#39;</span><span class="p">:</span> <span class="n">RESTUserWorkflow</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">mount</span><span class="p">,</span> <span class="n">extconfig</span><span class="p">),</span>
+                    <span class="s">&#39;campaign&#39;</span><span class="p">:</span> <span class="n">RESTCampaign</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">mount</span><span class="p">),</span>
+                    <span class="s">&#39;info&#39;</span><span class="p">:</span> <span class="n">RESTServerInfo</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">mount</span><span class="p">,</span> <span class="n">serverdn</span><span class="p">,</span> <span class="n">extconfig</span><span class="p">),</span>
+                    <span class="s">&#39;filemetadata&#39;</span><span class="p">:</span> <span class="n">RESTFileMetadata</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">mount</span><span class="p">),</span>
+                    <span class="s">&#39;workflowdb&#39;</span><span class="p">:</span> <span class="n">RESTWorkerWorkflow</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">mount</span><span class="p">),</span>
+                    <span class="s">&#39;task&#39;</span><span class="p">:</span> <span class="n">RESTTask</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">mount</span><span class="p">),</span>
+                   <span class="p">}</span> <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initLogger</span><span class="p">(</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s">&#39;loggingFile&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s">&#39;loggingLevel&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span> <span class="p">)</span>
+
+<div class="viewcode-block" id="RESTBaseAPI.modifynocheck"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTBaseAPI.RESTBaseAPI.modifynocheck">[docs]</a>    <span class="k">def</span> <span class="nf">modifynocheck</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sql</span><span class="p">,</span> <span class="o">*</span><span class="n">binds</span><span class="p">,</span> <span class="o">**</span><span class="n">kwbinds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This is the same as `WMCore.REST.Server`:modify method but</span>
+<span class="sd">           not implementing any kind of checks on the number of modified</span>
+<span class="sd">           rows.</span>
+
+<span class="sd">        :arg str sql: SQL modify statement.</span>
+<span class="sd">        :arg list binds: Bind variables by position: list of dictionaries.</span>
+<span class="sd">        :arg dict kwbinds: Bind variables by keyword: dictionary of lists.</span>
+<span class="sd">        :result: See :meth:`rowstatus` and description in `WMCore.REST.Server`.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">binds</span><span class="p">:</span>
+            <span class="n">c</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">executemany</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="o">*</span><span class="n">binds</span><span class="p">,</span> <span class="o">**</span><span class="n">kwbinds</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">kwbinds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindmap</span><span class="p">(</span><span class="o">**</span><span class="n">kwbinds</span><span class="p">)</span>
+            <span class="n">c</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">executemany</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">kwbinds</span><span class="p">,</span> <span class="o">*</span><span class="n">binds</span><span class="p">)</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">cherrypy</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="s">&quot;handle&quot;</span><span class="p">][</span><span class="s">&quot;trace&quot;</span><span class="p">]</span>
+        <span class="n">trace</span> <span class="ow">and</span> <span class="n">cherrypy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s"> commit&quot;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+        <span class="n">cherrypy</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="s">&quot;handle&quot;</span><span class="p">][</span><span class="s">&quot;connection&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">rows</span><span class="p">([{</span> <span class="s">&quot;modified&quot;</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">rowcount</span> <span class="p">}])</span>
+</div>
+    <span class="k">def</span> <span class="nf">_initLogger</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">loglevel</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setup the logger for all the CRAB API&#39;s. If loglevel is not specified (==None) we use the NullHandler which just &#39;pass&#39; and does not log</span>
+
+<span class="sd">        RESTEntities and other parts of the code can retrieve it by calling: logging.getLogger(&#39;CRABLogger.ChildName&#39;)</span>
+<span class="sd">        ChildName is the specific name of the logger (child of CRABLogger). Using childs in that way we can configure</span>
+<span class="sd">        the logging in a flexible way (a module logs at DEBUG level to a file, another module logs at INFO level to stdout, etc)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&#39;CRABLogger&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">loglevel</span><span class="p">:</span>
+            <span class="n">hdlr</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">FileHandler</span><span class="p">(</span><span class="n">logfile</span><span class="p">)</span>
+            <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%(asctime)s</span><span class="s">:</span><span class="si">%(levelname)s</span><span class="s">:</span><span class="si">%(module)s</span><span class="s">:</span><span class="si">%(message)s</span><span class="s">&#39;</span><span class="p">)</span>
+            <span class="n">hdlr</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">hdlr</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">loglevel</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span> <span class="n">NullHandler</span><span class="p">()</span> <span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright CERN, INFN and Fermilab.
+      Last updated on Jul 02, 2015.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

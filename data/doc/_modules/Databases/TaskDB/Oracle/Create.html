@@ -1,0 +1,229 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Databases.TaskDB.Oracle.Create &mdash; CRAB Server 3.3.1507.rc4</title>
+    
+    <link rel="stylesheet" href="../../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '3.3.1507.rc4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="CRAB Server 3.3.1507.rc4" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for Databases.TaskDB.Oracle.Create</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">_Databases.TaskDB.Oracle_</span>
+
+<span class="sd">Oracle Compatibility layer for Task Manager DB</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">from</span> <span class="nn">WMCore.Database.DBCreator</span> <span class="kn">import</span> <span class="n">DBCreator</span>
+
+<div class="viewcode-block" id="Create"><a class="viewcode-back" href="../../../../Databases.TaskDB.Oracle.html#Databases.TaskDB.Oracle.Create.Create">[docs]</a><span class="k">class</span> <span class="nc">Create</span><span class="p">(</span><span class="n">DBCreator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Implementation of TaskMgr DB for Oracle</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">requiredTables</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;tasks&#39;</span><span class="p">,</span>
+                      <span class="s">&#39;jobgroups&#39;</span><span class="p">,</span>
+                      <span class="s">&#39;jobgroups_id_seq&#39;</span>
+                      <span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">dbi</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">dbi</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">myThread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">currentThread</span><span class="p">()</span>
+            <span class="n">dbi</span> <span class="o">=</span> <span class="n">myThread</span><span class="o">.</span><span class="n">dbi</span>
+            <span class="n">logger</span> <span class="o">=</span> <span class="n">myThread</span><span class="o">.</span><span class="n">logger</span>
+        <span class="n">DBCreator</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logger</span><span class="p">,</span> <span class="n">dbi</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">create</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c">#  //</span>
+        <span class="c"># // Define create statements for each table</span>
+        <span class="c">#//</span>
+        <span class="c">#  //</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">[</span><span class="s">&#39;b_tasks&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">        CREATE TABLE tasks(</span>
+<span class="s">        tm_taskname VARCHAR(255) NOT NULL,</span>
+<span class="s">        tm_activity VARCHAR(255),</span>
+<span class="s">        panda_jobset_id NUMBER(11),</span>
+<span class="s">        tm_task_status VARCHAR(255) NOT NULL,</span>
+<span class="s">        tm_start_time TIMESTAMP,</span>
+<span class="s">        tm_start_injection TIMESTAMP,</span>
+<span class="s">        tm_end_injection TIMESTAMP,</span>
+<span class="s">        tm_task_failure CLOB,</span>
+<span class="s">        tm_job_sw VARCHAR(255) NOT NULL,</span>
+<span class="s">        tm_job_arch VARCHAR(255),</span>
+<span class="s">        tm_input_dataset VARCHAR(500),</span>
+<span class="s">        tm_nonvalid_input_dataset VARCHAR(1),</span>
+<span class="s">        tm_use_parent NUMBER(1),</span>
+<span class="s">        tm_site_whitelist VARCHAR(4000),</span>
+<span class="s">        tm_site_blacklist VARCHAR(4000),</span>
+<span class="s">        tm_split_algo VARCHAR(255) NOT NULL,</span>
+<span class="s">        tm_split_args CLOB NOT NULL,</span>
+<span class="s">        tm_totalunits NUMBER(38),</span>
+<span class="s">        tm_user_sandbox VARCHAR(255) NOT NULL,</span>
+<span class="s">        tm_cache_url VARCHAR(255) NOT NULL,</span>
+<span class="s">        tm_username VARCHAR(255) NOT NULL,</span>
+<span class="s">        tm_user_dn VARCHAR(255) NOT NULL,</span>
+<span class="s">        tm_user_vo VARCHAR(255) NOT NULL,</span>
+<span class="s">        tm_user_role VARCHAR(255),</span>
+<span class="s">        tm_user_group VARCHAR(255),</span>
+<span class="s">        tm_publish_name VARCHAR(500),</span>
+<span class="s">        tm_publish_groupname VARCHAR(1),</span>
+<span class="s">        tm_asyncdest VARCHAR(255) NOT NULL,</span>
+<span class="s">        tm_dbs_url VARCHAR(255) NOT NULL,</span>
+<span class="s">        tm_publish_dbs_url VARCHAR(255),</span>
+<span class="s">        tm_publication VARCHAR(1) NOT NULL,</span>
+<span class="s">        tm_outfiles CLOB,</span>
+<span class="s">        tm_tfile_outfiles CLOB,</span>
+<span class="s">        tm_edm_outfiles CLOB,</span>
+<span class="s">        tm_job_type VARCHAR(255) NOT NULL,</span>
+<span class="s">        tm_generator VARCHAR(255),</span>
+<span class="s">        tm_events_per_lumi NUMBER(38),</span>
+<span class="s">        tm_arguments CLOB,</span>
+<span class="s">        panda_resubmitted_jobs CLOB,</span>
+<span class="s">        tm_save_logs VARCHAR(1) NOT NULL,</span>
+<span class="s">        tw_name VARCHAR(255),</span>
+<span class="s">        tm_user_infiles VARCHAR(4000),</span>
+<span class="s">        tm_maxjobruntime NUMBER(38),</span>
+<span class="s">        tm_numcores NUMBER(38),</span>
+<span class="s">        tm_maxmemory NUMBER(38),</span>
+<span class="s">        tm_priority NUMBER(38),</span>
+<span class="s">        tm_output_dataset CLOB,</span>
+<span class="s">        tm_task_warnings CLOB DEFAULT &#39;[]&#39;,</span>
+<span class="s">        tm_user_webdir VARCHAR(1000),</span>
+<span class="s">        tm_scriptexe VARCHAR(255),</span>
+<span class="s">        tm_scriptargs VARCHAR(4000),</span>
+<span class="s">        tm_extrajdl VARCHAR(1000),</span>
+<span class="s">        tm_asourl VARCHAR(4000),</span>
+<span class="s">        tm_collector VARCHAR(1000),</span>
+<span class="s">        tm_schedd VARCHAR(255),</span>
+<span class="s">        tm_dry_run VARCHAR(1),</span>
+<span class="s">        tm_user_files CLOB DEFAULT &#39;[]&#39;,</span>
+<span class="s">        tm_transfer_outputs VARCHAR(1),</span>
+<span class="s">        tm_output_lfn VARCHAR(1000),</span>
+<span class="s">        tm_ignore_locality VARCHAR(1),</span>
+<span class="s">        tm_fail_limit NUMBER(38),</span>
+<span class="s">        tm_one_event_mode VARCHAR(1),</span>
+<span class="s">        CONSTRAINT taskname_pk PRIMARY KEY(tm_taskname),</span>
+<span class="s">        CONSTRAINT check_tm_publication CHECK (tm_publication IN (&#39;T&#39;, &#39;F&#39;)),</span>
+<span class="s">        CONSTRAINT check_tm_publish_groupname CHECK (tm_publish_groupname IN (&#39;T&#39;, &#39;F&#39;)),</span>
+<span class="s">        CONSTRAINT check_tm_save_logs CHECK (tm_save_logs IN (&#39;T&#39;, &#39;F&#39;)),</span>
+<span class="s">        CONSTRAINT check_tm_dry_run CHECK (tm_dry_run IN (&#39;T&#39;, &#39;F&#39;)),</span>
+<span class="s">        CONSTRAINT check_tm_transfer_outputs CHECK (tm_transfer_outputs IN (&#39;T&#39;, &#39;F&#39;)),</span>
+<span class="s">        CONSTRAINT check_tm_ignore_locality CHECK (tm_ignore_locality IN (&#39;T&#39;, &#39;F&#39;)),</span>
+<span class="s">        CONSTRAINT check_tm_one_event_mode CHECK (tm_one_event_mode IN (&#39;T&#39;, &#39;F&#39;))</span>
+<span class="s">        CONSTRAINT check_tm_nonvalid_input_dataset CHECK (tm_nonvalid_input_dataset IN (&#39;T&#39;, &#39;F&#39;))</span>
+<span class="s">        )</span>
+<span class="s">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">[</span><span class="s">&#39;c_jobgroups&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">        CREATE TABLE jobgroups(</span>
+<span class="s">        tm_jobgroups_id NUMBER(38) NOT NULL,</span>
+<span class="s">        tm_taskname VARCHAR(255) NOT NULL,</span>
+<span class="s">        panda_jobdef_id NUMBER(11),</span>
+<span class="s">        panda_jobdef_status VARCHAR(255) NOT NULL,</span>
+<span class="s">        tm_data_blocks CLOB,</span>
+<span class="s">        panda_jobgroup_failure CLOB,</span>
+<span class="s">        tm_user_dn VARCHAR(255) NOT NULL,</span>
+<span class="s">        CONSTRAINT taskname_fk FOREIGN KEY(tm_taskname) references</span>
+<span class="s">            tasks(tm_taskname)</span>
+<span class="s">            ON DELETE CASCADE,</span>
+<span class="s">        CONSTRAINT jobgroup_id_pk PRIMARY KEY(tm_jobgroups_id)</span>
+<span class="s">        )</span>
+<span class="s">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">[</span><span class="s">&#39;c_jobgroups_id_seq&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">        CREATE SEQUENCE jobgroups_id_seq</span>
+<span class="s">        START WITH 1</span>
+<span class="s">        INCREMENT BY 1</span>
+<span class="s">        NOMAXVALUE&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">[</span><span class="s">&#39;c_jobgroups_id_trg&#39;</span><span class="p">]</span> <span class="o">=</span>  <span class="s">&quot;&quot;&quot;</span>
+<span class="s">        CREATE TRIGGER jobgroups_id_trg</span>
+<span class="s">        BEFORE INSERT ON jobgroups</span>
+<span class="s">        FOR EACH ROW</span>
+<span class="s">        BEGIN</span>
+<span class="s">        SELECT jobgroups_id_seq.nextval INTO :new.tm_jobgroups_id FROM dual;</span>
+<span class="s">        END;&quot;&quot;&quot;</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright CERN, INFN and Fermilab.
+      Last updated on Jul 02, 2015.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

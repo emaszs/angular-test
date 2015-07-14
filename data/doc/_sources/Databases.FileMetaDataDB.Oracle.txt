@@ -1,0 +1,26 @@
+Oracle Package
+==============
+
+:mod:`Create` Module
+--------------------
+
+.. automodule:: Databases.FileMetaDataDB.Oracle.Create
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`Destroy` Module
+---------------------
+
+.. automodule:: Databases.FileMetaDataDB.Oracle.Destroy
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+
+    Databases.FileMetaDataDB.Oracle.FileMetaData
+

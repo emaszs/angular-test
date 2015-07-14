@@ -1,0 +1,227 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>HTCondorLocator &mdash; CRAB Server 3.3.1507.rc4</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '3.3.1507.rc4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="CRAB Server 3.3.1507.rc4" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for HTCondorLocator</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">types</span>
+<span class="kn">import</span> <span class="nn">bisect</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">classad</span>
+<span class="kn">import</span> <span class="nn">htcondor</span>
+
+<span class="kn">import</span> <span class="nn">HTCondorUtils</span>
+
+<span class="n">CollectorCache</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="c"># From http://stackoverflow.com/questions/3679694/a-weighted-version-of-random-choice</span>
+<div class="viewcode-block" id="weighted_choice"><a class="viewcode-back" href="../HTCondorLocator.html#HTCondorLocator.weighted_choice">[docs]</a><span class="k">def</span> <span class="nf">weighted_choice</span><span class="p">(</span><span class="n">choices</span><span class="p">):</span>
+    <span class="n">values</span><span class="p">,</span> <span class="n">weights</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">choices</span><span class="p">)</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">cum_weights</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">weights</span><span class="p">:</span>
+        <span class="n">total</span> <span class="o">+=</span> <span class="n">w</span>
+        <span class="n">cum_weights</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">total</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">*</span> <span class="n">total</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="n">bisect</span><span class="o">.</span><span class="n">bisect</span><span class="p">(</span><span class="n">cum_weights</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="HTCondorLocator"><a class="viewcode-back" href="../HTCondorLocator.html#HTCondorLocator.HTCondorLocator">[docs]</a><span class="k">class</span> <span class="nc">HTCondorLocator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+
+<div class="viewcode-block" id="HTCondorLocator.getSchedd"><a class="viewcode-back" href="../HTCondorLocator.html#HTCondorLocator.HTCondorLocator.getSchedd">[docs]</a>    <span class="k">def</span> <span class="nf">getSchedd</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determine a schedd to use for this task.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">collector</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getCollector</span><span class="p">()</span>
+        <span class="n">schedd</span> <span class="o">=</span> <span class="s">&quot;localhost&quot;</span>
+
+        <span class="n">htcondor</span><span class="o">.</span><span class="n">param</span><span class="p">[</span><span class="s">&#39;COLLECTOR_HOST&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">collector</span>
+        <span class="n">coll</span> <span class="o">=</span> <span class="n">htcondor</span><span class="o">.</span><span class="n">Collector</span><span class="p">()</span>
+        <span class="n">schedds</span> <span class="o">=</span> <span class="n">coll</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">htcondor</span><span class="o">.</span><span class="n">AdTypes</span><span class="o">.</span><span class="n">Schedd</span><span class="p">,</span> <span class="s">&#39;StartSchedulerUniverse =?= true&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;Name&#39;</span><span class="p">,</span> <span class="s">&#39;DetectedMemory&#39;</span><span class="p">])</span>
+        <span class="n">schedds_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">schedd</span> <span class="ow">in</span> <span class="n">schedds</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s">&#39;DetectedMemory&#39;</span> <span class="ow">in</span> <span class="n">schedd</span> <span class="ow">and</span> <span class="s">&#39;Name&#39;</span> <span class="ow">in</span> <span class="n">schedd</span><span class="p">:</span>
+                <span class="n">schedds_dict</span><span class="p">[</span><span class="n">schedd</span><span class="p">[</span><span class="s">&#39;Name&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">schedd</span><span class="p">[</span><span class="s">&#39;DetectedMemory&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="ow">and</span> <span class="s">&quot;htcondorSchedds&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">:</span>
+            <span class="n">choices</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">schedds_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">24</span><span class="o">*</span><span class="mi">1024</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&quot;htcondorSchedds&quot;</span><span class="p">]]</span>
+            <span class="n">schedd</span> <span class="o">=</span> <span class="n">weighted_choice</span><span class="p">(</span><span class="n">choices</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">collector</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">schedd</span><span class="p">,</span> <span class="n">collector</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">schedd</span>
+</div>
+<div class="viewcode-block" id="HTCondorLocator.getScheddObj"><a class="viewcode-back" href="../HTCondorLocator.html#HTCondorLocator.HTCondorLocator.getScheddObj">[docs]</a>    <span class="k">def</span> <span class="nf">getScheddObj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a tuple (schedd, address) containing an object representing the</span>
+<span class="sd">        remote schedd and its corresponding address.</span>
+<span class="sd">        Still required for OLD tasks. Remove it later TODO</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;_&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">info</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSchedd</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s">&quot;localhost&quot;</span><span class="p">:</span>
+            <span class="n">schedd</span> <span class="o">=</span> <span class="n">htcondor</span><span class="o">.</span><span class="n">Schedd</span><span class="p">()</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">htcondor</span><span class="o">.</span><span class="n">param</span><span class="p">[</span><span class="s">&#39;SCHEDD_ADDRESS_FILE&#39;</span><span class="p">])</span> <span class="k">as</span> <span class="n">fd</span><span class="p">:</span>
+                <span class="n">address</span> <span class="o">=</span> <span class="n">fd</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;:&quot;</span><span class="p">)</span>
+            <span class="n">pool</span> <span class="o">=</span> <span class="s">&quot;localhost&quot;</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">info</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">pool</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">htcondor</span><span class="o">.</span><span class="n">param</span><span class="p">[</span><span class="s">&#39;COLLECTOR_HOST&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getCollector</span><span class="p">(</span><span class="n">pool</span><span class="p">)</span>
+            <span class="n">coll</span> <span class="o">=</span> <span class="n">htcondor</span><span class="o">.</span><span class="n">Collector</span><span class="p">()</span>
+            <span class="n">schedds</span> <span class="o">=</span> <span class="n">coll</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">htcondor</span><span class="o">.</span><span class="n">AdTypes</span><span class="o">.</span><span class="n">Schedd</span><span class="p">,</span> <span class="s">&#39;regexp(</span><span class="si">%s</span><span class="s">, Name)&#39;</span> <span class="o">%</span> <span class="n">HTCondorUtils</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scheddAd</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">schedds</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">scheddAd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getCachedCollectorOutput</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cacheCollectorOutput</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">schedds</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">scheddAd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getCachedCollectorOutput</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">address</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheddAd</span><span class="p">[</span><span class="s">&#39;MyAddress&#39;</span><span class="p">]</span>
+            <span class="n">schedd</span> <span class="o">=</span> <span class="n">htcondor</span><span class="o">.</span><span class="n">Schedd</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scheddAd</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">schedd</span><span class="p">,</span> <span class="n">address</span>
+</div>
+<div class="viewcode-block" id="HTCondorLocator.getScheddObjNew"><a class="viewcode-back" href="../HTCondorLocator.html#HTCondorLocator.HTCondorLocator.getScheddObjNew">[docs]</a>    <span class="k">def</span> <span class="nf">getScheddObjNew</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">schedd</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a tuple (schedd, address) containing an object representing the</span>
+<span class="sd">        remote schedd and its corresponding address.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">htcondor</span><span class="o">.</span><span class="n">param</span><span class="p">[</span><span class="s">&#39;COLLECTOR_HOST&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getCollector</span><span class="p">()</span>
+        <span class="n">coll</span> <span class="o">=</span> <span class="n">htcondor</span><span class="o">.</span><span class="n">Collector</span><span class="p">()</span>
+        <span class="n">schedds</span> <span class="o">=</span> <span class="n">coll</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">htcondor</span><span class="o">.</span><span class="n">AdTypes</span><span class="o">.</span><span class="n">Schedd</span><span class="p">,</span> <span class="s">&#39;regexp(</span><span class="si">%s</span><span class="s">, Name)&#39;</span> <span class="o">%</span> <span class="n">HTCondorUtils</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="n">schedd</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scheddAd</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">schedds</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scheddAd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getCachedCollectorOutput</span><span class="p">(</span><span class="n">schedd</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cacheCollectorOutput</span><span class="p">(</span><span class="n">schedd</span><span class="p">,</span> <span class="n">schedds</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scheddAd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getCachedCollectorOutput</span><span class="p">(</span><span class="n">schedd</span><span class="p">)</span>
+        <span class="n">address</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheddAd</span><span class="p">[</span><span class="s">&#39;MyAddress&#39;</span><span class="p">]</span>
+        <span class="n">scheddObj</span> <span class="o">=</span> <span class="n">htcondor</span><span class="o">.</span><span class="n">Schedd</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scheddAd</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">scheddObj</span><span class="p">,</span> <span class="n">address</span>
+</div>
+<div class="viewcode-block" id="HTCondorLocator.cacheCollectorOutput"><a class="viewcode-back" href="../HTCondorLocator.html#HTCondorLocator.HTCondorLocator.cacheCollectorOutput">[docs]</a>    <span class="k">def</span> <span class="nf">cacheCollectorOutput</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cacheName</span><span class="p">,</span> <span class="n">output</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Saves Collector output in tmp directory.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">global</span> <span class="n">CollectorCache</span>
+        <span class="k">if</span> <span class="n">cacheName</span> <span class="ow">in</span> <span class="n">CollectorCache</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">CollectorCache</span><span class="p">[</span><span class="n">cacheName</span><span class="p">][</span><span class="s">&#39;ScheddAds&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">output</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">CollectorCache</span><span class="p">[</span><span class="n">cacheName</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">CollectorCache</span><span class="p">[</span><span class="n">cacheName</span><span class="p">][</span><span class="s">&#39;ScheddAds&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">output</span>
+        <span class="n">CollectorCache</span><span class="p">[</span><span class="n">cacheName</span><span class="p">][</span><span class="s">&#39;updated&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+</div>
+<div class="viewcode-block" id="HTCondorLocator.getCachedCollectorOutput"><a class="viewcode-back" href="../HTCondorLocator.html#HTCondorLocator.HTCondorLocator.getCachedCollectorOutput">[docs]</a>    <span class="k">def</span> <span class="nf">getCachedCollectorOutput</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cacheName</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return cached Collector output if they exist.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">global</span> <span class="n">CollectorCache</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">cacheName</span> <span class="ow">in</span> <span class="n">CollectorCache</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">now</span> <span class="o">-</span> <span class="n">CollectorCache</span><span class="p">[</span><span class="n">cacheName</span><span class="p">][</span><span class="s">&#39;updated&#39;</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mi">1800</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">CollectorCache</span><span class="p">[</span><span class="n">cacheName</span><span class="p">][</span><span class="s">&#39;ScheddAds&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Unable to contact the collector and cached results are too old for using.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Unable to contact the collector and cached results does not exist for </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">cacheName</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="HTCondorLocator.getCollector"><a class="viewcode-back" href="../HTCondorLocator.html#HTCondorLocator.HTCondorLocator.getCollector">[docs]</a>    <span class="k">def</span> <span class="nf">getCollector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;localhost&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return an object representing the collector given the pool name.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="ow">and</span> <span class="s">&quot;htcondorPool&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&quot;htcondorPool&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">name</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright CERN, INFN and Fermilab.
+      Last updated on Jul 02, 2015.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

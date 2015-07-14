@@ -1,0 +1,167 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>CRABInterface.RESTServerInfo &mdash; CRAB Server 3.3.1507.rc4</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '3.3.1507.rc4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="CRAB Server 3.3.1507.rc4" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for CRABInterface.RESTServerInfo</h1><div class="highlight"><pre>
+<span class="c"># WMCore dependecies here</span>
+<span class="kn">from</span> <span class="nn">WMCore.REST.Server</span> <span class="kn">import</span> <span class="n">RESTEntity</span><span class="p">,</span> <span class="n">restcall</span>
+<span class="kn">from</span> <span class="nn">WMCore.REST.Validation</span> <span class="kn">import</span> <span class="n">validate_str</span>
+<span class="kn">from</span> <span class="nn">WMCore.REST.Error</span> <span class="kn">import</span> <span class="n">ExecutionError</span>
+<span class="c"># CRABServer dependecies here</span>
+<span class="kn">from</span> <span class="nn">CRABInterface.RESTExtensions</span> <span class="kn">import</span> <span class="n">authz_login_valid</span>
+<span class="kn">from</span> <span class="nn">CRABInterface.Regexps</span> <span class="kn">import</span> <span class="n">RX_SUBRES_SI</span> <span class="p">,</span> <span class="n">RX_WORKFLOW</span>
+<span class="kn">from</span> <span class="nn">CRABInterface.Utils</span> <span class="kn">import</span> <span class="n">conn_handler</span>
+<span class="kn">from</span> <span class="nn">CRABInterface.__init__</span> <span class="kn">import</span> <span class="n">__version__</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">HTCondorLocator</span>
+
+<div class="viewcode-block" id="RESTServerInfo"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTServerInfo.RESTServerInfo">[docs]</a><span class="k">class</span> <span class="nc">RESTServerInfo</span><span class="p">(</span><span class="n">RESTEntity</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;REST entity for workflows and relative subresources&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">api</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">mount</span><span class="p">,</span> <span class="n">serverdn</span><span class="p">,</span> <span class="n">centralcfg</span><span class="p">):</span>
+        <span class="n">RESTEntity</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">api</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">mount</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">centralcfg</span> <span class="o">=</span> <span class="n">centralcfg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">serverdn</span> <span class="o">=</span> <span class="n">serverdn</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&quot;CRABLogger:RESTServerInfo&quot;</span><span class="p">)</span>
+        <span class="c">#used by the client to get the url where to update the cache (cacheSSL)</span>
+        <span class="c">#and by the taskworker Panda plugin to get panda urls</span>
+
+<div class="viewcode-block" id="RESTServerInfo.validate"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTServerInfo.RESTServerInfo.validate">[docs]</a>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apiobj</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">api</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Validating all the input parameter as enforced by the WMCore.REST module&quot;&quot;&quot;</span>
+        <span class="n">authz_login_valid</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;GET&#39;</span><span class="p">]:</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&#39;subresource&#39;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_SUBRES_SI</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&#39;workflow&#39;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_WORKFLOW</span> <span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</div>
+    <span class="nd">@restcall</span>
+<div class="viewcode-block" id="RESTServerInfo.get"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTServerInfo.RESTServerInfo.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subresource</span> <span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Retrieves the server information, like delegateDN, filecacheurls ...</span>
+<span class="sd">           :arg str subresource: the specific server information to be accessed;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">subresource</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">RESTServerInfo</span><span class="p">,</span> <span class="n">subresource</span><span class="p">)(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&quot;select NULL from DUAL&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">next</span><span class="p">()</span> <span class="c">#Checking database connection</span>
+            <span class="k">return</span> <span class="p">[{</span><span class="s">&quot;crabserver&quot;</span><span class="p">:</span><span class="s">&quot;Welcome&quot;</span><span class="p">,</span><span class="s">&quot;version&quot;</span><span class="p">:</span><span class="n">__version__</span><span class="p">}]</span>
+</div>
+    <span class="nd">@conn_handler</span><span class="p">(</span><span class="n">services</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;centralconfig&#39;</span><span class="p">])</span>
+<div class="viewcode-block" id="RESTServerInfo.delegatedn"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTServerInfo.RESTServerInfo.delegatedn">[docs]</a>    <span class="k">def</span> <span class="nf">delegatedn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="p">{</span><span class="s">&#39;services&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">centralcfg</span><span class="o">.</span><span class="n">centralconfig</span><span class="p">[</span><span class="s">&#39;delegate-dn&#39;</span><span class="p">]}</span>
+</div>
+    <span class="nd">@conn_handler</span><span class="p">(</span><span class="n">services</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;centralconfig&#39;</span><span class="p">])</span>
+<div class="viewcode-block" id="RESTServerInfo.backendurls"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTServerInfo.RESTServerInfo.backendurls">[docs]</a>    <span class="k">def</span> <span class="nf">backendurls</span><span class="p">(</span><span class="bp">self</span> <span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">centralcfg</span><span class="o">.</span><span class="n">centralconfig</span><span class="p">[</span><span class="s">&#39;backend-urls&#39;</span><span class="p">]</span>
+</div>
+    <span class="nd">@conn_handler</span><span class="p">(</span><span class="n">services</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;centralconfig&#39;</span><span class="p">])</span>
+<div class="viewcode-block" id="RESTServerInfo.version"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTServerInfo.RESTServerInfo.version">[docs]</a>    <span class="k">def</span> <span class="nf">version</span><span class="p">(</span><span class="bp">self</span> <span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">centralcfg</span><span class="o">.</span><span class="n">centralconfig</span><span class="p">[</span><span class="s">&#39;compatible-version&#39;</span><span class="p">]</span><span class="o">+</span><span class="p">[</span><span class="n">__version__</span><span class="p">]</span>
+</div>
+    <span class="nd">@conn_handler</span><span class="p">(</span><span class="n">services</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;centralconfig&#39;</span><span class="p">])</span>
+<div class="viewcode-block" id="RESTServerInfo.scheddaddress"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTServerInfo.RESTServerInfo.scheddaddress">[docs]</a>    <span class="k">def</span> <span class="nf">scheddaddress</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">backendurl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">centralcfg</span><span class="o">.</span><span class="n">centralconfig</span><span class="p">[</span><span class="s">&#39;backend-urls&#39;</span><span class="p">]</span>
+        <span class="n">workflow</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;workflow&#39;</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">loc</span> <span class="o">=</span> <span class="n">HTCondorLocator</span><span class="o">.</span><span class="n">HTCondorLocator</span><span class="p">(</span><span class="n">backendurl</span><span class="p">)</span>
+            <span class="n">schedd</span><span class="p">,</span> <span class="n">address</span> <span class="o">=</span> <span class="n">loc</span><span class="o">.</span><span class="n">getScheddObj</span><span class="p">(</span><span class="n">workflow</span><span class="p">)</span> 
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">ex</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="s">&quot;Unable to get schedd address for task </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">workflow</span><span class="p">)),</span> <span class="n">ex</span>
+        <span class="k">yield</span> <span class="n">loc</span><span class="o">.</span><span class="n">scheddAd</span><span class="p">[</span><span class="s">&#39;Machine&#39;</span><span class="p">]</span>
+</div>
+    <span class="nd">@conn_handler</span><span class="p">(</span><span class="n">services</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;centralconfig&#39;</span><span class="p">])</span>
+<div class="viewcode-block" id="RESTServerInfo.bannedoutdest"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTServerInfo.RESTServerInfo.bannedoutdest">[docs]</a>    <span class="k">def</span> <span class="nf">bannedoutdest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">centralcfg</span><span class="o">.</span><span class="n">centralconfig</span><span class="p">[</span><span class="s">&#39;banned-out-destinations&#39;</span><span class="p">]</span>
+</div>
+    <span class="nd">@conn_handler</span><span class="p">(</span><span class="n">services</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;centralconfig&#39;</span><span class="p">])</span>
+<div class="viewcode-block" id="RESTServerInfo.ignlocalityblacklist"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTServerInfo.RESTServerInfo.ignlocalityblacklist">[docs]</a>    <span class="k">def</span> <span class="nf">ignlocalityblacklist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">centralcfg</span><span class="o">.</span><span class="n">centralconfig</span><span class="p">[</span><span class="s">&#39;ign-locality-blacklist&#39;</span><span class="p">]</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright CERN, INFN and Fermilab.
+      Last updated on Jul 02, 2015.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

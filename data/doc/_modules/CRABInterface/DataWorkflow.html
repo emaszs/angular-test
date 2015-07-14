@@ -1,0 +1,527 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>CRABInterface.DataWorkflow &mdash; CRAB Server 3.3.1507.rc4</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '3.3.1507.rc4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="CRAB Server 3.3.1507.rc4" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for CRABInterface.DataWorkflow</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">cherrypy</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">ast</span> <span class="kn">import</span> <span class="n">literal_eval</span>
+
+<span class="c">## WMCore dependecies</span>
+<span class="kn">from</span> <span class="nn">WMCore.REST.Error</span> <span class="kn">import</span> <span class="n">ExecutionError</span>
+
+<span class="c">## CRAB dependencies</span>
+<span class="kn">from</span> <span class="nn">CRABInterface.Utils</span> <span class="kn">import</span> <span class="n">CMSSitesCache</span><span class="p">,</span> <span class="n">conn_handler</span><span class="p">,</span> <span class="n">getDBinstance</span>
+
+
+<div class="viewcode-block" id="DataWorkflow"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataWorkflow.DataWorkflow">[docs]</a><span class="k">class</span> <span class="nc">DataWorkflow</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Entity that allows to operate on workflow resources.</span>
+<span class="sd">       No aggregation of workflows provided here.&quot;&quot;&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="DataWorkflow.globalinit"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataWorkflow.DataWorkflow.globalinit">[docs]</a>    <span class="k">def</span> <span class="nf">globalinit</span><span class="p">(</span><span class="n">dbapi</span><span class="p">,</span> <span class="n">phedexargs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">credpath</span><span class="o">=</span><span class="s">&#39;/tmp&#39;</span><span class="p">,</span> <span class="n">centralcfg</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">DataWorkflow</span><span class="o">.</span><span class="n">api</span> <span class="o">=</span> <span class="n">dbapi</span>
+        <span class="n">DataWorkflow</span><span class="o">.</span><span class="n">phedexargs</span> <span class="o">=</span> <span class="n">phedexargs</span>
+        <span class="n">DataWorkflow</span><span class="o">.</span><span class="n">phedex</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">DataWorkflow</span><span class="o">.</span><span class="n">credpath</span> <span class="o">=</span> <span class="n">credpath</span>
+        <span class="n">DataWorkflow</span><span class="o">.</span><span class="n">centralcfg</span> <span class="o">=</span> <span class="n">centralcfg</span>
+        <span class="n">DataWorkflow</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+</div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&quot;CRABLogger.DataWorkflow&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allCMSNames</span> <span class="o">=</span> <span class="n">CMSSitesCache</span><span class="p">(</span><span class="n">cachetime</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sites</span><span class="o">=</span><span class="p">{})</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">splitArgMap</span> <span class="o">=</span> <span class="p">{</span> <span class="s">&quot;LumiBased&quot;</span> <span class="p">:</span> <span class="s">&quot;lumis_per_job&quot;</span><span class="p">,</span>
+                        <span class="s">&quot;FileBased&quot;</span> <span class="p">:</span> <span class="s">&quot;files_per_job&quot;</span><span class="p">,</span>
+                        <span class="s">&quot;EventBased&quot;</span> <span class="p">:</span> <span class="s">&quot;events_per_job&quot;</span><span class="p">,</span>
+                        <span class="s">&quot;EventAwareLumiBased&quot;</span><span class="p">:</span> <span class="s">&quot;events_per_job&quot;</span><span class="p">}</span>
+
+	<span class="bp">self</span><span class="o">.</span><span class="n">Task</span> <span class="o">=</span> <span class="n">getDBinstance</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s">&#39;TaskDB&#39;</span><span class="p">,</span> <span class="s">&#39;Task&#39;</span><span class="p">)</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">JobGroup</span> <span class="o">=</span> <span class="n">getDBinstance</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s">&#39;TaskDB&#39;</span><span class="p">,</span> <span class="s">&#39;JobGroup&#39;</span><span class="p">)</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">FileMetaData</span> <span class="o">=</span> <span class="n">getDBinstance</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s">&#39;FileMetaDataDB&#39;</span><span class="p">,</span> <span class="s">&#39;FileMetaData&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DataWorkflow.updateRequest"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataWorkflow.DataWorkflow.updateRequest">[docs]</a>    <span class="k">def</span> <span class="nf">updateRequest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Provide the implementing class a chance to rename the workflow</span>
+<span class="sd">           before it is committed to the DB.</span>
+<span class="sd">           &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">workflow</span>
+</div>
+<div class="viewcode-block" id="DataWorkflow.getLatests"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataWorkflow.DataWorkflow.getLatests">[docs]</a>    <span class="k">def</span> <span class="nf">getLatests</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Retrives the latest workflows for the user</span>
+
+<span class="sd">           :arg str user: a valid user hn login name</span>
+<span class="sd">           :arg int limit: the maximum number of workflows to return</span>
+<span class="sd">                          (this should probably have a default!)</span>
+<span class="sd">           :arg int limit: limit on the workflow age</span>
+<span class="sd">           :return: a list of workflows&quot;&quot;&quot;</span>
+        <span class="c"># convert the workflow age in something eatable by a couch view</span>
+        <span class="c"># in practice it&#39;s convenient that the timestamp is on a fixed format: latest 1 or 3 days, latest 1 week, latest 1 month</span>
+        <span class="c"># and that it&#39;s a list (probably it can be converted into it): [year, month-num, day, hh, mm, ss]</span>
+        <span class="c"># this will allow to query as it&#39;s described here: http://guide.couchdb.org/draft/views.html#many</span>
+
+        <span class="c"># example:</span>
+        <span class="c"># return self.monitordb.conn.loadView(&#39;WMStats&#39;, &#39;byUser&#39;,</span>
+        <span class="c">#                              options = { &quot;startkey&quot;: user,</span>
+        <span class="c">#                                          &quot;endkey&quot;: user,</span>
+        <span class="c">#                                          &quot;limit&quot;: limit, })</span>
+        <span class="c">#raise NotImplementedError</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="o">.</span><span class="n">GetTasksFromUser_sql</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="n">timestamp</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="DataWorkflow.errors"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataWorkflow.DataWorkflow.errors">[docs]</a>    <span class="k">def</span> <span class="nf">errors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow</span><span class="p">,</span> <span class="n">shortformat</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Retrieves the sets of errors for a specific workflow</span>
+
+<span class="sd">           :arg str workflow: a workflow name</span>
+<span class="sd">           :arg int shortformat: a flag indicating if the user is asking for detailed</span>
+<span class="sd">                                 information about sites and list of errors</span>
+<span class="sd">           :return: a list of errors grouped by exit code, error reason, site&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="DataWorkflow.report"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataWorkflow.DataWorkflow.report">[docs]</a>    <span class="k">def</span> <span class="nf">report</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Retrieves the quality of the workflow in term of what has been processed</span>
+<span class="sd">           (eg: good lumis)</span>
+
+<span class="sd">           :arg str workflow: a workflow name</span>
+<span class="sd">           :return: what?&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="DataWorkflow.logs"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataWorkflow.DataWorkflow.logs">[docs]</a>    <span class="k">def</span> <span class="nf">logs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow</span><span class="p">,</span> <span class="n">howmany</span><span class="p">,</span> <span class="n">exitcode</span><span class="p">,</span> <span class="n">jobids</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the workflow logs PFN. It takes care of the LFN - PFN conversion too.</span>
+
+<span class="sd">           :arg str workflow: a workflow name</span>
+<span class="sd">           :arg int howmany: the limit on the number of PFN to return</span>
+<span class="sd">           :arg int exitcode: the log has to be of a job ended with this exit_code</span>
+<span class="sd">           :return: (a generator of?) a list of logs pfns&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="DataWorkflow.output"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataWorkflow.DataWorkflow.output">[docs]</a>    <span class="k">def</span> <span class="nf">output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow</span><span class="p">,</span> <span class="n">howmany</span><span class="p">,</span> <span class="n">jobids</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieves the output PFN aggregating output in final and temporary locations.</span>
+
+<span class="sd">        :arg str workflow: the unique workflow name</span>
+<span class="sd">           :arg int howmany: the limit on the number of PFN to return</span>
+<span class="sd">           :return: a generator of list of outputs&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="DataWorkflow.schema"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataWorkflow.DataWorkflow.schema">[docs]</a>    <span class="k">def</span> <span class="nf">schema</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the workflow schema parameters.</span>
+
+<span class="sd">           :arg str workflow: a workflow name</span>
+<span class="sd">           :return: a json corresponding to the workflow schema&quot;&quot;&quot;</span>
+        <span class="c"># it probably needs to connect to the database</span>
+        <span class="c"># TODO: verify + code the above point</span>
+        <span class="c"># probably we need to explicitely select the schema parameters to return</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+    <span class="nd">@conn_handler</span><span class="p">(</span><span class="n">services</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;centralconfig&#39;</span><span class="p">])</span>
+<div class="viewcode-block" id="DataWorkflow.submit"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataWorkflow.DataWorkflow.submit">[docs]</a>    <span class="k">def</span> <span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow</span><span class="p">,</span> <span class="n">activity</span><span class="p">,</span> <span class="n">jobtype</span><span class="p">,</span> <span class="n">jobsw</span><span class="p">,</span> <span class="n">jobarch</span><span class="p">,</span> <span class="n">inputdata</span><span class="p">,</span> <span class="n">use_parent</span><span class="p">,</span> <span class="n">generator</span><span class="p">,</span> <span class="n">events_per_lumi</span><span class="p">,</span> <span class="n">siteblacklist</span><span class="p">,</span> <span class="n">sitewhitelist</span><span class="p">,</span> <span class="n">splitalgo</span><span class="p">,</span> <span class="n">algoargs</span><span class="p">,</span> <span class="n">cachefilename</span><span class="p">,</span> <span class="n">cacheurl</span><span class="p">,</span> <span class="n">addoutputfiles</span><span class="p">,</span>
+               <span class="n">userhn</span><span class="p">,</span> <span class="n">userdn</span><span class="p">,</span> <span class="n">savelogsflag</span><span class="p">,</span> <span class="n">publication</span><span class="p">,</span> <span class="n">publishname</span><span class="p">,</span> <span class="n">asyncdest</span><span class="p">,</span> <span class="n">dbsurl</span><span class="p">,</span> <span class="n">publishdbsurl</span><span class="p">,</span> <span class="n">vorole</span><span class="p">,</span> <span class="n">vogroup</span><span class="p">,</span> <span class="n">tfileoutfiles</span><span class="p">,</span> <span class="n">edmoutfiles</span><span class="p">,</span>
+               <span class="n">runs</span><span class="p">,</span> <span class="n">lumis</span><span class="p">,</span> <span class="n">totalunits</span><span class="p">,</span> <span class="n">adduserfiles</span><span class="p">,</span> <span class="n">oneEventMode</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">maxjobruntime</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">numcores</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">maxmemory</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">lfn</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">ignorelocality</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">saveoutput</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">faillimit</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">userfiles</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">userproxy</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">asourl</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">scriptexe</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">scriptargs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">scheddname</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">extrajdl</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">collector</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">dryrun</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">publishgroupname</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">nonvaliddata</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Perform the workflow injection</span>
+
+<span class="sd">           :arg str workflow: workflow name requested by the user;</span>
+<span class="sd">           :arg str activity: workflow activity type, usually analysis;</span>
+<span class="sd">           :arg str jobtype: job type of the workflow, usually Analysis;</span>
+<span class="sd">           :arg str jobsw: software requirement;</span>
+<span class="sd">           :arg str jobarch: software architecture (=SCRAM_ARCH);</span>
+<span class="sd">           :arg str inputdata: input dataset;</span>
+<span class="sd">           :arg str nonvaliddata: allow invalid input dataset;</span>
+<span class="sd">           :arg int use_parent: add the parent dataset as secondary input;</span>
+<span class="sd">           :arg str generator: event generator for MC production;</span>
+<span class="sd">           :arg int events_per_lumi: number of events per lumi to generate</span>
+<span class="sd">           :arg str list siteblacklist: black list of sites, with CMS name;</span>
+<span class="sd">           :arg str list sitewhitelist: white list of sites, with CMS name;</span>
+<span class="sd">           :arg str splitalgo: algorithm to be used for the workflow splitting;</span>
+<span class="sd">           :arg str algoargs: argument to be used by the splitting algorithm;</span>
+<span class="sd">           :arg str cachefilename: name of the file inside the cache</span>
+<span class="sd">           :arg str cacheurl: URL of the cache</span>
+<span class="sd">           :arg str list addoutputfiles: list of additional output files;</span>
+<span class="sd">           :arg int savelogsflag: archive the log files? 0 no, everything else yes;</span>
+<span class="sd">           :arg str userdn: DN of user doing the request;</span>
+<span class="sd">           :arg str userhn: hyper new name of the user doing the request;</span>
+<span class="sd">           :arg int publication: flag enabling or disabling data publication;</span>
+<span class="sd">           :arg str publishname: name to use for data publication;</span>
+<span class="sd">           :arg str publishgroupname: add groupname or username to publishname;</span>
+<span class="sd">           :arg str asyncdest: CMS site name for storage destination of the output files;</span>
+<span class="sd">           :arg str dbsurl: dbs url where the input dataset is published;</span>
+<span class="sd">           :arg str publishdbsurl: dbs url where the output data has to be published;</span>
+<span class="sd">           :arg str vorole: user vo role</span>
+<span class="sd">           :arg str vogroup: user vo group</span>
+<span class="sd">           :arg str tfileoutfiles: list of t-output files</span>
+<span class="sd">           :arg str edmoutfiles: list of edm output files</span>
+<span class="sd">           :arg str list runs: list of run numbers</span>
+<span class="sd">           :arg str list lumis: list of lumi section numbers</span>
+<span class="sd">           :arg int totalunits: number of MC event to be generated</span>
+<span class="sd">           :arg str list adduserfiles: list of additional user input files</span>
+<span class="sd">           :arg str oneEventMode: toggle one event mode</span>
+<span class="sd">           :arg int maxjobruntime: max job runtime, in minutes</span>
+<span class="sd">           :arg int numcores: number of CPU cores required by job</span>
+<span class="sd">           :arg int maxmemory: maximum amount of RAM required, in MB</span>
+<span class="sd">           :arg int priority: priority of this task</span>
+<span class="sd">           :arg str lfn: lfn used to store output files.</span>
+<span class="sd">           :arg str userfiles: The files to process instead of a DBS-based dataset.</span>
+<span class="sd">           :arg str asourl: Specify which ASO to use for transfers and publishing.</span>
+<span class="sd">           :arg str scheddname: Schedd Name used for debugging.</span>
+<span class="sd">           :arg str collector: Collector Name used for debugging.</span>
+<span class="sd">           :arg int dryrun: enable dry run mode (initialize but do not submit task).</span>
+<span class="sd">           :returns: a dict which contaians details of the request&quot;&quot;&quot;</span>
+
+        <span class="n">timestamp</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&#39;%y%m</span><span class="si">%d</span><span class="s">_%H%M%S&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">gmtime</span><span class="p">())</span>
+        <span class="n">requestname</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="n">schedd_name</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="n">backend_urls</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">centralcfg</span><span class="o">.</span><span class="n">centralconfig</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;backend-urls&quot;</span><span class="p">,</span> <span class="p">{}))</span>
+        <span class="k">if</span> <span class="n">collector</span><span class="p">:</span>
+            <span class="n">backend_urls</span><span class="p">[</span><span class="s">&#39;htcondorPool&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">collector</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">collector</span> <span class="o">=</span> <span class="n">backend_urls</span><span class="p">[</span><span class="s">&#39;htcondorPool&#39;</span><span class="p">]</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">requestname</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s">_</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">userhn</span><span class="p">,</span> <span class="n">workflow</span><span class="p">)</span>
+            <span class="n">schedd_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chooseScheduler</span><span class="p">(</span><span class="n">scheddname</span><span class="p">,</span> <span class="n">backend_urls</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;:&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Failed to communicate with components </span><span class="si">%s</span><span class="s">. Request name </span><span class="si">%s</span><span class="s">: &quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">requestname</span><span class="p">)))</span>
+            <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="s">&quot;Failed to communicate with crabserver components. If problem persist, please report it.&quot;</span><span class="p">)</span>
+        <span class="n">splitArgName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitArgMap</span><span class="p">[</span><span class="n">splitalgo</span><span class="p">]</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="n">cherrypy</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">[</span><span class="s">&#39;login&#39;</span><span class="p">]</span>
+        <span class="n">dbSerializer</span> <span class="o">=</span> <span class="nb">str</span>
+
+        <span class="c">## If these parameters were not set in the submission request, give them</span>
+        <span class="c">## predefined default values.</span>
+        <span class="k">if</span> <span class="n">maxjobruntime</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">maxjobruntime</span> <span class="o">=</span> <span class="mi">1315</span>
+        <span class="k">if</span> <span class="n">maxmemory</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">maxmemory</span> <span class="o">=</span> <span class="mi">2000</span>
+        <span class="k">if</span> <span class="n">numcores</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">numcores</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">priority</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">priority</span> <span class="o">=</span> <span class="mi">10</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">asourl</span><span class="p">:</span>
+            <span class="n">asourl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">centralcfg</span><span class="o">.</span><span class="n">centralconfig</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;backend-urls&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;ASOURL&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">asourl</span><span class="p">)</span><span class="o">==</span><span class="nb">list</span><span class="p">:</span>
+                <span class="n">asourl</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">asourl</span><span class="p">)</span>
+
+        <span class="n">arguments</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c">## Insert this new task into the Tasks DB.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="o">.</span><span class="n">New_sql</span><span class="p">,</span>
+                            <span class="n">task_name</span>       <span class="o">=</span> <span class="p">[</span><span class="n">requestname</span><span class="p">],</span>
+                            <span class="n">task_activity</span>   <span class="o">=</span> <span class="p">[</span><span class="n">activity</span><span class="p">],</span>
+                            <span class="n">jobset_id</span>       <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">],</span>
+                            <span class="n">task_status</span>     <span class="o">=</span> <span class="p">[</span><span class="s">&#39;NEW&#39;</span><span class="p">],</span>
+                            <span class="n">task_failure</span>    <span class="o">=</span> <span class="p">[</span><span class="s">&#39;&#39;</span><span class="p">],</span>
+                            <span class="n">job_sw</span>          <span class="o">=</span> <span class="p">[</span><span class="n">jobsw</span><span class="p">],</span>
+                            <span class="n">job_arch</span>        <span class="o">=</span> <span class="p">[</span><span class="n">jobarch</span><span class="p">],</span>
+                            <span class="n">input_dataset</span>   <span class="o">=</span> <span class="p">[</span><span class="n">inputdata</span><span class="p">],</span>
+                            <span class="n">nonvalid_data</span>   <span class="o">=</span> <span class="p">[</span><span class="s">&#39;T&#39;</span> <span class="k">if</span> <span class="n">nonvaliddata</span> <span class="k">else</span> <span class="s">&#39;F&#39;</span><span class="p">],</span>
+                            <span class="n">use_parent</span>      <span class="o">=</span> <span class="p">[</span><span class="n">use_parent</span><span class="p">],</span>
+                            <span class="n">generator</span>       <span class="o">=</span> <span class="p">[</span><span class="n">generator</span><span class="p">],</span>
+                            <span class="n">events_per_lumi</span> <span class="o">=</span> <span class="p">[</span><span class="n">events_per_lumi</span><span class="p">],</span>
+                            <span class="n">site_whitelist</span>  <span class="o">=</span> <span class="p">[</span><span class="n">dbSerializer</span><span class="p">(</span><span class="n">sitewhitelist</span><span class="p">)],</span>
+                            <span class="n">site_blacklist</span>  <span class="o">=</span> <span class="p">[</span><span class="n">dbSerializer</span><span class="p">(</span><span class="n">siteblacklist</span><span class="p">)],</span>
+                            <span class="n">split_algo</span>      <span class="o">=</span> <span class="p">[</span><span class="n">splitalgo</span><span class="p">],</span>
+                            <span class="n">split_args</span>      <span class="o">=</span> <span class="p">[</span><span class="n">dbSerializer</span><span class="p">({</span><span class="s">&#39;halt_job_on_file_boundaries&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span> <span class="s">&#39;splitOnRun&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                                                <span class="n">splitArgName</span> <span class="p">:</span> <span class="n">algoargs</span><span class="p">,</span> <span class="s">&#39;runs&#39;</span><span class="p">:</span> <span class="n">runs</span><span class="p">,</span> <span class="s">&#39;lumis&#39;</span><span class="p">:</span> <span class="n">lumis</span><span class="p">})],</span>
+                            <span class="n">total_units</span>     <span class="o">=</span> <span class="p">[</span><span class="n">totalunits</span><span class="p">],</span>
+                            <span class="n">user_sandbox</span>    <span class="o">=</span> <span class="p">[</span><span class="n">cachefilename</span><span class="p">],</span>
+                            <span class="n">cache_url</span>       <span class="o">=</span> <span class="p">[</span><span class="n">cacheurl</span><span class="p">],</span>
+                            <span class="n">username</span>        <span class="o">=</span> <span class="p">[</span><span class="n">userhn</span><span class="p">],</span>
+                            <span class="n">user_dn</span>         <span class="o">=</span> <span class="p">[</span><span class="n">userdn</span><span class="p">],</span>
+                            <span class="n">user_vo</span>         <span class="o">=</span> <span class="p">[</span><span class="s">&#39;cms&#39;</span><span class="p">],</span>
+                            <span class="n">user_role</span>       <span class="o">=</span> <span class="p">[</span><span class="n">vorole</span><span class="p">],</span>
+                            <span class="n">user_group</span>      <span class="o">=</span> <span class="p">[</span><span class="n">vogroup</span><span class="p">],</span>
+                            <span class="c">## The client defines publishname = &lt;Data.publishDataName&gt;-&lt;isbchecksum&gt;</span>
+                            <span class="c">## if the user defines Data.publishDataName, and publishname = &lt;isbchecksum&gt; otherwise.</span>
+                            <span class="c">## (The PostJob replaces then the isbchecksum by the psethash.)</span>
+                            <span class="n">publish_name</span>    <span class="o">=</span> <span class="p">[(</span><span class="n">workflow</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;:&quot;</span><span class="p">,</span> <span class="s">&quot;_&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;-&#39;</span> <span class="o">+</span> <span class="n">publishname</span><span class="p">)</span> <span class="k">if</span> <span class="n">publishname</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;-&#39;</span><span class="p">)</span><span class="o">==-</span><span class="mi">1</span> <span class="k">else</span> <span class="n">publishname</span><span class="p">],</span>
+                            <span class="n">publish_groupname</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;T&#39;</span> <span class="k">if</span> <span class="n">publishgroupname</span> <span class="k">else</span> <span class="s">&#39;F&#39;</span><span class="p">],</span>
+                            <span class="n">asyncdest</span>       <span class="o">=</span> <span class="p">[</span><span class="n">asyncdest</span><span class="p">],</span>
+                            <span class="n">dbs_url</span>         <span class="o">=</span> <span class="p">[</span><span class="n">dbsurl</span><span class="p">],</span>
+                            <span class="n">publish_dbs_url</span> <span class="o">=</span> <span class="p">[</span><span class="n">publishdbsurl</span><span class="p">],</span>
+                            <span class="n">publication</span>     <span class="o">=</span> <span class="p">[</span><span class="s">&#39;T&#39;</span> <span class="k">if</span> <span class="n">publication</span> <span class="k">else</span> <span class="s">&#39;F&#39;</span><span class="p">],</span>
+                            <span class="n">outfiles</span>        <span class="o">=</span> <span class="p">[</span><span class="n">dbSerializer</span><span class="p">(</span><span class="n">addoutputfiles</span><span class="p">)],</span>
+                            <span class="n">tfile_outfiles</span>  <span class="o">=</span> <span class="p">[</span><span class="n">dbSerializer</span><span class="p">(</span><span class="n">tfileoutfiles</span><span class="p">)],</span>
+                            <span class="n">edm_outfiles</span>    <span class="o">=</span> <span class="p">[</span><span class="n">dbSerializer</span><span class="p">(</span><span class="n">edmoutfiles</span><span class="p">)],</span>
+                            <span class="n">job_type</span>        <span class="o">=</span> <span class="p">[</span><span class="n">jobtype</span><span class="p">],</span>
+                            <span class="n">arguments</span>       <span class="o">=</span> <span class="p">[</span><span class="n">dbSerializer</span><span class="p">(</span><span class="n">arguments</span><span class="p">)],</span>
+                            <span class="n">resubmitted_jobs</span><span class="o">=</span> <span class="p">[</span><span class="n">dbSerializer</span><span class="p">([])],</span>
+                            <span class="n">save_logs</span>       <span class="o">=</span> <span class="p">[</span><span class="s">&#39;T&#39;</span> <span class="k">if</span> <span class="n">savelogsflag</span> <span class="k">else</span> <span class="s">&#39;F&#39;</span><span class="p">],</span>
+                            <span class="n">user_infiles</span>    <span class="o">=</span> <span class="p">[</span><span class="n">dbSerializer</span><span class="p">(</span><span class="n">adduserfiles</span><span class="p">)],</span>
+                            <span class="n">maxjobruntime</span>   <span class="o">=</span> <span class="p">[</span><span class="n">maxjobruntime</span><span class="p">],</span>
+                            <span class="n">numcores</span>        <span class="o">=</span> <span class="p">[</span><span class="n">numcores</span><span class="p">],</span>
+                            <span class="n">maxmemory</span>       <span class="o">=</span> <span class="p">[</span><span class="n">maxmemory</span><span class="p">],</span>
+                            <span class="n">priority</span>        <span class="o">=</span> <span class="p">[</span><span class="n">priority</span><span class="p">],</span>
+                            <span class="n">scriptexe</span>       <span class="o">=</span> <span class="p">[</span><span class="n">scriptexe</span><span class="p">],</span>
+                            <span class="n">scriptargs</span>      <span class="o">=</span> <span class="p">[</span><span class="n">dbSerializer</span><span class="p">(</span><span class="n">scriptargs</span><span class="p">)],</span>
+                            <span class="n">extrajdl</span>        <span class="o">=</span> <span class="p">[</span><span class="n">dbSerializer</span><span class="p">(</span><span class="n">extrajdl</span><span class="p">)],</span>
+                            <span class="n">asourl</span>          <span class="o">=</span> <span class="p">[</span><span class="n">asourl</span><span class="p">],</span>
+                            <span class="n">collector</span>       <span class="o">=</span> <span class="p">[</span><span class="n">collector</span><span class="p">],</span>
+                            <span class="n">schedd_name</span>     <span class="o">=</span> <span class="p">[</span><span class="n">schedd_name</span><span class="p">],</span>
+                            <span class="n">dry_run</span>         <span class="o">=</span> <span class="p">[</span><span class="s">&#39;T&#39;</span> <span class="k">if</span> <span class="n">dryrun</span> <span class="k">else</span> <span class="s">&#39;F&#39;</span><span class="p">],</span>
+                            <span class="n">user_files</span>       <span class="o">=</span> <span class="p">[</span><span class="n">dbSerializer</span><span class="p">(</span><span class="n">userfiles</span><span class="p">)],</span>
+                            <span class="n">transfer_outputs</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;T&#39;</span> <span class="k">if</span> <span class="n">saveoutput</span> <span class="k">else</span> <span class="s">&#39;F&#39;</span><span class="p">],</span>
+                            <span class="n">output_lfn</span>       <span class="o">=</span> <span class="p">[</span><span class="n">lfn</span><span class="p">],</span>
+                            <span class="n">ignore_locality</span>  <span class="o">=</span> <span class="p">[</span><span class="s">&#39;T&#39;</span> <span class="k">if</span> <span class="n">ignorelocality</span> <span class="k">else</span> <span class="s">&#39;F&#39;</span><span class="p">],</span>
+                            <span class="n">fail_limit</span>       <span class="o">=</span> <span class="p">[</span><span class="n">faillimit</span><span class="p">],</span>
+                            <span class="n">one_event_mode</span>   <span class="o">=</span> <span class="p">[</span><span class="s">&#39;T&#39;</span> <span class="k">if</span> <span class="n">oneEventMode</span> <span class="k">else</span> <span class="s">&#39;F&#39;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">[{</span><span class="s">&#39;RequestName&#39;</span><span class="p">:</span> <span class="n">requestname</span><span class="p">}]</span>
+</div>
+<div class="viewcode-block" id="DataWorkflow.resubmit"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataWorkflow.DataWorkflow.resubmit">[docs]</a>    <span class="k">def</span> <span class="nf">resubmit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow</span><span class="p">,</span> <span class="n">siteblacklist</span><span class="p">,</span> <span class="n">sitewhitelist</span><span class="p">,</span> <span class="n">jobids</span><span class="p">,</span> <span class="n">maxjobruntime</span><span class="p">,</span> <span class="n">numcores</span><span class="p">,</span> <span class="n">maxmemory</span><span class="p">,</span> <span class="n">priority</span><span class="p">,</span> <span class="n">force</span><span class="p">,</span> <span class="n">userdn</span><span class="p">,</span> <span class="n">userproxy</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Request to reprocess what the workflow hasn&#39;t finished to reprocess.</span>
+<span class="sd">           This needs to create a new workflow in the same campaign</span>
+
+<span class="sd">           :arg str workflow: a valid workflow name</span>
+<span class="sd">           :arg str list siteblacklist: black list of sites, with CMS name;</span>
+<span class="sd">           :arg str list sitewhitelist: white list of sites, with CMS name.&quot;&quot;&quot;</span>
+        <span class="n">retmsg</span> <span class="o">=</span> <span class="s">&quot;ok&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;About to resubmit workflow: </span><span class="si">%s</span><span class="s">. Getting status first.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">workflow</span><span class="p">))</span>
+        <span class="c">## Get the status of the task/jobs.</span>
+        <span class="n">statusRes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">userdn</span><span class="p">,</span> <span class="n">userproxy</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c">## We allow resubmission of jobs only if the task status is one of these:</span>
+        <span class="n">allowedTaskStates</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;SUBMITTED&#39;</span><span class="p">,</span> <span class="s">&#39;KILLED&#39;</span><span class="p">,</span> <span class="s">&#39;FAILED&#39;</span><span class="p">,</span> <span class="s">&#39;KILLFAILED&#39;</span><span class="p">]</span>
+        <span class="c">## If the user wants to resubmit a specific set of jobs, then we also accept the</span>
+        <span class="c">## task to be in COMPLETED state. This is because we want to allow resubmission</span>
+        <span class="c">## of successfully finished jobs if the user explicitly gave the job id.</span>
+        <span class="k">if</span> <span class="n">jobids</span> <span class="ow">and</span> <span class="n">force</span><span class="p">:</span>
+            <span class="n">allowedTaskStates</span> <span class="o">+=</span> <span class="p">[</span><span class="s">&#39;COMPLETED&#39;</span><span class="p">]</span>
+        <span class="c">## If the task status is not an allowed one, fail the resubmission.</span>
+        <span class="k">if</span> <span class="n">statusRes</span><span class="p">[</span><span class="s">&#39;status&#39;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowedTaskStates</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">statusRes</span><span class="p">[</span><span class="s">&#39;status&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;COMPLETED&#39;</span><span class="p">]:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s">&quot;Task status is COMPLETED. To resubmit jobs from a task in status COMPLETED, use the --jobids and --force options.&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s">&quot;You cannot resubmit a task if it is in the </span><span class="si">%s</span><span class="s"> state.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">statusRes</span><span class="p">[</span><span class="s">&#39;status&#39;</span><span class="p">])</span>
+            <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="c">## This is the list of job ids that we allow to be resubmitted.</span>
+        <span class="c">## Note: This list will be empty if statusRes[&#39;jobList&#39;] is empty to begin with.</span>
+        <span class="c">## And statusRes[&#39;jobList&#39;] may be empty even if jobs were created and have well</span>
+        <span class="c">## defined state. An example is when the task has status FAILED in the Task DB</span>
+        <span class="c">## because of an exception in the TaskWorker.</span>
+        <span class="n">resubmitjobids</span> <span class="o">=</span> <span class="p">[</span><span class="n">jobid</span> <span class="k">for</span> <span class="n">jobstatus</span><span class="p">,</span> <span class="n">jobid</span> <span class="ow">in</span> <span class="n">statusRes</span><span class="p">[</span><span class="s">&#39;jobList&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="p">(</span><span class="n">jobstatus</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">failedList</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">jobids</span> <span class="ow">and</span> <span class="n">force</span> <span class="ow">and</span> <span class="n">jobstatus</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">successList</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="n">statusRes</span><span class="p">[</span><span class="s">&#39;jobList&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">resubmitjobids</span><span class="p">:</span>
+            <span class="n">msg</span>  <span class="o">=</span> <span class="s">&quot;There are no jobs to resubmit.&quot;</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s">&quot; Only jobs in status </span><span class="si">%s</span><span class="s"> can be resubmitted.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">failedList</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s">&quot; Jobs in status </span><span class="si">%s</span><span class="s"> can also be resubmitted, but only if the jobid is specified and force = True.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">successList</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="c">## If the user wants to resubmit a specific set of jobs ...</span>
+        <span class="k">if</span> <span class="n">jobids</span><span class="p">:</span>
+            <span class="c">## ... make the intersection between the &quot;allowed&quot; and &quot;wanted&quot; jobs.</span>
+            <span class="n">resubmitjobids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">resubmitjobids</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">jobids</span><span class="p">))</span>
+            <span class="c">## Check if all the &quot;wanted&quot; jobs can be resubmitted. If not, fail the resubmission.</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">resubmitjobids</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">jobids</span><span class="p">):</span>
+                <span class="n">requestedResub</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">jobids</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">resubmitjobids</span><span class="p">))</span>
+                <span class="n">msg</span>  <span class="o">=</span> <span class="s">&quot;CRAB3 server refused to resubmit the following jobs: </span><span class="si">%s</span><span class="s">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">requestedResub</span><span class="p">))</span>
+                <span class="n">msg</span> <span class="o">+=</span> <span class="s">&quot; Only jobs in status </span><span class="si">%s</span><span class="s"> can be resubmitted.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">failedList</span><span class="p">)</span>
+                <span class="n">msg</span> <span class="o">+=</span> <span class="s">&quot; Jobs in status </span><span class="si">%s</span><span class="s"> can also be resubmitted, but only if the jobid is specified and force = True.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">successList</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="c">#return [{&#39;result&#39;: msg}]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Jobs to resubmit: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">resubmitjobids</span><span class="p">))</span>
+        <span class="c">## If these parameters were not set in the resubmission request, give them the</span>
+        <span class="c">## same values they had in the original task submission.</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">siteblacklist</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">sitewhitelist</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">maxjobruntime</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">maxmemory</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">numcores</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">priority</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="c">## origValues = [orig_siteblacklist, orig_sitewhitelist, orig_maxjobruntime, orig_maxmemory, orig_numcores, orig_priority]</span>
+            <span class="n">origValues</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="o">.</span><span class="n">GetResubmitParams_sql</span><span class="p">,</span> <span class="n">taskname</span> <span class="o">=</span> <span class="n">workflow</span><span class="p">)</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">siteblacklist</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">siteblacklist</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">origValues</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">sitewhitelist</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">sitewhitelist</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">origValues</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">maxjobruntime</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">maxjobruntime</span> <span class="o">=</span> <span class="n">origValues</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">maxmemory</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">maxmemory</span> <span class="o">=</span> <span class="n">origValues</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">numcores</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">numcores</span> <span class="o">=</span> <span class="n">origValues</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">priority</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">priority</span> <span class="o">=</span> <span class="n">origValues</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+        <span class="c">## These are the parameters that we want to writte down in the &#39;tm_arguments&#39;</span>
+        <span class="c">## column of the Tasks DB each time a resubmission is done.</span>
+        <span class="c">## DagmanResubmitter will read these parameters and write them into the task ad.</span>
+        <span class="n">arguments</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;resubmit_jobids&#39;</span> <span class="p">:</span> <span class="n">resubmitjobids</span><span class="p">,</span>
+                     <span class="s">&#39;site_blacklist&#39;</span>  <span class="p">:</span> <span class="n">siteblacklist</span><span class="p">,</span>
+                     <span class="s">&#39;site_whitelist&#39;</span>  <span class="p">:</span> <span class="n">sitewhitelist</span><span class="p">,</span>
+                     <span class="s">&#39;maxjobruntime&#39;</span>   <span class="p">:</span> <span class="n">maxjobruntime</span><span class="p">,</span>
+                     <span class="s">&#39;maxmemory&#39;</span>       <span class="p">:</span> <span class="n">maxmemory</span><span class="p">,</span>
+                     <span class="s">&#39;numcores&#39;</span>        <span class="p">:</span> <span class="n">numcores</span><span class="p">,</span>
+                     <span class="s">&#39;priority&#39;</span>        <span class="p">:</span> <span class="n">priority</span>
+                    <span class="p">}</span>
+        <span class="c">## Change the &#39;tm_arguments&#39; column of the Tasks DB for this task to contain the</span>
+        <span class="c">## above parameters.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="o">.</span><span class="n">SetArgumentsTask_sql</span><span class="p">,</span> <span class="n">taskname</span> <span class="o">=</span> <span class="p">[</span><span class="n">workflow</span><span class="p">],</span> <span class="n">arguments</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">arguments</span><span class="p">)])</span>
+        <span class="c">## Change the status of the task in the Tasks DB to RESUBMIT.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="o">.</span><span class="n">SetStatusTask_sql</span><span class="p">,</span> <span class="n">status</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;RESUBMIT&quot;</span><span class="p">],</span> <span class="n">taskname</span> <span class="o">=</span> <span class="p">[</span><span class="n">workflow</span><span class="p">])</span>
+        <span class="k">return</span> <span class="p">[{</span><span class="s">&#39;result&#39;</span><span class="p">:</span> <span class="n">retmsg</span><span class="p">}]</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">_updateTaskStatus</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">jobsPerStatus</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update the status of the task when it is finished.</span>
+<span class="sd">        More details: if the status of the task is submitted =&gt; all the jobs are finished then taskStatus=COMPLETED</span>
+<span class="sd">                                                             =&gt; all the jobs are finished or failed then taskStatus=FAILED</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">status</span> <span class="o">==</span> <span class="s">&#39;SUBMITTED&#39;</span><span class="p">:</span>
+            <span class="c">#only completed jobs</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="n">jobsPerStatus</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">successList</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Changing task status to COMPLETED&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="o">.</span><span class="n">SetStatusTask_sql</span><span class="p">,</span> <span class="n">status</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;COMPLETED&quot;</span><span class="p">],</span> <span class="n">taskname</span> <span class="o">=</span> <span class="p">[</span><span class="n">workflow</span><span class="p">])</span>
+                <span class="k">return</span> <span class="s">&quot;COMPLETED&quot;</span>
+            <span class="c">#only failed and completed jobs (completed may not be there) =&gt; task failed</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="n">jobsPerStatus</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">successList</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">failedList</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Changing task status to FAILED&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="o">.</span><span class="n">SetStatusTask_sql</span><span class="p">,</span> <span class="n">status</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;FAILED&quot;</span><span class="p">],</span> <span class="n">taskname</span> <span class="o">=</span> <span class="p">[</span><span class="n">workflow</span><span class="p">])</span>
+                <span class="k">return</span> <span class="s">&quot;FAILED&quot;</span>
+        <span class="k">return</span> <span class="n">status</span>
+
+
+<div class="viewcode-block" id="DataWorkflow.status"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataWorkflow.DataWorkflow.status">[docs]</a>    <span class="k">def</span> <span class="nf">status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow</span><span class="p">,</span> <span class="n">userdn</span><span class="p">,</span> <span class="n">userproxy</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Retrieve the status of the workflow.</span>
+
+<span class="sd">           :arg str workflow: a valid workflow name</span>
+<span class="sd">           :return: a workflow status summary document&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+    <span class="nd">@conn_handler</span><span class="p">(</span><span class="n">services</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;centralconfig&#39;</span><span class="p">])</span>
+<div class="viewcode-block" id="DataWorkflow.kill"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataWorkflow.DataWorkflow.kill">[docs]</a>    <span class="k">def</span> <span class="nf">kill</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow</span><span class="p">,</span> <span class="n">force</span><span class="p">,</span> <span class="n">jobids</span><span class="p">,</span> <span class="n">userdn</span><span class="p">,</span> <span class="n">userproxy</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Request to Abort a workflow.</span>
+
+<span class="sd">           :arg str workflow: a workflow name&quot;&quot;&quot;</span>
+
+        <span class="n">retmsg</span> <span class="o">=</span> <span class="s">&quot;ok&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;About to kill workflow: </span><span class="si">%s</span><span class="s">. Getting status first.&quot;</span> <span class="o">%</span> <span class="n">workflow</span><span class="p">)</span>
+        <span class="n">statusRes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">userdn</span><span class="p">,</span> <span class="n">userproxy</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">args</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;ASOURL&#39;</span> <span class="p">:</span> <span class="n">statusRes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;ASOURL&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">)}</span>
+        <span class="c"># Hm...</span>
+        <span class="n">dbSerializer</span> <span class="o">=</span> <span class="nb">str</span>
+
+        <span class="k">if</span> <span class="n">statusRes</span><span class="p">[</span><span class="s">&#39;status&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;SUBMITTED&#39;</span><span class="p">,</span> <span class="s">&#39;KILLFAILED&#39;</span><span class="p">,</span> <span class="s">&#39;FAILED&#39;</span><span class="p">]:</span>
+            <span class="n">killList</span> <span class="o">=</span> <span class="p">[</span><span class="n">jobid</span> <span class="k">for</span> <span class="n">jobstatus</span><span class="p">,</span> <span class="n">jobid</span> <span class="ow">in</span> <span class="n">statusRes</span><span class="p">[</span><span class="s">&#39;jobList&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">jobstatus</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">successList</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">jobids</span><span class="p">:</span>
+                <span class="c">#if the user wants to kill specific jobids make the intersection</span>
+                <span class="n">killList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">killList</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">jobids</span><span class="p">))</span>
+                <span class="c">#check if all the requested jobids can be resubmitted</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">killList</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">jobids</span><span class="p">):</span>
+                    <span class="n">retmsg</span> <span class="o">=</span> <span class="s">&quot;Cannot request kill for </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">jobids</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">killList</span><span class="p">))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">killList</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="s">&quot;There are no jobs to kill. Only jobs not in </span><span class="si">%s</span><span class="s"> states can be killed&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">successList</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Jobs to kill: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">killList</span><span class="p">)</span>
+
+            <span class="n">args</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s">&quot;killList&quot;</span><span class="p">:</span> <span class="n">killList</span><span class="p">,</span> <span class="s">&quot;killAll&quot;</span><span class="p">:</span> <span class="n">jobids</span><span class="o">==</span><span class="p">[]})</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="o">.</span><span class="n">SetStatusTask_sql</span><span class="p">,</span> <span class="n">status</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;KILL&quot;</span><span class="p">],</span> <span class="n">taskname</span> <span class="o">=</span> <span class="p">[</span><span class="n">workflow</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="o">.</span><span class="n">SetArgumentsTask_sql</span><span class="p">,</span> <span class="n">taskname</span> <span class="o">=</span> <span class="p">[</span><span class="n">workflow</span><span class="p">],</span> <span class="n">arguments</span> <span class="o">=</span> <span class="p">[</span><span class="n">dbSerializer</span><span class="p">(</span><span class="n">args</span><span class="p">)])</span>
+        <span class="k">elif</span> <span class="n">statusRes</span><span class="p">[</span><span class="s">&#39;status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;NEW&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="o">.</span><span class="n">SetStatusTask_sql</span><span class="p">,</span> <span class="n">status</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;KILLED&quot;</span><span class="p">],</span> <span class="n">taskname</span> <span class="o">=</span> <span class="p">[</span><span class="n">workflow</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="s">&quot;You cannot kill a task if it is in the </span><span class="si">%s</span><span class="s"> state&quot;</span> <span class="o">%</span> <span class="n">statusRes</span><span class="p">[</span><span class="s">&#39;status&#39;</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="p">[{</span><span class="s">&quot;result&quot;</span><span class="p">:</span><span class="n">retmsg</span><span class="p">}]</span>
+</div>
+<div class="viewcode-block" id="DataWorkflow.proceed"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataWorkflow.DataWorkflow.proceed">[docs]</a>    <span class="k">def</span> <span class="nf">proceed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Continue a task which was initialized with &#39;crab submit --dryrun&#39;.</span>
+
+<span class="sd">           :arg str workflow: a workflow name</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="o">.</span><span class="n">ID_tuple</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="o">.</span><span class="n">ID_sql</span><span class="p">,</span> <span class="n">taskname</span><span class="o">=</span><span class="n">workflow</span><span class="p">)</span><span class="o">.</span><span class="n">next</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">task_status</span> <span class="o">!=</span> <span class="s">&#39;UPLOADED&#39;</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Can only proceed if task is in the UPLOADED state, but it is in the </span><span class="si">%s</span><span class="s"> state.&#39;</span> <span class="o">%</span> <span class="n">row</span><span class="o">.</span><span class="n">task_status</span>
+            <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="o">.</span><span class="n">SetDryRun_sql</span><span class="p">,</span> <span class="n">taskname</span><span class="o">=</span><span class="p">[</span><span class="n">workflow</span><span class="p">],</span> <span class="n">dry_run</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;F&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="o">.</span><span class="n">SetStatusTask_sql</span><span class="p">,</span> <span class="n">taskname</span><span class="o">=</span><span class="p">[</span><span class="n">workflow</span><span class="p">],</span> <span class="n">status</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;NEW&#39;</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="p">[{</span><span class="s">&#39;result&#39;</span><span class="p">:</span> <span class="s">&#39;ok&#39;</span><span class="p">}]</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright CERN, INFN and Fermilab.
+      Last updated on Jul 02, 2015.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

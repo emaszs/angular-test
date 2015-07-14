@@ -1,0 +1,10 @@
+HTCondorLocator Module
+======================
+
+:mod:`HTCondorLocator` Module
+-----------------------------
+
+.. automodule:: HTCondorLocator
+    :members:
+    :undoc-members:
+    :show-inheritance:

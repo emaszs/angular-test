@@ -1,0 +1,262 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>CRABInterface.PandaDataWorkflow &mdash; CRAB Server 3.3.1507.rc4</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '3.3.1507.rc4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="CRAB Server 3.3.1507.rc4" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for CRABInterface.PandaDataWorkflow</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">ast</span> <span class="kn">import</span> <span class="n">literal_eval</span>
+<span class="kn">import</span> <span class="nn">PandaServerInterface</span> <span class="kn">as</span> <span class="nn">pserver</span>
+<span class="kn">from</span> <span class="nn">WMCore.REST.Error</span> <span class="kn">import</span> <span class="n">ExecutionError</span><span class="p">,</span> <span class="n">InvalidParameter</span>
+<span class="kn">from</span> <span class="nn">WMCore.WMSpec.WMTask</span> <span class="kn">import</span> <span class="n">buildLumiMask</span>
+<span class="kn">from</span> <span class="nn">CRABInterface.DataWorkflow</span> <span class="kn">import</span> <span class="n">DataWorkflow</span>
+<span class="kn">from</span> <span class="nn">CRABInterface.Utils</span> <span class="kn">import</span> <span class="n">conn_handler</span>
+
+<div class="viewcode-block" id="PandaDataWorkflow"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.PandaDataWorkflow.PandaDataWorkflow">[docs]</a><span class="k">class</span> <span class="nc">PandaDataWorkflow</span><span class="p">(</span><span class="n">DataWorkflow</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Panda implementation of the status command.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c">#List of states which in panda are considered completed (and therefore not killed)</span>
+    <span class="n">successList</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;finished&#39;</span><span class="p">]</span>
+    <span class="n">failedList</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;cancelled&#39;</span><span class="p">,</span> <span class="s">&#39;failed&#39;</span><span class="p">]</span>
+
+    <span class="nd">@conn_handler</span><span class="p">(</span><span class="n">services</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;centralconfig&#39;</span><span class="p">])</span>
+<div class="viewcode-block" id="PandaDataWorkflow.status"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.PandaDataWorkflow.PandaDataWorkflow.status">[docs]</a>    <span class="k">def</span> <span class="nf">status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow</span><span class="p">,</span> <span class="n">userdn</span><span class="p">,</span> <span class="n">userproxy</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Retrieve the status of the workflow.</span>
+
+<span class="sd">           :arg str workflow: a valid workflow name</span>
+<span class="sd">           :return: a workflow status summary document&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Getting status for workflow </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">workflow</span><span class="p">)</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="o">.</span><span class="n">ID_sql</span><span class="p">,</span> <span class="n">taskname</span> <span class="o">=</span> <span class="n">workflow</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">jobsetid</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">vogroup</span><span class="p">,</span> <span class="n">vorole</span><span class="p">,</span> <span class="n">taskFailure</span><span class="p">,</span> <span class="n">splitArgs</span><span class="p">,</span> <span class="n">resJobs</span><span class="p">,</span> <span class="n">saveLogs</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">next</span><span class="p">()</span> <span class="c">#just one row is picked up by the previous query</span>
+        <span class="n">resJobs</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">resJobs</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Status result for workflow </span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s">. JobsetID: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">jobsetid</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;User vogroup=</span><span class="si">%s</span><span class="s"> and user vorole=</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">vogroup</span><span class="p">,</span> <span class="n">vorole</span><span class="p">))</span>
+
+        <span class="n">rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">JobGroup</span><span class="o">.</span><span class="n">GetJobGroupFromID_sql</span><span class="p">,</span> <span class="n">taskname</span> <span class="o">=</span> <span class="n">workflow</span><span class="p">)</span>
+        <span class="n">jobsPerStatus</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">jobList</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">totalJobdefs</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">failedJobdefs</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">jobDefErrs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">jobdef</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+            <span class="n">jobdefid</span> <span class="o">=</span> <span class="n">jobdef</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">jobdefStatus</span> <span class="o">=</span> <span class="n">jobdef</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">jobdefError</span> <span class="o">=</span> <span class="n">jobdef</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">read</span><span class="p">()</span> <span class="k">if</span> <span class="n">jobdef</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">else</span> <span class="s">&#39;&#39;</span>
+            <span class="n">totalJobdefs</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;DB Status for jobdefid </span><span class="si">%s</span><span class="s"> is </span><span class="si">%s</span><span class="s">. </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">jobdefid</span><span class="p">,</span> <span class="n">jobdefStatus</span><span class="p">,</span> <span class="n">jobdefError</span><span class="p">))</span>
+
+            <span class="c">#check if the taskworker succeded in the submission</span>
+            <span class="k">if</span> <span class="n">jobdefStatus</span> <span class="o">==</span> <span class="s">&#39;FAILED&#39;</span><span class="p">:</span>
+                <span class="n">jobDefErrs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">jobdefError</span><span class="p">)</span>
+                <span class="n">failedJobdefs</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">continue</span>
+
+            <span class="c">#check the status of the jobdef in panda</span>
+            <span class="n">schedEC</span><span class="p">,</span> <span class="n">res</span> <span class="o">=</span> <span class="n">pserver</span><span class="o">.</span><span class="n">getPandIDsWithJobID</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">centralcfg</span><span class="o">.</span><span class="n">centralconfig</span><span class="p">[</span><span class="s">&#39;backend-urls&#39;</span><span class="p">][</span><span class="s">&#39;baseURLSSL&#39;</span><span class="p">],</span> <span class="n">jobID</span><span class="o">=</span><span class="n">jobdefid</span><span class="p">,</span> <span class="n">dn</span><span class="o">=</span><span class="n">userdn</span><span class="p">,</span> <span class="n">userproxy</span><span class="o">=</span><span class="n">userproxy</span><span class="p">,</span> <span class="n">credpath</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">credpath</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Status for jobdefid </span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">jobdefid</span><span class="p">,</span> <span class="n">schedEC</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">schedEC</span><span class="p">:</span>
+                <span class="n">jobDefErrs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;Cannot get information for jobdefid </span><span class="si">%s</span><span class="s">. Panda server error: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">jobdefid</span><span class="p">,</span> <span class="n">schedEC</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">jobDefErrs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">failedJobdefs</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">continue</span>
+
+            <span class="c">#prepare the result at the job granularity</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Iterating on: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">res</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">jobid</span><span class="p">,</span> <span class="p">(</span><span class="n">jobstatus</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="ow">in</span> <span class="n">res</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">jobid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">resJobs</span><span class="p">:</span>
+                    <span class="n">jobsPerStatus</span><span class="p">[</span><span class="n">jobstatus</span><span class="p">]</span> <span class="o">=</span> <span class="n">jobsPerStatus</span><span class="p">[</span><span class="n">jobstatus</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span> <span class="k">if</span> <span class="n">jobstatus</span> <span class="ow">in</span> <span class="n">jobsPerStatus</span> <span class="k">else</span> <span class="mi">1</span>
+                    <span class="n">jobList</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">jobstatus</span><span class="p">,</span><span class="n">jobid</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">jobsPerStatus</span><span class="p">):</span> <span class="c">#if we actually submitted something</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_updateTaskStatus</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">jobsPerStatus</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">[</span> <span class="p">{</span><span class="s">&quot;status&quot;</span> <span class="p">:</span> <span class="n">status</span><span class="p">,</span>\
+                  <span class="s">&quot;taskFailureMsg&quot;</span> <span class="p">:</span> <span class="n">taskFailure</span><span class="o">.</span><span class="n">read</span><span class="p">()</span> <span class="k">if</span> <span class="n">taskFailure</span> <span class="k">else</span> <span class="s">&#39;&#39;</span><span class="p">,</span>\
+                  <span class="s">&quot;jobSetID&quot;</span>        <span class="p">:</span> <span class="n">jobsetid</span> <span class="k">if</span> <span class="n">jobsetid</span> <span class="k">else</span> <span class="s">&#39;&#39;</span><span class="p">,</span>\
+                  <span class="s">&quot;jobsPerStatus&quot;</span>   <span class="p">:</span> <span class="n">jobsPerStatus</span><span class="p">,</span>\
+                  <span class="s">&quot;failedJobdefs&quot;</span>   <span class="p">:</span> <span class="n">failedJobdefs</span><span class="p">,</span>\
+                  <span class="s">&quot;totalJobdefs&quot;</span>    <span class="p">:</span> <span class="n">totalJobdefs</span><span class="p">,</span>\
+                  <span class="s">&quot;jobdefErrors&quot;</span>    <span class="p">:</span> <span class="n">jobDefErrs</span><span class="p">,</span>\
+                  <span class="s">&quot;jobList&quot;</span>         <span class="p">:</span> <span class="n">jobList</span><span class="p">,</span>\
+                  <span class="s">&quot;saveLogs&quot;</span>        <span class="p">:</span> <span class="n">saveLogs</span> <span class="p">}]</span>
+</div>
+<div class="viewcode-block" id="PandaDataWorkflow.logs"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.PandaDataWorkflow.PandaDataWorkflow.logs">[docs]</a>    <span class="k">def</span> <span class="nf">logs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow</span><span class="p">,</span> <span class="n">howmany</span><span class="p">,</span> <span class="n">exitcode</span><span class="p">,</span> <span class="n">jobids</span><span class="p">,</span> <span class="n">userdn</span><span class="p">,</span> <span class="n">userproxy</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;About to get log of workflow: </span><span class="si">%s</span><span class="s">. Getting status first.&quot;</span> <span class="o">%</span> <span class="n">workflow</span><span class="p">)</span>
+        <span class="n">statusRes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">userdn</span><span class="p">,</span> <span class="n">userproxy</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">transferingIds</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">statusRes</span><span class="p">[</span><span class="s">&#39;jobList&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;transferring&#39;</span><span class="p">,</span> <span class="s">&#39;failed&#39;</span><span class="p">]]</span>
+        <span class="n">finishedIds</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">statusRes</span><span class="p">[</span><span class="s">&#39;jobList&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;finished&#39;</span><span class="p">]]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getFiles</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">howmany</span><span class="p">,</span> <span class="n">jobids</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;LOG&#39;</span><span class="p">],</span> <span class="n">transferingIds</span><span class="p">,</span> <span class="n">finishedIds</span><span class="p">,</span> <span class="n">userdn</span><span class="p">,</span> <span class="n">saveLogs</span><span class="o">=</span><span class="n">statusRes</span><span class="p">[</span><span class="s">&#39;saveLogs&#39;</span><span class="p">],</span> <span class="n">userproxy</span><span class="o">=</span><span class="n">userproxy</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PandaDataWorkflow.output"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.PandaDataWorkflow.PandaDataWorkflow.output">[docs]</a>    <span class="k">def</span> <span class="nf">output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow</span><span class="p">,</span> <span class="n">howmany</span><span class="p">,</span> <span class="n">jobids</span><span class="p">,</span> <span class="n">userdn</span><span class="p">,</span> <span class="n">userproxy</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;About to get output of workflow: </span><span class="si">%s</span><span class="s">. Getting status first.&quot;</span> <span class="o">%</span> <span class="n">workflow</span><span class="p">)</span>
+        <span class="n">statusRes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">userdn</span><span class="p">,</span> <span class="n">userproxy</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">transferingIds</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">statusRes</span><span class="p">[</span><span class="s">&#39;jobList&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;transferring&#39;</span><span class="p">,</span> <span class="s">&#39;failed&#39;</span><span class="p">]]</span>
+        <span class="n">finishedIds</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">statusRes</span><span class="p">[</span><span class="s">&#39;jobList&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;finished&#39;</span><span class="p">]]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getFiles</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">howmany</span><span class="p">,</span> <span class="n">jobids</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;EDM&#39;</span><span class="p">,</span> <span class="s">&#39;TFILE&#39;</span><span class="p">],</span> <span class="n">transferingIds</span><span class="p">,</span> <span class="n">finishedIds</span><span class="p">,</span> <span class="n">userdn</span><span class="p">,</span> <span class="n">userproxy</span><span class="o">=</span><span class="n">userproxy</span><span class="p">)</span>
+</div>
+    <span class="nd">@conn_handler</span><span class="p">(</span><span class="n">services</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;phedex&#39;</span><span class="p">])</span>
+<div class="viewcode-block" id="PandaDataWorkflow.getFiles"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.PandaDataWorkflow.PandaDataWorkflow.getFiles">[docs]</a>    <span class="k">def</span> <span class="nf">getFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow</span><span class="p">,</span> <span class="n">howmany</span><span class="p">,</span> <span class="n">jobids</span><span class="p">,</span> <span class="n">filetype</span><span class="p">,</span> <span class="n">transferingIds</span><span class="p">,</span> <span class="n">finishedIds</span><span class="p">,</span> <span class="n">userdn</span><span class="p">,</span> <span class="n">saveLogs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">userproxy</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieves the output PFN aggregating output in final and temporary locations.</span>
+
+<span class="sd">        :arg str workflow: the unique workflow name</span>
+<span class="sd">        :arg int howmany: the limit on the number of PFN to return</span>
+<span class="sd">        :return: a generator of list of outputs&quot;&quot;&quot;</span>
+
+        <span class="c">#check that the jobids passed by the user are finished</span>
+        <span class="k">for</span> <span class="n">jobid</span> <span class="ow">in</span> <span class="n">jobids</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">jobid</span> <span class="ow">in</span> <span class="n">transferingIds</span> <span class="o">+</span> <span class="n">finishedIds</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">InvalidParameter</span><span class="p">(</span><span class="s">&quot;The job with id </span><span class="si">%s</span><span class="s"> is not finished&quot;</span> <span class="o">%</span> <span class="n">jobid</span><span class="p">)</span>
+
+        <span class="c">#If the user do not give us jobids set them to all possible ids</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">jobids</span><span class="p">:</span>
+            <span class="n">jobids</span> <span class="o">=</span> <span class="n">transferingIds</span> <span class="o">+</span> <span class="n">finishedIds</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">howmany</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="c">#if the user specify the jobids return all possible files with those ids</span>
+
+        <span class="c">#user did not give us ids and no ids available in the task</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">jobids</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;No finished jobs found in the task&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Retrieving output of jobs: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">jobids</span><span class="p">)</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">FileMetaData</span><span class="o">.</span><span class="n">GetFromTaskAndType_sql</span><span class="p">,</span> <span class="n">filetype</span><span class="o">=</span><span class="s">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filetype</span><span class="p">),</span> <span class="n">taskname</span><span class="o">=</span><span class="n">workflow</span><span class="p">)</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="n">GetFromTaskAndType</span><span class="o">.</span><span class="n">PANDAID</span><span class="p">]</span> <span class="ow">in</span> <span class="n">jobids</span><span class="p">,</span> <span class="n">rows</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">howmany</span><span class="o">!=-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">rows</span><span class="o">=</span><span class="n">rows</span><span class="p">[:</span><span class="n">howmany</span><span class="p">]</span>
+        <span class="c">#jobids=&#39;,&#39;.join(map(str,jobids)), limit=str(howmany) if howmany!=-1 else str(len(jobids)*100))</span>
+
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">filetype</span> <span class="o">==</span> <span class="p">[</span><span class="s">&#39;LOG&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">saveLogs</span> <span class="o">==</span> <span class="s">&#39;F&#39;</span><span class="p">:</span>
+                <span class="n">pfn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">phedex</span><span class="o">.</span><span class="n">getPFN</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">GetFromTaskAndType</span><span class="o">.</span><span class="n">TMPLOCATION</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="n">GetFromTaskAndType</span><span class="o">.</span><span class="n">LFN</span><span class="p">])[(</span><span class="n">row</span><span class="p">[</span><span class="n">GetFromTaskAndType</span><span class="o">.</span><span class="n">TMPLOCATION</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="n">GetFromTaskAndType</span><span class="o">.</span><span class="n">LFN</span><span class="p">])]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="n">GetFromTaskAndType</span><span class="o">.</span><span class="n">PANDAID</span><span class="p">]</span> <span class="ow">in</span> <span class="n">finishedIds</span><span class="p">:</span>
+                    <span class="n">lfn</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&#39;^/store/temp/&#39;</span><span class="p">,</span> <span class="s">&#39;/store/&#39;</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="n">GetFromTaskAndType</span><span class="o">.</span><span class="n">LFN</span><span class="p">])</span>
+                    <span class="n">pfn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">phedex</span><span class="o">.</span><span class="n">getPFN</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">GetFromTaskAndType</span><span class="o">.</span><span class="n">LOCATION</span><span class="p">],</span> <span class="n">lfn</span><span class="p">)[(</span><span class="n">row</span><span class="p">[</span><span class="n">GetFromTaskAndType</span><span class="o">.</span><span class="n">LOCATION</span><span class="p">],</span> <span class="n">lfn</span><span class="p">)]</span>
+                <span class="k">elif</span> <span class="n">row</span><span class="p">[</span><span class="n">GetFromTaskAndType</span><span class="o">.</span><span class="n">PANDAID</span><span class="p">]</span> <span class="ow">in</span> <span class="n">transferingIds</span><span class="p">:</span>
+                    <span class="n">pfn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">phedex</span><span class="o">.</span><span class="n">getPFN</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">GetFromTaskAndType</span><span class="o">.</span><span class="n">TMPLOCATION</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="n">GetFromTaskAndType</span><span class="o">.</span><span class="n">LFN</span><span class="p">])[(</span><span class="n">row</span><span class="p">[</span><span class="n">GetFromTaskAndType</span><span class="o">.</span><span class="n">TMPLOCATION</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="n">GetFromTaskAndType</span><span class="o">.</span><span class="n">LFN</span><span class="p">])]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+            <span class="k">yield</span> <span class="p">{</span> <span class="s">&#39;pfn&#39;</span> <span class="p">:</span> <span class="n">pfn</span><span class="p">,</span>
+                    <span class="s">&#39;size&#39;</span> <span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="n">GetFromTaskAndType</span><span class="o">.</span><span class="n">SIZE</span><span class="p">],</span>
+                    <span class="s">&#39;checksum&#39;</span> <span class="p">:</span> <span class="p">{</span><span class="s">&#39;cksum&#39;</span> <span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="n">GetFromTaskAndType</span><span class="o">.</span><span class="n">CKSUM</span><span class="p">],</span> <span class="s">&#39;md5&#39;</span> <span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="n">GetFromTaskAndType</span><span class="o">.</span><span class="n">ADLER32</span><span class="p">],</span> <span class="s">&#39;adler31&#39;</span> <span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="n">GetFromTaskAndType</span><span class="o">.</span><span class="n">ADLER32</span><span class="p">]}</span>
+            <span class="p">}</span>
+</div>
+<div class="viewcode-block" id="PandaDataWorkflow.report"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.PandaDataWorkflow.PandaDataWorkflow.report">[docs]</a>    <span class="k">def</span> <span class="nf">report</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow</span><span class="p">,</span> <span class="n">userdn</span><span class="p">,</span> <span class="n">userproxy</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;About to compute report of workflow: </span><span class="si">%s</span><span class="s">. Getting status first.&quot;</span> <span class="o">%</span> <span class="n">workflow</span><span class="p">)</span>
+        <span class="n">statusRes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">userdn</span><span class="p">,</span> <span class="n">userproxy</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c">#load the lumimask</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="o">.</span><span class="n">ID_sql</span><span class="p">,</span> <span class="n">taskname</span> <span class="o">=</span> <span class="n">workflow</span><span class="p">)</span>
+        <span class="n">splitArgs</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">rows</span><span class="o">.</span><span class="n">next</span><span class="p">()[</span><span class="mi">6</span><span class="p">]</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+        <span class="n">res</span><span class="p">[</span><span class="s">&#39;lumiMask&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">buildLumiMask</span><span class="p">(</span><span class="n">splitArgs</span><span class="p">[</span><span class="s">&#39;runs&#39;</span><span class="p">],</span> <span class="n">splitArgs</span><span class="p">[</span><span class="s">&#39;lumis&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Lumi mask was: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">res</span><span class="p">[</span><span class="s">&#39;lumiMask&#39;</span><span class="p">])</span>
+
+        <span class="c">#extract the finished jobs from filemetadata</span>
+        <span class="n">jobids</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">statusRes</span><span class="p">[</span><span class="s">&#39;jobList&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;finished&#39;</span><span class="p">,</span> <span class="s">&#39;transferring&#39;</span><span class="p">]]</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">FileMetaData</span><span class="o">.</span><span class="n">GetFromTaskAndType_sql</span><span class="p">,</span> <span class="n">filetype</span><span class="o">=</span><span class="s">&#39;EDM&#39;</span><span class="p">,</span> <span class="n">taskname</span><span class="o">=</span><span class="n">workflow</span><span class="p">)</span>
+
+        <span class="n">res</span><span class="p">[</span><span class="s">&#39;runsAndLumis&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="n">GetFromTaskAndType</span><span class="o">.</span><span class="n">PANDAID</span><span class="p">]</span> <span class="ow">in</span> <span class="n">jobids</span><span class="p">:</span>
+                <span class="n">res</span><span class="p">[</span><span class="s">&#39;runsAndLumis&#39;</span><span class="p">][</span><span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">GetFromTaskAndType</span><span class="o">.</span><span class="n">PANDAID</span><span class="p">])]</span> <span class="o">=</span> <span class="p">{</span> <span class="s">&#39;parents&#39;</span> <span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="n">GetFromTaskAndType</span><span class="o">.</span><span class="n">PARENTS</span><span class="p">]</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span>
+                        <span class="s">&#39;runlumi&#39;</span> <span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="n">GetFromTaskAndType</span><span class="o">.</span><span class="n">RUNLUMI</span><span class="p">]</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span>
+                        <span class="s">&#39;events&#39;</span>  <span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="n">GetFromTaskAndType</span><span class="o">.</span><span class="n">INEVENTS</span><span class="p">],</span>
+                <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Got </span><span class="si">%s</span><span class="s"> edm files for workflow </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">),</span> <span class="n">workflow</span><span class="p">))</span>
+
+        <span class="k">yield</span> <span class="n">res</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright CERN, INFN and Fermilab.
+      Last updated on Jul 02, 2015.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,248 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>CRABInterface.DataCampaign &mdash; CRAB Server 3.3.1507.rc4</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '3.3.1507.rc4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="CRAB Server 3.3.1507.rc4" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for CRABInterface.DataCampaign</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="c"># WMCore dependecies here</span>
+<span class="kn">from</span> <span class="nn">WMCore.REST.Error</span> <span class="kn">import</span> <span class="n">MissingObject</span>
+
+<span class="c"># CRABServer dependencies here</span>
+<span class="kn">from</span> <span class="nn">CRABInterface.DataUserWorkflow</span> <span class="kn">import</span> <span class="n">DataUserWorkflow</span>
+<span class="kn">from</span> <span class="nn">CRABInterface.Utils</span> <span class="kn">import</span> <span class="n">conn_handler</span>
+
+<div class="viewcode-block" id="DataCampaign"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataCampaign.DataCampaign">[docs]</a><span class="k">class</span> <span class="nc">DataCampaign</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Entity that allows to operate on campaign resources.</span>
+<span class="sd">       DataCampaign is a container on a set of workflows which have not strict relation</span>
+<span class="sd">       a part of being part of the same campaign container.</span>
+<span class="sd">       An operations on a campaign implies to act in all the workflows</span>
+<span class="sd">       it contains.</span>
+
+<span class="sd">       CAMPAIGN-UNIQUE-NAME</span>
+<span class="sd">         |</span>
+<span class="sd">         |_workflow-1.0__workflow-1.1__....</span>
+<span class="sd">         |</span>
+<span class="sd">         |_workflow-2.0__workflow-2.1__workflow-2.2__....</span>
+<span class="sd">         |</span>
+<span class="sd">         |_workflow-3.0__....</span>
+
+<span class="sd">       This class does not provide any aggregation of the workflows in the campaign,</span>
+<span class="sd">       and it returns a list of workflows. Aggregation of workflows which have a hierarchical</span>
+<span class="sd">       relationship (e.g. resubmission) is left to the DataUserWorkflow class.</span>
+<span class="sd">       This means that it shows information of the first column of the schema above,</span>
+<span class="sd">       where the first column aggregates the row information (thanks to DataUserWorkflow).</span>
+
+<span class="sd">       In the current implementation DataUserWorkflow just mirror DataWorkflow and therefore</span>
+<span class="sd">       workflow-1.1, workflow-2.1, workflow-2.2 ... are not there&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&#39;CRABLogger.DataCampaign&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">userworkflow</span> <span class="o">=</span> <span class="n">DataUserWorkflow</span><span class="p">()</span>
+
+<div class="viewcode-block" id="DataCampaign.create"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataCampaign.DataCampaign.create">[docs]</a>    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">campaign</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create a campaign object with an unique name.</span>
+<span class="sd">           This can be a simple call to ReqMgr python API.</span>
+
+<span class="sd">           :arg str campaign: the campaign name received from the client</span>
+<span class="sd">           :return: unique campaign name&quot;&quot;&quot;</span>
+
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+        <span class="k">return</span> <span class="p">{}</span>
+</div>
+<div class="viewcode-block" id="DataCampaign.injectWorkflow"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataCampaign.DataCampaign.injectWorkflow">[docs]</a>    <span class="k">def</span> <span class="nf">injectWorkflow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">campaign</span><span class="p">,</span> <span class="n">wfs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Insert a workflow into the ReqMgr. It uses the `DataUserWorkflow` object.</span>
+<span class="sd">           To create the campaign and to get the unique campaign name refer to</span>
+<span class="sd">           `create` method.</span>
+
+<span class="sd">           :arg str campaign: the unique campaign name</span>
+<span class="sd">           :arg str list wfs: the list of workflows to create</span>
+<span class="sd">           :return: the workflows unique names.&quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">workflow</span> <span class="ow">in</span> <span class="n">wfs</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">userworkflow</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="n">workflow</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="DataCampaign.resubmit"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataCampaign.DataCampaign.resubmit">[docs]</a>    <span class="k">def</span> <span class="nf">resubmit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">campaign</span><span class="p">,</span> <span class="n">workflows</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Resubmit all the unfinished workflows in the campaign.</span>
+
+<span class="sd">           :arg str campaign: the unique campaign name</span>
+<span class="sd">           :arg list str workflows: the list of workflows part of the campaign</span>
+<span class="sd">           :return: the workflows unique names.&quot;&quot;&quot;</span>
+
+        <span class="n">workflows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getCampaignWorkflows</span><span class="p">(</span><span class="n">campaign</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">workflows</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MissingObject</span><span class="p">(</span><span class="s">&quot;Cannot find workflows in campaign&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">workflow</span> <span class="ow">in</span> <span class="n">workflows</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">userworkflow</span><span class="o">.</span><span class="n">resubmit</span><span class="p">(</span><span class="n">workflow</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="DataCampaign.kill"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataCampaign.DataCampaign.kill">[docs]</a>    <span class="k">def</span> <span class="nf">kill</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">campaign</span><span class="p">,</span> <span class="n">force</span><span class="p">,</span> <span class="n">workflows</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Cancel all the unfinished workflows in the campaign.</span>
+
+<span class="sd">           :arg str campaign: the unique campaign name</span>
+<span class="sd">           :arg int force: in case the workflow has to be forced when deleted</span>
+<span class="sd">           :arg list str workflows: the list of workflows part of the campaign</span>
+<span class="sd">           :return: potentially nothing&quot;&quot;&quot;</span>
+
+        <span class="n">workflows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getCampaignWorkflows</span><span class="p">(</span><span class="n">campaign</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">workflows</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MissingObject</span><span class="p">(</span><span class="s">&quot;Cannot find workflows in campaign&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">workflow</span> <span class="ow">in</span> <span class="n">workflows</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">userworkflow</span><span class="o">.</span><span class="n">kill</span><span class="p">(</span><span class="n">workflow</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="DataCampaign.getCampaignWorkflows"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataCampaign.DataCampaign.getCampaignWorkflows">[docs]</a>    <span class="k">def</span> <span class="nf">getCampaignWorkflows</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">campaign</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Retrieve the list of workflow names part of the campaign.</span>
+<span class="sd">           This considers only top level workflows and not their resubmissions.</span>
+
+<span class="sd">           :arg str campaign: the unique campaign name</span>
+<span class="sd">           :return: list of workflows&quot;&quot;&quot;</span>
+
+        <span class="c">## TODO: this needs to be changed, avoiding to pick resubmitted workflows.</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="DataCampaign.campaignSummary"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataCampaign.DataCampaign.campaignSummary">[docs]</a>    <span class="k">def</span> <span class="nf">campaignSummary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">campaign</span><span class="p">,</span> <span class="n">workflows</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Provide the campaign status summary. This method iterates on all the workflows</span>
+<span class="sd">           part of the campaign starting from the oldest one, and counts the number of</span>
+<span class="sd">           jobs in each state. Then it returns a list where the first element is the</span>
+<span class="sd">           campaign name, the second element is the campaign status, the third is a dict</span>
+<span class="sd">           where keys are the &#39;main&#39; states and values are number of jobs, the fourth is</span>
+<span class="sd">           the breakdown of the &#39;main&#39; states, and finally a dict containing the same</span>
+<span class="sd">           information grouped by site</span>
+
+<span class="sd">           :arg str campaign: the unique campaign name</span>
+<span class="sd">           :arg list str workflows: the list of workflows part of the campaign</span>
+<span class="sd">           :return: the campaign status summary&quot;&quot;&quot;</span>
+
+        <span class="n">workflows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getCampaignWorkflows</span><span class="p">(</span><span class="n">campaign</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">workflows</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MissingObject</span><span class="p">(</span><span class="s">&quot;Cannot find workflows in campaign&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">workflow</span> <span class="ow">in</span> <span class="n">workflows</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">userworkflow</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="n">workflow</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="DataCampaign.retrieveRecent"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataCampaign.DataCampaign.retrieveRecent">[docs]</a>    <span class="k">def</span> <span class="nf">retrieveRecent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">since</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Query the monitoring db to retrieve the latest user campaigns.</span>
+<span class="sd">           It can include the campaign status.</span>
+
+<span class="sd">           :arg str user: the user hn login name (or the DN?)</span>
+<span class="sd">           :arg int since: timestamp in second to not retrieve campaigns older then this</span>
+<span class="sd">           :return: the list of campaign-staus objects.&quot;&quot;&quot;</span>
+
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+        <span class="k">return</span> <span class="p">[]</span>
+</div>
+<div class="viewcode-block" id="DataCampaign.output"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataCampaign.DataCampaign.output">[docs]</a>    <span class="k">def</span> <span class="nf">output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">campaign</span><span class="p">,</span> <span class="n">limit</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the campaign output PFN. It takes care of the LFN - PFN conversion too.</span>
+
+<span class="sd">           :arg str campaign: a campaign name</span>
+<span class="sd">           :arg int limit: the limit on the number of PFN to return</span>
+<span class="sd">           :return: an object with the list of output pfns&quot;&quot;&quot;</span>
+        <span class="n">workflows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getCampaignWorkflows</span><span class="p">(</span><span class="n">campaign</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">workflows</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MissingObject</span><span class="p">(</span><span class="s">&quot;Cannot find workflows in campaign&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">workflow</span> <span class="ow">in</span> <span class="n">workflows</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">userworkflow</span><span class="o">.</span><span class="n">output</span><span class="p">(</span><span class="n">workflow</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="DataCampaign.logs"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataCampaign.DataCampaign.logs">[docs]</a>    <span class="k">def</span> <span class="nf">logs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">campaign</span><span class="p">,</span> <span class="n">limit</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the campaign log archive PFN. It takes care of the LFN - PFN conversion too.</span>
+
+<span class="sd">           :arg str campaign: a campaign name</span>
+<span class="sd">           :arg int limit: the limit on the number of PFN to return</span>
+<span class="sd">           :return: an object with the list of log pfns&quot;&quot;&quot;</span>
+        <span class="n">workflows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getCampaignWorkflows</span><span class="p">(</span><span class="n">campaign</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">workflows</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MissingObject</span><span class="p">(</span><span class="s">&quot;Cannot find workflows in campaign&quot;</span><span class="p">)</span>
+
+        <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">userworkflow</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">workflows</span><span class="p">,</span> <span class="n">limit</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright CERN, INFN and Fermilab.
+      Last updated on Jul 02, 2015.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

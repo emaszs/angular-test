@@ -1,0 +1,11 @@
+FileMetaData Package
+====================
+
+:mod:`FileMetaData` Module
+--------------------------
+
+.. automodule:: Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData
+    :members:
+    :undoc-members:
+    :show-inheritance:
+

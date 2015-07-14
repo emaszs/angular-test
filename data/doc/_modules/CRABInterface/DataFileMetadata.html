@@ -1,0 +1,186 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>CRABInterface.DataFileMetadata &mdash; CRAB Server 3.3.1507.rc4</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '3.3.1507.rc4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="CRAB Server 3.3.1507.rc4" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for CRABInterface.DataFileMetadata</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">commands</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">ast</span> <span class="kn">import</span> <span class="n">literal_eval</span>
+
+<span class="c"># WMCore dependecies here</span>
+<span class="kn">from</span> <span class="nn">WMCore.REST.Error</span> <span class="kn">import</span> <span class="n">InvalidParameter</span><span class="p">,</span> <span class="n">ExecutionError</span><span class="p">,</span> <span class="n">MissingObject</span>
+
+<span class="kn">from</span> <span class="nn">CRABInterface.Utils</span> <span class="kn">import</span> <span class="n">getDBinstance</span>
+
+<div class="viewcode-block" id="DataFileMetadata"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataFileMetadata.DataFileMetadata">[docs]</a><span class="k">class</span> <span class="nc">DataFileMetadata</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="DataFileMetadata.globalinit"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataFileMetadata.DataFileMetadata.globalinit">[docs]</a>    <span class="k">def</span> <span class="nf">globalinit</span><span class="p">(</span><span class="n">dbapi</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="n">DataFileMetadata</span><span class="o">.</span><span class="n">api</span> <span class="o">=</span> <span class="n">dbapi</span>
+        <span class="n">DataFileMetadata</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+</div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&quot;CRABLogger.DataFileMetadata&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">FileMetaData</span> <span class="o">=</span> <span class="n">getDBinstance</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="s">&#39;FileMetaDataDB&#39;</span><span class="p">,</span><span class="s">&#39;FileMetaData&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DataFileMetadata.getFiles"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataFileMetadata.DataFileMetadata.getFiles">[docs]</a>    <span class="k">def</span> <span class="nf">getFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taskname</span><span class="p">,</span> <span class="n">filetype</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Calling jobmetadata for task </span><span class="si">%s</span><span class="s"> and filetype </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">taskname</span><span class="p">,</span> <span class="n">filetype</span><span class="p">))</span>
+        <span class="n">binds</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;taskname&#39;</span><span class="p">:</span> <span class="n">taskname</span><span class="p">,</span> <span class="s">&#39;filetype&#39;</span><span class="p">:</span> <span class="n">filetype</span><span class="p">}</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">FileMetaData</span><span class="o">.</span><span class="n">GetFromTaskAndType_sql</span><span class="p">,</span> <span class="o">**</span><span class="n">binds</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="p">{</span><span class="s">&#39;taskname&#39;</span><span class="p">:</span> <span class="n">taskname</span><span class="p">,</span>
+                   <span class="s">&#39;filetype&#39;</span><span class="p">:</span> <span class="n">filetype</span><span class="p">,</span>
+                   <span class="s">&#39;pandajobid&#39;</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                   <span class="s">&#39;outdataset&#39;</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                   <span class="s">&#39;acquisitionera&#39;</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                   <span class="s">&#39;swversion&#39;</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+                   <span class="s">&#39;inevents&#39;</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span>
+                   <span class="s">&#39;globaltag&#39;</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span>
+                   <span class="s">&#39;publishname&#39;</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span>
+                   <span class="s">&#39;location&#39;</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span>
+                   <span class="s">&#39;tmplocation&#39;</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="mi">8</span><span class="p">],</span>
+                   <span class="s">&#39;runlumi&#39;</span><span class="p">:</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span><span class="o">.</span><span class="n">read</span><span class="p">()),</span>
+                   <span class="s">&#39;adler32&#39;</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="mi">10</span><span class="p">],</span>
+                   <span class="s">&#39;cksum&#39;</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="mi">11</span><span class="p">],</span>
+                   <span class="s">&#39;md5&#39;</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="mi">12</span><span class="p">],</span>
+                   <span class="s">&#39;lfn&#39;</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="mi">13</span><span class="p">],</span>
+                   <span class="s">&#39;filesize&#39;</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="mi">14</span><span class="p">],</span>
+                   <span class="s">&#39;parents&#39;</span><span class="p">:</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">15</span><span class="p">]</span><span class="o">.</span><span class="n">read</span><span class="p">()),</span>
+                   <span class="s">&#39;state&#39;</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="mi">16</span><span class="p">],</span>
+                   <span class="s">&#39;created&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">17</span><span class="p">]),</span>
+                   <span class="s">&#39;tmplfn&#39;</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="mi">18</span><span class="p">]}</span>
+</div>
+<div class="viewcode-block" id="DataFileMetadata.inject"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataFileMetadata.DataFileMetadata.inject">[docs]</a>    <span class="k">def</span> <span class="nf">inject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Calling jobmetadata inject with parameters </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="n">bindnames</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">-</span> <span class="nb">set</span><span class="p">([</span><span class="s">&#39;outfileruns&#39;</span><span class="p">,</span> <span class="s">&#39;outfilelumis&#39;</span><span class="p">])</span>
+        <span class="n">binds</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">bindnames</span><span class="p">:</span>
+            <span class="n">binds</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="n">name</span><span class="p">])]</span>
+        <span class="n">binds</span><span class="p">[</span><span class="s">&#39;runlumi&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;outfileruns&#39;</span><span class="p">]),</span> <span class="p">[</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">lumilist</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">))</span> <span class="k">for</span> <span class="n">lumilist</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;outfilelumis&#39;</span><span class="p">]])))]</span>
+
+        <span class="c">#Changed to Select if exist, update, else insert</span>
+        <span class="n">binds</span><span class="p">[</span><span class="s">&#39;outtmplfn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">binds</span><span class="p">[</span><span class="s">&#39;outlfn&#39;</span><span class="p">]</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">FileMetaData</span><span class="o">.</span><span class="n">GetCurrent_sql</span><span class="p">,</span> 
+                              <span class="n">outlfn</span><span class="o">=</span><span class="n">binds</span><span class="p">[</span><span class="s">&#39;outlfn&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">taskname</span><span class="o">=</span><span class="n">binds</span><span class="p">[</span><span class="s">&#39;taskname&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c">#just one row is picked up by the previous query</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+            <span class="c">#StipIteration will be raised if no rows was found</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;No rows selected. Inserting new row into filemetadata&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FileMetaData</span><span class="o">.</span><span class="n">New_sql</span><span class="p">,</span> <span class="o">**</span><span class="n">binds</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Changing filemetadata information about job </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">row</span><span class="p">)</span>
+        <span class="n">update_bind</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">update_bind</span><span class="p">[</span><span class="s">&#39;outtmplocation&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">binds</span><span class="p">[</span><span class="s">&#39;outtmplocation&#39;</span><span class="p">]</span>
+        <span class="n">update_bind</span><span class="p">[</span><span class="s">&#39;outsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">binds</span><span class="p">[</span><span class="s">&#39;outsize&#39;</span><span class="p">]</span>
+        <span class="n">update_bind</span><span class="p">[</span><span class="s">&#39;taskname&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">binds</span><span class="p">[</span><span class="s">&#39;taskname&#39;</span><span class="p">]</span>
+        <span class="n">update_bind</span><span class="p">[</span><span class="s">&#39;outlfn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">binds</span><span class="p">[</span><span class="s">&#39;outlfn&#39;</span><span class="p">]</span>
+        <span class="n">update_bind</span><span class="p">[</span><span class="s">&#39;outtmplfn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">binds</span><span class="p">[</span><span class="s">&#39;outlfn&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FileMetaData</span><span class="o">.</span><span class="n">Update_sql</span><span class="p">,</span> <span class="o">**</span><span class="n">update_bind</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[]</span>
+</div>
+<div class="viewcode-block" id="DataFileMetadata.changeState"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataFileMetadata.DataFileMetadata.changeState">[docs]</a>    <span class="k">def</span> <span class="nf">changeState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span><span class="c">#kwargs are (taskname, outlfn, filestate)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Changing state of file </span><span class="si">%(outlfn)s</span><span class="s"> in task </span><span class="si">%(taskname)s</span><span class="s"> to </span><span class="si">%(filestate)s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FileMetaData</span><span class="o">.</span><span class="n">ChangeFileState_sql</span><span class="p">,</span> <span class="o">**</span><span class="nb">dict</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="p">[</span><span class="n">v</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()))</span>
+</div>
+<div class="viewcode-block" id="DataFileMetadata.delete"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataFileMetadata.DataFileMetadata.delete">[docs]</a>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taskname</span><span class="p">,</span> <span class="n">hours</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">taskname</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Deleting all the files associated to task: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">taskname</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">modifynocheck</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FileMetaData</span><span class="o">.</span><span class="n">DeleteTaskFiles_sql</span><span class="p">,</span> <span class="n">taskname</span><span class="o">=</span><span class="p">[</span><span class="n">taskname</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">hours</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Deleting all the files older than </span><span class="si">%s</span><span class="s"> hours&quot;</span> <span class="o">%</span> <span class="n">hours</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">modifynocheck</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FileMetaData</span><span class="o">.</span><span class="n">DeleteFilesByTime_sql</span><span class="p">,</span> <span class="n">hours</span><span class="o">=</span><span class="p">[</span><span class="n">hours</span><span class="p">])</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright CERN, INFN and Fermilab.
+      Last updated on Jul 02, 2015.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

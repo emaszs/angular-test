@@ -1,0 +1,276 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Databases.TaskDB.Oracle.Task.Task &mdash; CRAB Server 3.3.1507.rc4</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '3.3.1507.rc4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="CRAB Server 3.3.1507.rc4" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../../index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for Databases.TaskDB.Oracle.Task.Task</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+
+<div class="viewcode-block" id="Task"><a class="viewcode-back" href="../../../../../Databases.TaskDB.Oracle.Task.html#Databases.TaskDB.Oracle.Task.Task.Task">[docs]</a><span class="k">class</span> <span class="nc">Task</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+     <span class="c">#ID</span>
+    <span class="n">ID_tuple</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s">&quot;ID&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s">&quot;taskname&quot;</span><span class="p">,</span> <span class="s">&quot;panda_jobset_id&quot;</span><span class="p">,</span> <span class="s">&quot;task_status&quot;</span><span class="p">,</span> <span class="s">&quot;user_role&quot;</span><span class="p">,</span> <span class="s">&quot;user_group&quot;</span><span class="p">,</span> \
+             <span class="s">&quot;task_failure&quot;</span><span class="p">,</span> <span class="s">&quot;split_args&quot;</span><span class="p">,</span> <span class="s">&quot;panda_resubmitted_jobs&quot;</span><span class="p">,</span> <span class="s">&quot;save_logs&quot;</span><span class="p">,</span> <span class="s">&quot;username&quot;</span><span class="p">,</span> \
+             <span class="s">&quot;user_dn&quot;</span><span class="p">,</span> <span class="s">&quot;arguments&quot;</span><span class="p">,</span> <span class="s">&quot;input_dataset&quot;</span><span class="p">,</span> <span class="s">&quot;dbs_url&quot;</span><span class="p">,</span> <span class="s">&quot;task_warnings&quot;</span><span class="p">,</span> <span class="s">&quot;publication&quot;</span><span class="p">,</span> <span class="s">&quot;user_webdir&quot;</span><span class="p">,</span> \
+             <span class="s">&quot;asourl&quot;</span><span class="p">,</span> <span class="s">&quot;output_dataset&quot;</span><span class="p">,</span> <span class="s">&quot;collector&quot;</span><span class="p">,</span> <span class="s">&quot;schedd&quot;</span><span class="p">,</span> <span class="s">&quot;dry_run&quot;</span><span class="p">])</span>
+    <span class="n">ID_sql</span> <span class="o">=</span> <span class="s">&quot;SELECT tm_taskname, panda_jobset_id, tm_task_status, tm_user_role, tm_user_group, </span><span class="se">\</span>
+<span class="s">             tm_task_failure, tm_split_args, panda_resubmitted_jobs, tm_save_logs, tm_username, </span><span class="se">\</span>
+<span class="s">             tm_user_dn, tm_arguments, tm_input_dataset, tm_dbs_url, tm_task_warnings, tm_publication, tm_user_webdir, tm_asourl, </span><span class="se">\</span>
+<span class="s">             tm_output_dataset, tm_collector, tm_schedd, tm_dry_run </span><span class="se">\</span>
+<span class="s">             FROM tasks WHERE tm_taskname=:taskname&quot;</span>
+
+    <span class="n">IDAll_sql</span> <span class="o">=</span> <span class="s">&quot;SELECT tm_taskname, tm_task_status, tm_user_role, tm_user_group, </span><span class="se">\</span>
+<span class="s">             tm_save_logs, tm_username, tm_user_dn </span><span class="se">\</span>
+<span class="s">             FROM tasks WHERE tm_taskname = :taskname&quot;</span>
+
+    <span class="c">#INSERTED BY ERIC SUMMER STUDENT</span>
+    <span class="n">ALLUSER_sql</span> <span class="o">=</span> <span class="s">&quot;SELECT DISTINCT(tm_username) FROM tasks&quot;</span>
+    <span class="n">TASKSUMMARY_sql</span> <span class="o">=</span> <span class="s">&quot;select tm_username, tm_task_status, count(*) from tasks group by tm_username, tm_task_status order by tm_username&quot;</span>
+    <span class="c">#get taskname by user and status</span>
+    <span class="n">GetByUserAndStatus_sql</span> <span class="o">=</span> <span class="s">&quot;select tm_taskname from tasks where tm_username=:username and tm_task_status=:status&quot;</span>
+    <span class="c">#quick search</span>
+    <span class="n">QuickSearch_sql</span> <span class="o">=</span> <span class="s">&quot;SELECT * FROM tasks WHERE tm_taskname = :taskname&quot;</span>
+    <span class="c">#get all jobs with a specified status</span>
+    <span class="n">TaskByStatus_sql</span> <span class="o">=</span> <span class="s">&quot;SELECT tm_task_status,tm_taskname FROM tasks WHERE tm_task_status = :taskstatus AND tm_username=:username_&quot;</span>
+    <span class="c">#get all the tasks in a certain state in the last :minutes minutes</span>
+    <span class="n">CountLastTasksByStatus</span> <span class="o">=</span> <span class="s">&quot;SELECT tm_task_status, count(*) FROM tasks WHERE tm_start_time &gt; SYS_EXTRACT_UTC(SYSTIMESTAMP) - (:minutes/1440)  GROUP BY tm_task_status&quot;</span>
+    <span class="c">#get all the task failures sorted by username in the last :minutes minutes</span>
+    <span class="n">LastFailures</span> <span class="o">=</span> <span class="s">&quot;SELECT tm_username, tm_taskname, tm_task_failure from tasks WHERE tm_start_time &gt; SYS_EXTRACT_UTC(SYSTIMESTAMP) - (:minutes/1440) and tm_task_status=&#39;FAILED&#39; </span><span class="se">\</span>
+<span class="s">                    AND tm_task_failure IS NOT NULL ORDER BY tm_username&quot;</span>
+
+    <span class="c">#New</span>
+    <span class="n">New_sql</span> <span class="o">=</span> <span class="s">&quot;INSERT INTO tasks ( </span><span class="se">\</span>
+<span class="s">              tm_taskname,tm_activity, panda_jobset_id, tm_task_status, tm_start_time, tm_task_failure, tm_job_sw, </span><span class="se">\</span>
+<span class="s">              tm_job_arch, tm_input_dataset, tm_nonvalid_input_dataset, tm_use_parent, tm_site_whitelist, tm_site_blacklist, </span><span class="se">\</span>
+<span class="s">              tm_split_algo, tm_split_args, tm_totalunits, tm_user_sandbox, tm_cache_url, tm_username, tm_user_dn, </span><span class="se">\</span>
+<span class="s">              tm_user_vo, tm_user_role, tm_user_group, tm_publish_name, tm_publish_groupname, tm_asyncdest, tm_dbs_url, tm_publish_dbs_url, </span><span class="se">\</span>
+<span class="s">              tm_publication, tm_outfiles, tm_tfile_outfiles, tm_edm_outfiles, tm_job_type, tm_generator, tm_arguments, </span><span class="se">\</span>
+<span class="s">              panda_resubmitted_jobs, tm_save_logs, tm_user_infiles, tm_maxjobruntime, tm_numcores, tm_maxmemory, tm_priority, </span><span class="se">\</span>
+<span class="s">              tm_scriptexe, tm_scriptargs, tm_extrajdl, tm_asourl, tm_events_per_lumi, tm_collector, tm_schedd, tm_dry_run, </span><span class="se">\</span>
+<span class="s">              tm_user_files, tm_transfer_outputs, tm_output_lfn, tm_ignore_locality, tm_fail_limit, tm_one_event_mode) </span><span class="se">\</span>
+<span class="s">              VALUES (:task_name, :task_activity, :jobset_id, upper(:task_status), SYS_EXTRACT_UTC(SYSTIMESTAMP), :task_failure, :job_sw, </span><span class="se">\</span>
+<span class="s">              :job_arch, :input_dataset, :nonvalid_data, :use_parent, :site_whitelist, :site_blacklist, :split_algo, :split_args, </span><span class="se">\</span>
+<span class="s">              :total_units, :user_sandbox, :cache_url, :username, :user_dn, </span><span class="se">\</span>
+<span class="s">              :user_vo, :user_role, :user_group, :publish_name, :publish_groupname, :asyncdest, :dbs_url, :publish_dbs_url, </span><span class="se">\</span>
+<span class="s">              :publication, :outfiles, :tfile_outfiles, :edm_outfiles, :job_type, :generator, :arguments, </span><span class="se">\</span>
+<span class="s">              :resubmitted_jobs, :save_logs, :user_infiles, :maxjobruntime, :numcores, :maxmemory, :priority, </span><span class="se">\</span>
+<span class="s">              :scriptexe, :scriptargs, :extrajdl, :asourl, :events_per_lumi, :collector, :schedd_name, :dry_run, </span><span class="se">\</span>
+<span class="s">              :user_files, :transfer_outputs, :output_lfn, :ignore_locality, :fail_limit, :one_event_mode)&quot;</span>
+
+    <span class="c">#GetFailedTasks</span>
+    <span class="n">GetFailedTasks_sql</span> <span class="o">=</span> <span class="s">&quot;SELECT tm_taskname, tm_task_status FROM tasks WHERE tm_task_status = &#39;FAILED&#39;&quot;</span>
+
+    <span class="c">#GetInjectedTasks</span>
+    <span class="n">GetInjectedTasks_sql</span> <span class="o">=</span> <span class="s">&quot;SELECT tm_taskname, tm_task_status FROM tasks WHERE tm_task_status = &#39;INJECTED&#39;&quot;</span>
+
+    <span class="c">#GetKillTasks</span>
+    <span class="n">GetKillTasks_sql</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;SELECT tm_taskname, panda_jobset_id, tm_task_status, </span><span class="se">\</span>
+<span class="s">                       tm_start_time, tm_start_injection, tm_end_injection, </span><span class="se">\</span>
+<span class="s">                       tm_task_failure, tm_job_sw, tm_job_arch, tm_input_dataset, </span><span class="se">\</span>
+<span class="s">                       tm_site_whitelist, tm_site_blacklist, tm_split_algo, tm_split_args, </span><span class="se">\</span>
+<span class="s">                       tm_totalunits, tm_user_sandbox, tm_cache_url, tm_username, tm_user_dn, tm_user_vo, </span><span class="se">\</span>
+<span class="s">                       tm_user_role, tm_user_group, tm_publish_name, tm_asyncdest, tm_dbs_url, </span><span class="se">\</span>
+<span class="s">                       tm_publish_dbs_url, tm_publication, tm_outfiles, tm_tfile_outfiles, tm_edm_outfiles, </span><span class="se">\</span>
+<span class="s">                       tm_job_type, tm_arguments, panda_resubmitted_jobs, tm_save_logs, </span><span class="se">\</span>
+<span class="s">                       tm_user_infiles, tw_name, tm_maxjobruntime, tm_numcores, tm_maxmemory, tm_priority, tm_activity, </span><span class="se">\</span>
+<span class="s">                       tm_scriptexe, tm_scriptargs, tm_extrajdl, tm_generator, tm_asourl, tm_events_per_lumi, </span><span class="se">\</span>
+<span class="s">                       tm_use_parent, tm_collector, tm_schedd, tm_dry_run, </span><span class="se">\</span>
+<span class="s">                       tm_user_files, tm_transfer_outputs, tm_output_lfn, tm_ignore_locality, tm_fail_limit, tm_one_event_mode, </span><span class="se">\</span>
+<span class="s">                       tm_publish_groupname, tm_nonvalid_input_dataset </span><span class="se">\</span>
+<span class="s">                       FROM tasks WHERE tm_task_status = &#39;KILL&#39; &quot;&quot;&quot;</span>
+
+    <span class="c">#GetNewResubmit</span>
+    <span class="n">GetNewResubmit_sql</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;SELECT tm_taskname, panda_jobset_id, tm_task_status, </span><span class="se">\</span>
+<span class="s">                       tm_start_time, tm_start_injection, tm_end_injection, </span><span class="se">\</span>
+<span class="s">                       tm_task_failure, tm_job_sw, tm_job_arch, tm_input_dataset, </span><span class="se">\</span>
+<span class="s">                       tm_site_whitelist, tm_site_blacklist, tm_split_algo, tm_split_args, </span><span class="se">\</span>
+<span class="s">                       tm_totalunits, tm_user_sandbox, tm_cache_url, tm_username, tm_user_dn, tm_user_vo, </span><span class="se">\</span>
+<span class="s">                       tm_user_role, tm_user_group, tm_publish_name, tm_asyncdest, tm_dbs_url, </span><span class="se">\</span>
+<span class="s">                       tm_publish_dbs_url, tm_publication, tm_outfiles, tm_tfile_outfiles, tm_edm_outfiles, </span><span class="se">\</span>
+<span class="s">                       tm_job_type, tm_arguments, panda_resubmitted_jobs, tm_save_logs, </span><span class="se">\</span>
+<span class="s">                       tm_user_infiles, tw_name, tm_maxjobruntime, tm_numcores, tm_maxmemory, tm_priority, tm_activity, </span><span class="se">\</span>
+<span class="s">                       tm_scriptexe, tm_scriptargs, tm_extrajdl, tm_generator, tm_asourl, tm_events_per_lumi, </span><span class="se">\</span>
+<span class="s">                       tm_use_parent, tm_collector, tm_schedd, tm_dry_run, </span><span class="se">\</span>
+<span class="s">                       tm_user_files, tm_transfer_outputs, tm_output_lfn, tm_ignore_locality, tm_fail_limit, tm_one_event_mode, </span><span class="se">\</span>
+<span class="s">                       tm_publish_groupname, tm_nonvalid_input_dataset </span><span class="se">\</span>
+<span class="s">                       FROM tasks WHERE tm_task_status = &#39;NEW&#39; OR tm_task_status = &#39;RESUBMIT&#39; &quot;&quot;&quot;</span>
+
+    <span class="c">#GetReadyTasks</span>
+    <span class="n">GetReadyTasks_sql</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;SELECT tm_taskname, panda_jobset_id, tm_task_status, </span><span class="se">\</span>
+<span class="s">                       tm_start_time, tm_start_injection, tm_end_injection, </span><span class="se">\</span>
+<span class="s">                       tm_task_failure, tm_job_sw, tm_job_arch, tm_input_dataset, </span><span class="se">\</span>
+<span class="s">                       tm_site_whitelist, tm_site_blacklist, tm_split_algo, tm_split_args, </span><span class="se">\</span>
+<span class="s">                       tm_totalunits, tm_user_sandbox, tm_cache_url, tm_username, tm_user_dn, tm_user_vo, </span><span class="se">\</span>
+<span class="s">                       tm_user_role, tm_user_group, tm_publish_name, tm_asyncdest, tm_dbs_url, </span><span class="se">\</span>
+<span class="s">                       tm_publish_dbs_url, tm_publication, tm_outfiles, tm_tfile_outfiles, tm_edm_outfiles, </span><span class="se">\</span>
+<span class="s">                       tm_job_type, tm_arguments, panda_resubmitted_jobs, tm_save_logs, </span><span class="se">\</span>
+<span class="s">                       tm_user_infiles, tw_name, tm_maxjobruntime, tm_numcores, tm_maxmemory, tm_priority, tm_activity, </span><span class="se">\</span>
+<span class="s">                       tm_scriptexe, tm_scriptargs, tm_extrajdl, tm_generator, tm_asourl, tm_events_per_lumi, </span><span class="se">\</span>
+<span class="s">                       tm_use_parent, tm_collector, tm_schedd, tm_dry_run, </span><span class="se">\</span>
+<span class="s">                       tm_user_files, tm_transfer_outputs, tm_output_lfn, tm_ignore_locality, tm_fail_limit, tm_one_event_mode, </span><span class="se">\</span>
+<span class="s">                       tm_publish_groupname, tm_nonvalid_input_dataset </span><span class="se">\</span>
+<span class="s">                       FROM tasks WHERE tm_task_status = :get_status AND ROWNUM &lt;= :limit AND tw_name = :tw_name&quot;&quot;&quot;</span>
+
+    <span class="c">#GetUserFromID</span>
+    <span class="n">GetUserFromID_sql</span> <span class="o">=</span><span class="s">&quot;SELECT tm_username FROM tasks WHERE tm_taskname=:taskname&quot;</span>
+
+    <span class="c">#GetTasksFromUser</span>
+    <span class="n">GetTasksFromUser_sql</span> <span class="o">=</span><span class="s">&quot;SELECT tm_taskname,tm_task_status, tw_name,tm_user_dn tm_spliti_args FROM tasks WHERE tm_username=:username AND tm_start_time&gt;TO_TIMESTAMP(:timestamp, &#39;YYYY-MM-DD&#39;)&quot;</span>
+
+    <span class="c">#GetResubmitParams</span>
+    <span class="n">GetResubmitParams_sql</span> <span class="o">=</span> <span class="s">&quot;SELECT tm_site_blacklist, tm_site_whitelist, tm_maxjobruntime, tm_maxmemory, tm_numcores, tm_priority </span><span class="se">\</span>
+<span class="s">                             FROM tasks </span><span class="se">\</span>
+<span class="s">                             WHERE tm_taskname = :taskname&quot;</span>
+
+    <span class="c">#SetArgumentsTask</span>
+    <span class="n">SetArgumentsTask_sql</span> <span class="o">=</span> <span class="s">&quot;UPDATE tasks SET tm_arguments = :arguments WHERE tm_taskname = :taskname&quot;</span>
+
+    <span class="c"># Obsolete</span>
+    <span class="c">##SetEndInjection</span>
+    <span class="c">#SetEndInjection_sql = &quot;UPDATE tasks SET tm_end_injection = :tm_end_injection  </span>
+    <span class="c">#                      WHERE tm_taskname = :tm_taskname&quot;</span>
+    <span class="c">#    time_sql = &quot;select SYS_EXTRACT_UTC(SYSTIMESTAMP) from dual&quot;</span>
+
+    <span class="c">#SetFailedTasks</span>
+    <span class="n">SetFailedTasks_sql</span> <span class="o">=</span> <span class="s">&quot;UPDATE tasks SET tm_end_injection = SYS_EXTRACT_UTC(SYSTIMESTAMP), </span><span class="se">\</span>
+<span class="s">                         tm_task_status = UPPER(:tm_task_status), tm_task_failure = :failure </span><span class="se">\</span>
+<span class="s">                         WHERE tm_taskname = :tm_taskname&quot;</span>
+   
+    <span class="c">#SetInjectedTasks</span>
+    <span class="n">SetInjectedTasks_sql</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;UPDATE tasks SET tm_end_injection = SYS_EXTRACT_UTC(SYSTIMESTAMP), </span><span class="se">\</span>
+<span class="s">                             tm_task_status = upper(:tm_task_status), panda_jobset_id = :panda_jobset_id, </span><span class="se">\</span>
+<span class="s">                             panda_resubmitted_jobs = :resubmitted_jobs </span><span class="se">\</span>
+<span class="s">                             WHERE tm_taskname = :tm_taskname&quot;&quot;&quot;</span> 
+   
+    <span class="c">#SetJobSetId</span>
+    <span class="n">SetJobSetId_sql</span> <span class="o">=</span> <span class="s">&quot;UPDATE tasks SET panda_jobset_id = :jobsetid WHERE tm_taskname = :taskname&quot;</span>
+   
+    <span class="c">#SetReadyTasks</span>
+    <span class="n">SetReadyTasks_sql</span> <span class="o">=</span> <span class="s">&quot;UPDATE tasks SET tm_start_injection = SYS_EXTRACT_UTC(SYSTIMESTAMP), </span><span class="se">\</span>
+<span class="s">                        tm_task_status = upper(:tm_task_status)  WHERE tm_taskname = :tm_taskname&quot;</span>
+   
+    <span class="c">#SetSplitargsTask</span>
+    <span class="n">SetSplitargsTask_sql</span> <span class="o">=</span> <span class="s">&quot;UPDATE tasks SET tm_split_args = :splitargs WHERE tm_taskname = :taskname&quot;</span>
+   
+    <span class="c">#SetStartInjection</span>
+    <span class="n">SetStartInjection_sql</span> <span class="o">=</span> <span class="s">&quot;UPDATE tasks SET tm_start_injection = SYS_EXTRACT_UTC(SYSTIMESTAMP) </span><span class="se">\</span>
+<span class="s">                            WHERE tm_taskname = :tm_taskname&quot;</span>
+   
+    <span class="c">#SetStatusTask</span>
+    <span class="n">SetStatusTask_sql</span> <span class="o">=</span> <span class="s">&quot;UPDATE tasks SET tm_task_status = upper(:status) WHERE tm_taskname = :taskname&quot;</span>
+   
+    <span class="c">#UpdateWorker</span>
+    <span class="n">UpdateWorker_sql</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;UPDATE tasks SET tw_name = :tw_name, tm_task_status = :set_status </span><span class="se">\</span>
+<span class="s">                         WHERE tm_taskname IN (SELECT tm_taskname FROM (SELECT tm_taskname, rownum as counter </span><span class="se">\</span>
+<span class="s">                         FROM tasks WHERE tm_task_status = :get_status ORDER BY tm_start_time) </span><span class="se">\</span>
+<span class="s">                         WHERE counter &lt;= :limit)&quot;&quot;&quot;</span>
+
+    <span class="c">#UpdateOutDataset</span>
+    <span class="n">SetUpdateOutDataset_sql</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;UPDATE tasks SET tm_output_dataset = :tm_output_dataset </span><span class="se">\</span>
+<span class="s">                                WHERE tm_taskname = :tm_taskname&quot;&quot;&quot;</span>
+
+    <span class="c">#UpdateWarnings</span>
+    <span class="n">SetWarnings_sql</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;UPDATE tasks SET tm_task_warnings=:warnings WHERE tm_taskname=:workflow&quot;&quot;&quot;</span>
+
+    <span class="c">#TaskUpdateWebDir</span>
+    <span class="n">UpdateWebUrl_sql</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;UPDATE tasks SET tm_user_webdir = :webdirurl </span><span class="se">\</span>
+<span class="s">                              WHERE tm_taskname = :workflow&quot;&quot;&quot;</span>
+
+    <span class="n">SetDryRun_sql</span> <span class="o">=</span> <span class="s">&quot;UPDATE tasks set tm_dry_run = :dry_run WHERE tm_taskname = :taskname&quot;</span>
+
+    <span class="c">#UpdateSchedd_sql</span>
+    <span class="n">UpdateSchedd_sql</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;UPDATE tasks SET tm_schedd = :scheddname </span><span class="se">\</span>
+<span class="s">                              WHERE tm_taskname = :workflow&quot;&quot;&quot;</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../../index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright CERN, INFN and Fermilab.
+      Last updated on Jul 02, 2015.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

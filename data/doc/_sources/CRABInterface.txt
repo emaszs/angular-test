@@ -1,0 +1,162 @@
+CRABInterface Package
+=====================
+
+:mod:`CRABInterface` Package
+----------------------------
+
+.. automodule:: CRABInterface
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`Attrib` Module
+--------------------
+
+.. automodule:: CRABInterface.Attrib
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`CRABServerBase` Module
+----------------------------
+
+.. automodule:: CRABInterface.CRABServerBase
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`DataCampaign` Module
+--------------------------
+
+.. automodule:: CRABInterface.DataCampaign
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`DataFileMetadata` Module
+------------------------------
+
+.. automodule:: CRABInterface.DataFileMetadata
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`DataUserWorkflow` Module
+------------------------------
+
+.. automodule:: CRABInterface.DataUserWorkflow
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`DataWorkflow` Module
+--------------------------
+
+.. automodule:: CRABInterface.DataWorkflow
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`HTCondorDataWorkflow` Module
+----------------------------------
+
+.. automodule:: CRABInterface.HTCondorDataWorkflow
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`PandaDataWorkflow` Module
+-------------------------------
+
+.. automodule:: CRABInterface.PandaDataWorkflow
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`RESTBaseAPI` Module
+-------------------------
+
+.. automodule:: CRABInterface.RESTBaseAPI
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`RESTCampaign` Module
+--------------------------
+
+.. automodule:: CRABInterface.RESTCampaign
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`RESTExtensions` Module
+----------------------------
+
+.. automodule:: CRABInterface.RESTExtensions
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`RESTFileMetadata` Module
+------------------------------
+
+.. automodule:: CRABInterface.RESTFileMetadata
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`RESTServerInfo` Module
+----------------------------
+
+.. automodule:: CRABInterface.RESTServerInfo
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`RESTTask` Module
+----------------------
+
+.. automodule:: CRABInterface.RESTTask
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`RESTUserWorkflow` Module
+------------------------------
+
+.. automodule:: CRABInterface.RESTUserWorkflow
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`RESTWorkerWorkflow` Module
+--------------------------------
+
+.. automodule:: CRABInterface.RESTWorkerWorkflow
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`Regexps` Module
+---------------------
+
+.. automodule:: CRABInterface.Regexps
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`Utils` Module
+-------------------
+
+.. automodule:: CRABInterface.Utils
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+
+    CRABInterface.Pages
+

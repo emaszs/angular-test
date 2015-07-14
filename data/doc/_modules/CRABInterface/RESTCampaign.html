@@ -1,0 +1,205 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>CRABInterface.RESTCampaign &mdash; CRAB Server 3.3.1507.rc4</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '3.3.1507.rc4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="CRAB Server 3.3.1507.rc4" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for CRABInterface.RESTCampaign</h1><div class="highlight"><pre>
+<span class="c"># WMCore dependecies here</span>
+<span class="kn">from</span> <span class="nn">WMCore.REST.Error</span> <span class="kn">import</span> <span class="n">InvalidParameter</span>
+<span class="kn">from</span> <span class="nn">WMCore.REST.Server</span> <span class="kn">import</span> <span class="n">RESTEntity</span><span class="p">,</span> <span class="n">restcall</span>
+<span class="kn">from</span> <span class="nn">WMCore.REST.Validation</span> <span class="kn">import</span> <span class="n">validate_str</span><span class="p">,</span> <span class="n">validate_strlist</span><span class="p">,</span> <span class="n">validate_num</span>
+
+<span class="c"># CRABServer dependecies here</span>
+<span class="kn">from</span> <span class="nn">CRABInterface.DataCampaign</span> <span class="kn">import</span> <span class="n">DataCampaign</span>
+<span class="kn">from</span> <span class="nn">CRABInterface.RESTExtensions</span> <span class="kn">import</span>  <span class="n">authz_login_valid</span>
+<span class="kn">from</span> <span class="nn">CRABInterface.Regexps</span> <span class="kn">import</span> <span class="n">RX_CAMPAIGN</span><span class="p">,</span> <span class="n">RX_WORKFLOW</span><span class="p">,</span> <span class="n">RX_SUBRESTAT</span>
+
+<span class="c"># external dependecies here</span>
+<span class="kn">import</span> <span class="nn">cherrypy</span>
+
+
+<div class="viewcode-block" id="RESTCampaign"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTCampaign.RESTCampaign">[docs]</a><span class="k">class</span> <span class="nc">RESTCampaign</span><span class="p">(</span><span class="n">RESTEntity</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;REST entity for campaigns allows to handle a set of workflows all together&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">api</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">mount</span><span class="p">):</span>
+        <span class="n">RESTEntity</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">api</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">mount</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">campaignmgr</span> <span class="o">=</span> <span class="n">DataCampaign</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+<div class="viewcode-block" id="RESTCampaign.validate"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTCampaign.RESTCampaign.validate">[docs]</a>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apiobj</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">api</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Validating all the input parameter as enforced by the WMCore.REST module&quot;&quot;&quot;</span>
+        <span class="n">authz_login_valid</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;PUT&#39;</span><span class="p">]:</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;campaign&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_CAMPAIGN</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">validate_strlist</span><span class="p">(</span><span class="s">&quot;workflow&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_WORKFLOW</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;POST&#39;</span><span class="p">]:</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;campaign&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_CAMPAIGN</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;GET&#39;</span><span class="p">]:</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;campaign&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_CAMPAIGN</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_num</span><span class="p">(</span><span class="s">&#39;age&#39;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&#39;subresource&#39;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_SUBRESTAT</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_num</span><span class="p">(</span><span class="s">&#39;limit&#39;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">safe</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;campaign&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">safe</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;age&#39;</span><span class="p">]:</span>
+                <span class="k">raise</span> <span class="n">InvalidParameter</span><span class="p">(</span><span class="s">&quot;Invalid input parameters&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">safe</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;campaign&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">safe</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;subresource&#39;</span><span class="p">]:</span>
+                <span class="k">raise</span> <span class="n">InvalidParameter</span><span class="p">(</span><span class="s">&quot;Invalid input parameters&quot;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;DELETE&#39;</span><span class="p">]:</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;campaign&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_CAMPAIGN</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">validate_num</span><span class="p">(</span><span class="s">&quot;force&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</div>
+    <span class="nd">@restcall</span>
+<div class="viewcode-block" id="RESTCampaign.put"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTCampaign.RESTCampaign.put">[docs]</a>    <span class="k">def</span> <span class="nf">put</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">campaign</span><span class="p">,</span> <span class="n">workflow</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Insert a new campaign  and eventually adds a set of workflows to the campaign.</span>
+<span class="sd">           The caller needs to be a CMS user with a valid CMS x509 cert/proxy.</span>
+
+<span class="sd">           :arg str campaign: campaign name requested by the user;</span>
+<span class="sd">           :arg str list workflow: workflow names requested by the user;</span>
+<span class="sd">           :return: the campaign name with the relative workflow names.&quot;&quot;&quot;</span>
+
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">uniquecampaign</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">campaignmgr</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">campaign</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">workflow</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">campaignmgr</span><span class="o">.</span><span class="n">injectWorkflow</span><span class="p">(</span><span class="n">campaign</span><span class="p">,</span> <span class="n">workflow</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[{</span><span class="s">&#39;campaign&#39;</span><span class="p">:</span> <span class="n">uniquecampaign</span><span class="p">,</span> <span class="s">&#39;workflows&#39;</span><span class="p">:</span> <span class="n">result</span><span class="p">}]</span>
+</div>
+    <span class="nd">@restcall</span>
+<div class="viewcode-block" id="RESTCampaign.post"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTCampaign.RESTCampaign.post">[docs]</a>    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">campaign</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Resubmit an existing campaign. The caller needs to be a CMS user owner of the campaign.</span>
+
+<span class="sd">           :arg str campaign: unique name identifier of the campaign;</span>
+<span class="sd">           :returns: the list of modified field&quot;&quot;&quot;</span>
+
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+    <span class="nd">@restcall</span>
+<div class="viewcode-block" id="RESTCampaign.get"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTCampaign.RESTCampaign.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">campaign</span><span class="p">,</span> <span class="n">age</span><span class="p">,</span> <span class="n">subresource</span><span class="p">,</span> <span class="n">limit</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Retrieves the campaigns information, like a status summary, in case the campaign unique name is specified.</span>
+<span class="sd">           Otherwise returns all campaigns since (now - age) for which the user is the owner.</span>
+<span class="sd">           The caller needs to be a CMS user owner of the campaign.</span>
+
+<span class="sd">           :arg str campaign: list of unique name identifiers of campaigns;</span>
+<span class="sd">           :arg int age: max campaigns age in days;</span>
+<span class="sd">           :arg str subresource: the campaign sub-resource to retrieve</span>
+<span class="sd">           :arg int limit: limit of sub-resource elements to retrieve</span>
+<span class="sd">           :retrun: the list of campaigns with the relative status summary or (the list of) sub-resource(s)&quot;&quot;&quot;</span>
+
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">campaign</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">subresource</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">campaignmgr</span><span class="o">.</span><span class="n">campaignSummary</span><span class="p">(</span><span class="n">campaign</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">subresource</span> <span class="o">==</span> <span class="s">&#39;logs&#39;</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">campaignmgr</span><span class="o">.</span><span class="n">logs</span><span class="p">(</span><span class="n">campaign</span><span class="p">,</span> <span class="n">limit</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">subresource</span> <span class="o">==</span> <span class="s">&#39;data&#39;</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">campaignmgr</span><span class="o">.</span><span class="n">output</span><span class="p">(</span><span class="n">campaign</span><span class="p">,</span> <span class="n">limit</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+        <span class="k">elif</span> <span class="n">age</span><span class="p">:</span>
+            <span class="c"># retrieve the information about latest campaigns for that user</span>
+            <span class="c"># age can have a default: 1 week ?</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">campaignmgr</span><span class="o">.</span><span class="n">retrieveRecent</span><span class="p">(</span><span class="n">cherrypy</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">[</span><span class="s">&#39;login&#39;</span><span class="p">],</span> <span class="n">age</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span>
+</div>
+    <span class="nd">@restcall</span>
+<div class="viewcode-block" id="RESTCampaign.delete"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTCampaign.RESTCampaign.delete">[docs]</a>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">campaign</span><span class="p">,</span> <span class="n">force</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Aborts a campaign. The user needs to be a CMS owner of the campaign.</span>
+
+<span class="sd">           :arg str list campaign: list of unique name identifiers of campaigns;</span>
+<span class="sd">           :arg int force: force to delete the campaigns in any case; 0 no, everything else yes;</span>
+<span class="sd">           :return: nothing?&quot;&quot;&quot;</span>
+
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright CERN, INFN and Fermilab.
+      Last updated on Jul 02, 2015.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,155 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData &mdash; CRAB Server 3.3.1507.rc4</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '3.3.1507.rc4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="CRAB Server 3.3.1507.rc4" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../../index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<div class="viewcode-block" id="GetFromTaskAndType"><a class="viewcode-back" href="../../../../../Databases.FileMetaDataDB.Oracle.FileMetaData.html#Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType">[docs]</a><span class="k">class</span> <span class="nc">GetFromTaskAndType</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; Used for indexing columns retrieved by the GetFromTaskAndType_sql query</span>
+<span class="sd">        Order of parameters must be the same as it is in query GetFromTaskAndType_sql</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">PANDAID</span><span class="p">,</span> <span class="n">OUTDS</span><span class="p">,</span> <span class="n">ACQERA</span><span class="p">,</span> <span class="n">SWVER</span><span class="p">,</span> <span class="n">INEVENTS</span><span class="p">,</span> <span class="n">GLOBALTAG</span><span class="p">,</span> <span class="n">PUBLISHNAME</span><span class="p">,</span> <span class="n">LOCATION</span><span class="p">,</span> <span class="n">TMPLOCATION</span><span class="p">,</span> <span class="n">RUNLUMI</span><span class="p">,</span> <span class="n">ADLER32</span><span class="p">,</span> <span class="n">CKSUM</span><span class="p">,</span> <span class="n">MD5</span><span class="p">,</span> <span class="n">LFN</span><span class="p">,</span> <span class="n">SIZE</span><span class="p">,</span> <span class="n">PARENTS</span><span class="p">,</span> <span class="n">STATE</span><span class="p">,</span>\
+    <span class="n">CREATIONTIME</span><span class="p">,</span> <span class="n">TMPLFN</span><span class="p">,</span> <span class="n">TYPE</span><span class="p">,</span> <span class="n">DIRECTSTAGEOUT</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">21</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="FileMetaData"><a class="viewcode-back" href="../../../../../Databases.FileMetaDataDB.Oracle.FileMetaData.html#Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.FileMetaData">[docs]</a><span class="k">class</span> <span class="nc">FileMetaData</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ChangeFileState_sql</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;UPDATE filemetadata SET fmd_filestate=:filestate </span><span class="se">\</span>
+<span class="s">                             WHERE fmd_lfn=:outlfn and tm_taskname=:taskname &quot;&quot;&quot;</span>
+
+    <span class="n">GetFromTaskAndType_sql</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;SELECT panda_job_id AS pandajobid, </span><span class="se">\</span>
+<span class="s">                           fmd_outdataset AS outdataset, </span><span class="se">\</span>
+<span class="s">                           fmd_acq_era AS acquisitionera, </span><span class="se">\</span>
+<span class="s">                           fmd_sw_ver AS swversion, </span><span class="se">\</span>
+<span class="s">                           fmd_in_events AS inevents, </span><span class="se">\</span>
+<span class="s">                           fmd_global_tag AS globaltag, </span><span class="se">\</span>
+<span class="s">                           fmd_publish_name AS publishname, </span><span class="se">\</span>
+<span class="s">                           fmd_location AS location, </span><span class="se">\</span>
+<span class="s">                           fmd_tmp_location AS tmplocation, </span><span class="se">\</span>
+<span class="s">                           fmd_runlumi AS runlumi, </span><span class="se">\</span>
+<span class="s">                           fmd_adler32 AS adler32, </span><span class="se">\</span>
+<span class="s">                           fmd_cksum AS cksum, </span><span class="se">\</span>
+<span class="s">                           fmd_md5 AS md5, </span><span class="se">\</span>
+<span class="s">                           fmd_lfn AS lfn, </span><span class="se">\</span>
+<span class="s">                           fmd_size AS filesize, </span><span class="se">\</span>
+<span class="s">                           fmd_parent AS parents, </span><span class="se">\</span>
+<span class="s">                           fmd_filestate AS state, </span><span class="se">\</span>
+<span class="s">                           fmd_creation_time AS created, </span><span class="se">\</span>
+<span class="s">                           fmd_tmplfn AS tmplfn, </span><span class="se">\</span>
+<span class="s">                           fmd_type AS type, </span><span class="se">\</span>
+<span class="s">                           fmd_direct_stageout AS directstageout</span>
+<span class="s">                    FROM filemetadata </span><span class="se">\</span>
+<span class="s">                    WHERE tm_taskname = :taskname </span><span class="se">\</span>
+<span class="s">                    AND fmd_type IN (SELECT REGEXP_SUBSTR(:filetype, &#39;[^,]+&#39;, 1, LEVEL) FROM DUAL CONNECT BY LEVEL &lt;= REGEXP_COUNT(:filetype, &#39;,&#39;) + 1) </span><span class="se">\</span>
+<span class="s">                    ORDER BY fmd_creation_time DESC</span>
+<span class="s">             &quot;&quot;&quot;</span>
+
+    <span class="n">New_sql</span> <span class="o">=</span> <span class="s">&quot;INSERT INTO filemetadata ( </span><span class="se">\</span>
+<span class="s">               tm_taskname, panda_job_id, fmd_outdataset, fmd_acq_era, fmd_sw_ver, fmd_in_events, fmd_global_tag,</span><span class="se">\</span>
+<span class="s">               fmd_publish_name, fmd_location, fmd_tmp_location, fmd_runlumi, fmd_adler32, fmd_cksum, fmd_md5, fmd_lfn, fmd_size,</span><span class="se">\</span>
+<span class="s">               fmd_type, fmd_parent, fmd_creation_time, fmd_filestate, fmd_direct_stageout, fmd_tmplfn) </span><span class="se">\</span>
+<span class="s">               VALUES (:taskname, :pandajobid, :outdatasetname, :acquisitionera, :appver, :events, :globalTag,</span><span class="se">\</span>
+<span class="s">                       :publishdataname, :outlocation, :outtmplocation, :runlumi, :checksumadler32, :checksumcksum, :checksummd5, :outlfn, :outsize,</span><span class="se">\</span>
+<span class="s">                       :outtype, :inparentlfns, SYS_EXTRACT_UTC(SYSTIMESTAMP), :filestate, :directstageout, :outtmplfn)&quot;</span>
+
+    <span class="n">Update_sql</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;UPDATE filemetadata SET fmd_tmp_location = :outtmplocation, fmd_size = :outsize, fmd_creation_time = SYS_EXTRACT_UTC(SYSTIMESTAMP), fmd_tmplfn = :outtmplfn </span><span class="se">\</span>
+<span class="s">                    WHERE tm_taskname = :taskname AND fmd_lfn = :outlfn&quot;&quot;&quot;</span>
+
+    <span class="n">GetCurrent_sql</span> <span class="o">=</span> <span class="s">&quot;SELECT panda_job_id from filemetadata WHERE tm_taskname = :taskname AND fmd_lfn = :outlfn&quot;</span>
+
+    <span class="n">DeleteTaskFiles_sql</span> <span class="o">=</span> <span class="s">&quot;DELETE FROM filemetadata WHERE tm_taskname = :taskname&quot;</span>
+    <span class="n">DeleteFilesByTime_sql</span> <span class="o">=</span> <span class="s">&quot;DELETE FROM filemetadata WHERE fmd_creation_time &lt; sysdate - (:hours/24)&quot;</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../../index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright CERN, INFN and Fermilab.
+      Last updated on Jul 02, 2015.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

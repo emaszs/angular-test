@@ -1,0 +1,254 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>CRABInterface.DataUserWorkflow &mdash; CRAB Server 3.3.1507.rc4</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '3.3.1507.rc4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="CRAB Server 3.3.1507.rc4" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for CRABInterface.DataUserWorkflow</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">commands</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="c"># WMCore dependecies here</span>
+<span class="kn">from</span> <span class="nn">WMCore.REST.Error</span> <span class="kn">import</span> <span class="n">InvalidParameter</span><span class="p">,</span> <span class="n">ExecutionError</span><span class="p">,</span> <span class="n">MissingObject</span>
+
+<span class="c">#CRAB dependencies</span>
+<span class="kn">from</span> <span class="nn">CRABInterface.DataWorkflow</span> <span class="kn">import</span> <span class="n">DataWorkflow</span>
+<span class="kn">from</span> <span class="nn">CRABInterface.Utils</span> <span class="kn">import</span> <span class="n">conn_handler</span><span class="p">,</span> <span class="n">retrieveUserCert</span>
+
+
+<div class="viewcode-block" id="DataUserWorkflow"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataUserWorkflow.DataUserWorkflow">[docs]</a><span class="k">class</span> <span class="nc">DataUserWorkflow</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="DataUserWorkflow.globalinit"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataUserWorkflow.DataUserWorkflow.globalinit">[docs]</a>    <span class="k">def</span> <span class="nf">globalinit</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+        <span class="n">DataUserWorkflow</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="n">DataUserWorkflow</span><span class="o">.</span><span class="n">workflowManager</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">workflowManager</span>
+</div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&quot;CRABLogger.DataUserWorkflow&quot;</span><span class="p">)</span>
+        <span class="n">mod</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="s">&#39;CRABInterface.</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflowManager</span><span class="p">,</span> <span class="n">fromlist</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">workflowManager</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">workflow</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">mod</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflowManager</span><span class="p">)(</span><span class="n">DataUserWorkflow</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DataUserWorkflow.getLatests"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataUserWorkflow.DataUserWorkflow.getLatests">[docs]</a>    <span class="k">def</span> <span class="nf">getLatests</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Retrives the latest workflows for the user</span>
+
+<span class="sd">           :arg str user: a valid user hn login name</span>
+<span class="sd">           :arg int limit: the maximum number of workflows to return</span>
+<span class="sd">                          (this should probably have a default!)</span>
+<span class="sd">           :arg int limit: limit on the workflow age</span>
+<span class="sd">           :return: a list of workflows&quot;&quot;&quot;</span>
+        <span class="c"># convert the workflow age in something eatable by a couch view</span>
+        <span class="c"># in practice it&#39;s convenient that the timestamp is on a fixed format: latest 1 or 3 days, latest 1 week, latest 1 month</span>
+        <span class="c"># and that it&#39;s a list (probably it can be converted into it): [year, month-num, day, hh, mm, ss]</span>
+        <span class="c"># this will allow to query as it&#39;s described here: http://guide.couchdb.org/draft/views.html#many</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflow</span><span class="o">.</span><span class="n">getLatests</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="DataUserWorkflow.errors"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataUserWorkflow.DataUserWorkflow.errors">[docs]</a>    <span class="k">def</span> <span class="nf">errors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow</span><span class="p">,</span> <span class="n">shortformat</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Retrieves the sets of errors for a specific workflow</span>
+
+<span class="sd">           :arg str workflow: a workflow name</span>
+<span class="sd">           :arg int shortformat: a flag indicating if the user is asking for detailed</span>
+<span class="sd">                                 information about sites and list of errors</span>
+<span class="sd">           :return: a list of errors grouped by exit code, error reason, site&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="DataUserWorkflow.report"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataUserWorkflow.DataUserWorkflow.report">[docs]</a>    <span class="k">def</span> <span class="nf">report</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow</span><span class="p">,</span> <span class="n">userdn</span><span class="p">,</span> <span class="n">usedbs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Retrieves the quality of the workflow in term of what has been processed</span>
+<span class="sd">           (eg: good lumis). This can call a different function depending on the jobtype.</span>
+
+<span class="sd">           :arg str workflow: a workflow name</span>
+<span class="sd">           :return: what?&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflow</span><span class="o">.</span><span class="n">report</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">userdn</span><span class="p">,</span> <span class="n">usedbs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="DataUserWorkflow.logs"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataUserWorkflow.DataUserWorkflow.logs">[docs]</a>    <span class="k">def</span> <span class="nf">logs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow</span><span class="p">,</span> <span class="n">howmany</span><span class="p">,</span> <span class="n">exitcode</span><span class="p">,</span> <span class="n">jobids</span><span class="p">,</span> <span class="n">userdn</span><span class="p">,</span> <span class="n">userproxy</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the workflow logs PFN. It takes care of the LFN - PFN conversion too.</span>
+
+<span class="sd">           :arg str workflow: a workflow name</span>
+<span class="sd">           :arg int howmany: the limit on the number of PFN to return</span>
+<span class="sd">           :arg int exitcode: the log has to be of a job ended with this exit_code</span>
+<span class="sd">           :return: a generator of list of logs pfns&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflow</span><span class="o">.</span><span class="n">logs</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">howmany</span><span class="p">,</span> <span class="n">exitcode</span><span class="p">,</span> <span class="n">jobids</span><span class="p">,</span> <span class="n">userdn</span><span class="p">,</span> <span class="n">userproxy</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="DataUserWorkflow.output"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataUserWorkflow.DataUserWorkflow.output">[docs]</a>    <span class="k">def</span> <span class="nf">output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow</span><span class="p">,</span> <span class="n">howmany</span><span class="p">,</span> <span class="n">jobids</span><span class="p">,</span> <span class="n">userdn</span><span class="p">,</span> <span class="n">userproxy</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the workflow output PFN. It takes care of the LFN - PFN conversion too.</span>
+
+<span class="sd">           :arg str list workflow: a workflow name</span>
+<span class="sd">           :arg int howmany: the limit on the number of PFN to return</span>
+<span class="sd">           :return: a generator of list of output pfns&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflow</span><span class="o">.</span><span class="n">output</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">howmany</span><span class="p">,</span> <span class="n">jobids</span><span class="p">,</span> <span class="n">userdn</span><span class="p">,</span> <span class="n">userproxy</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="DataUserWorkflow.submit"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataUserWorkflow.DataUserWorkflow.submit">[docs]</a>    <span class="k">def</span> <span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Perform the workflow injection</span>
+
+<span class="sd">           :arg str workflow: workflow name requested by the user;</span>
+<span class="sd">           :arg str activity: workflow activity type, usually analysis;</span>
+<span class="sd">           :arg str jobtype: job type of the workflow, usually Analysis;</span>
+<span class="sd">           :arg str jobsw: software requirement;</span>
+<span class="sd">           :arg str jobarch: software architecture (=SCRAM_ARCH);</span>
+<span class="sd">           :arg str inputdata: input dataset;</span>
+<span class="sd">           :arg str nonvaliddata: allow invalid input dataset;</span>
+<span class="sd">           :arg int use_parent: add the parent dataset as secondary input;</span>
+<span class="sd">           :arg str generator: event generator for MC production;</span>
+<span class="sd">           :arg int events_per_lumi: events to generate per lumi;</span>
+<span class="sd">           :arg str list siteblacklist: black list of sites, with CMS name;</span>
+<span class="sd">           :arg str list sitewhitelist: white list of sites, with CMS name;</span>
+<span class="sd">           :arg str splitalgo: algorithm to be used for the workflow splitting;</span>
+<span class="sd">           :arg str algoargs: argument to be used by the splitting algorithm;</span>
+<span class="sd">           :arg str cachefilename: name of the file inside the cache</span>
+<span class="sd">           :arg str cacheurl: URL of the cache</span>
+<span class="sd">           :arg str list addoutputfiles: list of additional output files;</span>
+<span class="sd">           :arg str userdn: DN of user doing the request;</span>
+<span class="sd">           :arg str userhn: hyper new name of the user doing the request;</span>
+<span class="sd">           :arg int savelogsflag: archive the log files? 0 no, everything else yes;</span>
+<span class="sd">           :arg int publication: flag enabling or disabling data publication;</span>
+<span class="sd">           :arg str publishname: name to use for data publication;</span>
+<span class="sd">           :arg str publishgroupname: add groupname or username to publishname;</span>
+<span class="sd">           :arg str asyncdest: CMS site name for storage destination of the output files;</span>
+<span class="sd">           :arg str dbsurl: dbs url where the input dataset is published;</span>
+<span class="sd">           :arg str publishdbsurl: dbs url where the output data has to be published;</span>
+<span class="sd">           :arg str vorole: user vo role</span>
+<span class="sd">           :arg str vogroup: user vo group</span>
+<span class="sd">           :arg str tfileoutfiles: list of t-output files</span>
+<span class="sd">           :arg str edmoutfiles: list of edm output files</span>
+<span class="sd">           :arg str list runs: list of run numbers</span>
+<span class="sd">           :arg str list lumis: list of lumi section numbers</span>
+<span class="sd">           :arg int totalunits: number of MC event to be generated</span>
+<span class="sd">           :arg str list adduserfiles: list of additional user input files</span>
+<span class="sd">           :arg int oneEventMode: enables oneEventMode</span>
+<span class="sd">           :arg int maxjobruntime: max job runtime, in minutes</span>
+<span class="sd">           :arg int numcores: number of CPU cores required by job</span>
+<span class="sd">           :arg int maxmemory: maximum amount of RAM required, in MB</span>
+<span class="sd">           :arg int priority: priority of this task</span>
+<span class="sd">           :arg str lfn: lfn used to store output files.</span>
+<span class="sd">           :arg int saveoutput: whether to perform ASO on job output.</span>
+<span class="sd">           :arg int faillimit: the maximum number of failed jobs allowed before workflow is aborted</span>
+<span class="sd">           :arg int ignorelocality: ignore data locality.</span>
+<span class="sd">           :arg str list userfiles: The files to process instead of a DBS-based dataset.</span>
+<span class="sd">           :arg str scheddname: Schedd name used for debugging.</span>
+<span class="sd">           :arg str collector: Collector name used for debugging.</span>
+<span class="sd">           :returns: a dict which contaians details of the request&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflow</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="DataUserWorkflow.resubmit"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataUserWorkflow.DataUserWorkflow.resubmit">[docs]</a>    <span class="k">def</span> <span class="nf">resubmit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow</span><span class="p">,</span> <span class="n">siteblacklist</span><span class="p">,</span> <span class="n">sitewhitelist</span><span class="p">,</span> <span class="n">jobids</span><span class="p">,</span> <span class="n">maxjobruntime</span><span class="p">,</span> <span class="n">numcores</span><span class="p">,</span> <span class="n">maxmemory</span><span class="p">,</span> <span class="n">priority</span><span class="p">,</span> <span class="n">force</span><span class="p">,</span> <span class="n">userdn</span><span class="p">,</span> <span class="n">userproxy</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Request to Resubmit a workflow.</span>
+
+<span class="sd">           :arg str workflow: a workflow name&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflow</span><span class="o">.</span><span class="n">resubmit</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">siteblacklist</span><span class="p">,</span> <span class="n">sitewhitelist</span><span class="p">,</span> <span class="n">jobids</span><span class="p">,</span> <span class="n">maxjobruntime</span><span class="p">,</span> <span class="n">numcores</span><span class="p">,</span> <span class="n">maxmemory</span><span class="p">,</span> <span class="n">priority</span><span class="p">,</span> <span class="n">force</span><span class="p">,</span> <span class="n">userdn</span><span class="p">,</span> <span class="n">userproxy</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="DataUserWorkflow.status"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataUserWorkflow.DataUserWorkflow.status">[docs]</a>    <span class="k">def</span> <span class="nf">status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow</span><span class="p">,</span> <span class="n">userdn</span><span class="p">,</span> <span class="n">userproxy</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Retrieve the status of the workflow</span>
+
+<span class="sd">           :arg str workflow: a valid workflow name</span>
+<span class="sd">           :arg str userdn: the user dn makind the request</span>
+<span class="sd">           :arg str userproxy: the user proxy retrieved by `retrieveUserCert`</span>
+<span class="sd">           :return: a generator of workflow states</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflow</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">userdn</span><span class="p">,</span> <span class="n">userproxy</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="DataUserWorkflow.kill"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataUserWorkflow.DataUserWorkflow.kill">[docs]</a>    <span class="k">def</span> <span class="nf">kill</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow</span><span class="p">,</span> <span class="n">force</span><span class="p">,</span> <span class="n">jobids</span><span class="p">,</span> <span class="n">userdn</span><span class="p">,</span> <span class="n">userproxy</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Request to Abort a workflow.</span>
+
+<span class="sd">           :arg str workflow: a workflow name</span>
+<span class="sd">           :arg str force: a flag to know if kill should be brutal</span>
+<span class="sd">           :arg str userproxy: the user proxy retrieved by `retrieveUserCert`</span>
+<span class="sd">           :arg int force: force to delete the workflows in any case; 0 no, everything else yes&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflow</span><span class="o">.</span><span class="n">kill</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">force</span><span class="p">,</span> <span class="n">jobids</span><span class="p">,</span> <span class="n">userdn</span><span class="p">,</span> <span class="n">userproxy</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="DataUserWorkflow.proceed"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.DataUserWorkflow.DataUserWorkflow.proceed">[docs]</a>    <span class="k">def</span> <span class="nf">proceed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Continue a task initialized with &#39;crab submit --dryrun&#39;.</span>
+
+<span class="sd">           :arg str workflow: a workflow name</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflow</span><span class="o">.</span><span class="n">proceed</span><span class="p">(</span><span class="n">workflow</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright CERN, INFN and Fermilab.
+      Last updated on Jul 02, 2015.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

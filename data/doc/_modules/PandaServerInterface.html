@@ -1,0 +1,664 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>PandaServerInterface &mdash; CRAB Server 3.3.1507.rc4</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '3.3.1507.rc4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="CRAB Server 3.3.1507.rc4" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for PandaServerInterface</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">stat</span>
+<span class="kn">import</span> <span class="nn">types</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">urllib</span>
+<span class="kn">import</span> <span class="nn">struct</span>
+<span class="kn">import</span> <span class="nn">commands</span>
+<span class="kn">import</span> <span class="nn">cPickle</span> <span class="kn">as</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">xml.dom.minidom</span>
+<span class="kn">import</span> <span class="nn">socket</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">hashlib</span> <span class="kn">import</span> <span class="n">sha1</span>
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<span class="c"># exit code</span>
+<span class="n">EC_Failed</span> <span class="o">=</span> <span class="mi">255</span>
+
+<span class="n">globalTmpDir</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+<span class="c">#PandaSites = {}</span>
+<span class="c">#PandaClouds = {}</span>
+
+
+<div class="viewcode-block" id="PanDAException"><a class="viewcode-back" href="../PandaServerInterface.html#PandaServerInterface.PanDAException">[docs]</a><span class="k">class</span> <span class="nc">PanDAException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Specific errors coming from interaction with PanDa</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">exitcode</span> <span class="o">=</span> <span class="mi">3100</span>
+
+</div>
+<span class="k">def</span> <span class="nf">_x509</span><span class="p">():</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&#39;X509_USER_PROXY&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="c"># no valid proxy certificate</span>
+    <span class="c"># FIXME raise exception or something?</span>
+
+    <span class="n">x509</span> <span class="o">=</span> <span class="s">&#39;/tmp/x509up_u</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">getuid</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">access</span><span class="p">(</span><span class="n">x509</span><span class="p">,</span><span class="n">os</span><span class="o">.</span><span class="n">R_OK</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">x509</span>
+    <span class="c"># no valid proxy certificate</span>
+    <span class="c"># FIXME</span>
+    <span class="k">raise</span> <span class="n">PanDAException</span><span class="p">(</span><span class="s">&quot;No valid grid proxy certificate found&quot;</span><span class="p">)</span>
+
+
+<span class="c"># look for a CA certificate directory</span>
+<span class="k">def</span> <span class="nf">_x509_CApath</span><span class="p">():</span>
+    <span class="c"># use X509_CERT_DIR</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&#39;X509_CERT_DIR&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="c"># get X509_CERT_DIR</span>
+    <span class="n">gridSrc</span> <span class="o">=</span> <span class="n">_getGridSrc</span><span class="p">()</span>
+    <span class="n">com</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> echo $X509_CERT_DIR&quot;</span> <span class="o">%</span> <span class="n">gridSrc</span>
+    <span class="n">tmpOut</span> <span class="o">=</span> <span class="n">commands</span><span class="o">.</span><span class="n">getoutput</span><span class="p">(</span><span class="n">com</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tmpOut</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+
+
+<span class="c"># curl class</span>
+<span class="k">class</span> <span class="nc">_Curl</span><span class="p">:</span>
+    <span class="c"># constructor</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># path to curl</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="s">&#39;curl --user-agent &quot;dqcurl&quot; &#39;</span>
+        <span class="c"># verification of the host certificate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verifyHost</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="c"># request a compressed response</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compress</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="c"># SSL cert/key</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sslCert</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sslKey</span>  <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="c"># verbose</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="c"># GET method</span>
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">url</span><span class="p">,</span><span class="n">data</span><span class="p">,</span><span class="n">rucioAccount</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="c"># make command</span>
+        <span class="n">com</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> --silent --get&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">verifyHost</span><span class="p">:</span>
+            <span class="n">com</span> <span class="o">+=</span> <span class="s">&#39; --insecure&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">com</span> <span class="o">+=</span> <span class="s">&#39; --capath </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span>  <span class="n">_x509_CApath</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">compress</span><span class="p">:</span>
+            <span class="n">com</span> <span class="o">+=</span> <span class="s">&#39; --compressed&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sslCert</span> <span class="o">!=</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">com</span> <span class="o">+=</span> <span class="s">&#39; --cert </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">sslCert</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sslKey</span> <span class="o">!=</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">com</span> <span class="o">+=</span> <span class="s">&#39; --key </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">sslKey</span>
+        <span class="c"># add rucio account info</span>
+        <span class="k">if</span> <span class="n">rucioAccount</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s">&#39;RUCIO_ACCOUNT&#39;</span><span class="p">):</span>
+                <span class="n">data</span><span class="p">[</span><span class="s">&#39;account&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&#39;RUCIO_ACCOUNT&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s">&#39;RUCIO_APPID&#39;</span><span class="p">):</span>
+                <span class="n">data</span><span class="p">[</span><span class="s">&#39;appid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&#39;RUCIO_APPID&#39;</span><span class="p">]</span>
+        <span class="c"># data</span>
+        <span class="n">strData</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">strData</span> <span class="o">+=</span> <span class="s">&#39;data=&quot;</span><span class="si">%s</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">urllib</span><span class="o">.</span><span class="n">urlencode</span><span class="p">({</span><span class="n">key</span><span class="p">:</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]})</span>
+        <span class="c"># write data to temporary config file</span>
+        <span class="k">if</span> <span class="n">globalTmpDir</span> <span class="o">!=</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">tmpFD</span><span class="p">,</span><span class="n">tmpName</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkstemp</span><span class="p">(</span><span class="nb">dir</span><span class="o">=</span><span class="n">globalTmpDir</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tmpFD</span><span class="p">,</span><span class="n">tmpName</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkstemp</span><span class="p">()</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">tmpFD</span><span class="p">,</span><span class="n">strData</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">tmpFD</span><span class="p">)</span>
+        <span class="n">com</span> <span class="o">+=</span> <span class="s">&#39; --config </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">tmpName</span>
+        <span class="n">com</span> <span class="o">+=</span> <span class="s">&#39; </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">url</span>
+        <span class="c"># execute</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">com</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">strData</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">s</span><span class="p">,</span><span class="n">o</span> <span class="o">=</span> <span class="n">commands</span><span class="o">.</span><span class="n">getstatusoutput</span><span class="p">(</span><span class="n">com</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">o</span> <span class="o">!=</span> <span class="s">&#39;</span><span class="se">\x00</span><span class="s">&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">tmpout</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">unquote_plus</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+                <span class="n">o</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">tmpout</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">o</span><span class="p">)</span>
+        <span class="c"># remove temporary file</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">tmpName</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convRet</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span>
+
+    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">url</span><span class="p">,</span><span class="n">data</span><span class="p">,</span><span class="n">rucioAccount</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="c"># make command</span>
+        <span class="n">com</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> --silent&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">verifyHost</span><span class="p">:</span>
+            <span class="n">com</span> <span class="o">+=</span> <span class="s">&#39; --insecure&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">com</span> <span class="o">+=</span> <span class="s">&#39; --capath </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span>  <span class="n">_x509_CApath</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">compress</span><span class="p">:</span>
+            <span class="n">com</span> <span class="o">+=</span> <span class="s">&#39; --compressed&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sslCert</span> <span class="o">!=</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">com</span> <span class="o">+=</span> <span class="s">&#39; --cert </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">sslCert</span>
+            <span class="c">#com += &#39; --cert %s&#39; % &#39;/tmp/mycredentialtest&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sslKey</span> <span class="o">!=</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">com</span> <span class="o">+=</span> <span class="s">&#39; --key </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">sslCert</span>
+            <span class="c">#com += &#39; --key %s&#39; % &#39;/tmp/mycredentialtest&#39;</span>
+        <span class="c"># add rucio account info</span>
+        <span class="k">if</span> <span class="n">rucioAccount</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s">&#39;RUCIO_ACCOUNT&#39;</span><span class="p">):</span>
+                <span class="n">data</span><span class="p">[</span><span class="s">&#39;account&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&#39;RUCIO_ACCOUNT&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s">&#39;RUCIO_APPID&#39;</span><span class="p">):</span>
+                <span class="n">data</span><span class="p">[</span><span class="s">&#39;appid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&#39;RUCIO_APPID&#39;</span><span class="p">]</span>
+        <span class="c"># data</span>
+        <span class="n">strData</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">strData</span> <span class="o">+=</span> <span class="s">&#39;data=&quot;</span><span class="si">%s</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">urllib</span><span class="o">.</span><span class="n">urlencode</span><span class="p">({</span><span class="n">key</span><span class="p">:</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]})</span>
+        <span class="c"># write data to temporary config file</span>
+        <span class="k">if</span> <span class="n">globalTmpDir</span> <span class="o">!=</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">tmpFD</span><span class="p">,</span><span class="n">tmpName</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkstemp</span><span class="p">(</span><span class="nb">dir</span><span class="o">=</span><span class="n">globalTmpDir</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tmpFD</span><span class="p">,</span><span class="n">tmpName</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkstemp</span><span class="p">()</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">tmpFD</span><span class="p">,</span><span class="n">strData</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">tmpFD</span><span class="p">)</span>
+        <span class="n">com</span> <span class="o">+=</span> <span class="s">&#39; --config </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">tmpName</span>
+        <span class="n">com</span> <span class="o">+=</span> <span class="s">&#39; </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">url</span>
+        <span class="c"># execute</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">com</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">strData</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">s</span><span class="p">,</span><span class="n">o</span> <span class="o">=</span> <span class="n">commands</span><span class="o">.</span><span class="n">getstatusoutput</span><span class="p">(</span><span class="n">com</span><span class="p">)</span>
+        <span class="c">#print s,o</span>
+        <span class="k">if</span> <span class="n">o</span> <span class="o">!=</span> <span class="s">&#39;</span><span class="se">\x00</span><span class="s">&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">tmpout</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">unquote_plus</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+                <span class="n">o</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">tmpout</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">o</span><span class="p">)</span>
+        <span class="c"># remove temporary file</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">tmpName</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convRet</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span>
+
+    <span class="c"># PUT method</span>
+    <span class="k">def</span> <span class="nf">put</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">url</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>
+        <span class="c"># make command</span>
+        <span class="n">com</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> --silent&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">verifyHost</span><span class="p">:</span>
+            <span class="n">com</span> <span class="o">+=</span> <span class="s">&#39; --insecure&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">compress</span><span class="p">:</span>
+            <span class="n">com</span> <span class="o">+=</span> <span class="s">&#39; --compressed&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sslCert</span> <span class="o">!=</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">com</span> <span class="o">+=</span> <span class="s">&#39; --cert </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">sslCert</span>
+            <span class="c">#com += &#39; --cert %s&#39; % &#39;/data/certs/prova&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sslKey</span> <span class="o">!=</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">com</span> <span class="o">+=</span> <span class="s">&#39; --key </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">sslKey</span>
+        <span class="c"># emulate PUT</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">com</span> <span class="o">+=</span> <span class="s">&#39; -F &quot;</span><span class="si">%s</span><span class="s">=@</span><span class="si">%s</span><span class="s">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+        <span class="n">com</span> <span class="o">+=</span> <span class="s">&#39; </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">url</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">com</span><span class="p">)</span>
+        <span class="c"># execute</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">commands</span><span class="o">.</span><span class="n">getstatusoutput</span><span class="p">(</span><span class="n">com</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convRet</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span>
+
+
+    <span class="c"># convert return</span>
+    <span class="k">def</span> <span class="nf">convRet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ret</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">ret</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">%</span><span class="mi">255</span><span class="p">,</span><span class="n">ret</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="c"># add messages to silent errors</span>
+        <span class="k">if</span> <span class="n">ret</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">35</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s">&#39;SSL connect error. The SSL handshaking failed. Check grid certificate/proxy.&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">ret</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">7</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s">&#39;Failed to connect to host.&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">ret</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">55</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s">&#39;Failed sending network data.&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">ret</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">56</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s">&#39;Failure in receiving network data.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span>
+
+
+<span class="c"># get site specs</span>
+<div class="viewcode-block" id="getSiteSpecs"><a class="viewcode-back" href="../PandaServerInterface.html#PandaServerInterface.getSiteSpecs">[docs]</a><span class="k">def</span> <span class="nf">getSiteSpecs</span><span class="p">(</span><span class="n">baseURL</span><span class="p">,</span> <span class="n">sslCert</span><span class="p">,</span> <span class="n">sslKey</span><span class="p">,</span> <span class="n">siteType</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="c"># instantiate curl</span>
+    <span class="n">curl</span> <span class="o">=</span> <span class="n">_Curl</span><span class="p">()</span>
+    <span class="n">curl</span><span class="o">.</span><span class="n">sslCert</span> <span class="o">=</span> <span class="n">sslCert</span>
+    <span class="n">curl</span><span class="o">.</span><span class="n">sslKey</span> <span class="o">=</span> <span class="n">sslKey</span>
+    <span class="c"># execute</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">baseURL</span> <span class="o">+</span> <span class="s">&#39;/getSiteSpecs&#39;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">siteType</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s">&#39;siteType&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">siteType</span>
+    <span class="n">status</span><span class="p">,</span><span class="n">output</span> <span class="o">=</span> <span class="n">curl</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">status</span><span class="p">,</span><span class="n">pickle</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">type</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">traceBack</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
+        <span class="n">errStr</span> <span class="o">=</span> <span class="s">&quot;ERROR getSiteSpecs : </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">type</span><span class="p">,</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">errStr</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">EC_Failed</span><span class="p">,</span><span class="n">output</span><span class="o">+</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">+</span><span class="n">errStr</span>
+
+
+<span class="c"># get cloud specs</span></div>
+<div class="viewcode-block" id="getCloudSpecs"><a class="viewcode-back" href="../PandaServerInterface.html#PandaServerInterface.getCloudSpecs">[docs]</a><span class="k">def</span> <span class="nf">getCloudSpecs</span><span class="p">(</span><span class="n">baseURL</span><span class="p">,</span> <span class="n">sslCert</span><span class="p">,</span> <span class="n">sslKey</span><span class="p">):</span>
+    <span class="c"># instantiate curl</span>
+    <span class="n">curl</span> <span class="o">=</span> <span class="n">_Curl</span><span class="p">()</span>
+    <span class="n">curl</span><span class="o">.</span><span class="n">sslCert</span> <span class="o">=</span> <span class="n">sslCert</span>
+    <span class="n">curl</span><span class="o">.</span><span class="n">sslKey</span> <span class="o">=</span> <span class="n">sslKey</span>
+    <span class="c"># execute</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">baseURL</span> <span class="o">+</span> <span class="s">&#39;/getCloudSpecs&#39;</span>
+    <span class="n">status</span><span class="p">,</span><span class="n">output</span> <span class="o">=</span> <span class="n">curl</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,{})</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">status</span><span class="p">,</span><span class="n">pickle</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">type</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">traceBack</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
+        <span class="n">errStr</span> <span class="o">=</span> <span class="s">&quot;ERROR getCloudSpecs : </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">type</span><span class="p">,</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">errStr</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">EC_Failed</span><span class="p">,</span><span class="n">output</span><span class="o">+</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">+</span><span class="n">errStr</span>
+
+<span class="c"># refresh specs</span></div>
+<div class="viewcode-block" id="refreshSpecs"><a class="viewcode-back" href="../PandaServerInterface.html#PandaServerInterface.refreshSpecs">[docs]</a><span class="k">def</span> <span class="nf">refreshSpecs</span><span class="p">(</span><span class="n">baseURL</span><span class="p">,</span> <span class="n">proxy</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">PandaSites</span>
+    <span class="k">global</span> <span class="n">PandaClouds</span>
+
+    <span class="n">sslCert</span> <span class="o">=</span> <span class="n">proxy</span>
+    <span class="n">sslKey</span>  <span class="o">=</span> <span class="n">proxy</span>
+    <span class="c"># get Panda Sites</span>
+    <span class="n">tmpStat</span><span class="p">,</span><span class="n">PandaSites</span> <span class="o">=</span> <span class="n">getSiteSpecs</span><span class="p">(</span><span class="n">baseURL</span><span class="p">,</span> <span class="n">sslCert</span><span class="p">,</span> <span class="n">sslKey</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">tmpStat</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;ERROR : cannot get Panda Sites&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">EC_Failed</span><span class="p">)</span>
+    <span class="c"># get cloud info</span>
+    <span class="n">tmpStat</span><span class="p">,</span><span class="n">PandaClouds</span> <span class="o">=</span> <span class="n">getCloudSpecs</span><span class="p">(</span><span class="n">baseURL</span><span class="p">,</span> <span class="n">sslCert</span><span class="p">,</span> <span class="n">sslKey</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">tmpStat</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;ERROR : cannot get Panda Clouds&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">EC_Failed</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="getSite"><a class="viewcode-back" href="../PandaServerInterface.html#PandaServerInterface.getSite">[docs]</a><span class="k">def</span> <span class="nf">getSite</span><span class="p">(</span><span class="n">sitename</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">PandaSites</span>
+    <span class="k">return</span> <span class="n">PandaSites</span><span class="p">[</span><span class="n">sitename</span><span class="p">][</span><span class="s">&#39;cloud&#39;</span><span class="p">]</span>
+
+<span class="c"># submit jobs</span></div>
+<div class="viewcode-block" id="submitJobs"><a class="viewcode-back" href="../PandaServerInterface.html#PandaServerInterface.submitJobs">[docs]</a><span class="k">def</span> <span class="nf">submitJobs</span><span class="p">(</span><span class="n">baseURLSSL</span><span class="p">,</span> <span class="n">jobs</span><span class="p">,</span> <span class="n">proxy</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="c"># set hostname</span>
+    <span class="n">hostname</span> <span class="o">=</span> <span class="n">commands</span><span class="o">.</span><span class="n">getoutput</span><span class="p">(</span><span class="s">&#39;hostname&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">job</span> <span class="ow">in</span> <span class="n">jobs</span><span class="p">:</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">creationHost</span> <span class="o">=</span> <span class="n">hostname</span>
+    <span class="c"># serialize</span>
+    <span class="n">strJobs</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">jobs</span><span class="p">)</span>
+    <span class="c"># instantiate curl</span>
+    <span class="n">curl</span> <span class="o">=</span> <span class="n">_Curl</span><span class="p">()</span>
+    <span class="n">curl</span><span class="o">.</span><span class="n">sslCert</span> <span class="o">=</span> <span class="n">proxy</span>
+    <span class="n">curl</span><span class="o">.</span><span class="n">sslKey</span>  <span class="o">=</span> <span class="n">proxy</span>
+    <span class="n">curl</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="c"># execute</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">baseURLSSL</span> <span class="o">+</span> <span class="s">&#39;/submitJobs&#39;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;jobs&#39;</span><span class="p">:</span><span class="n">strJobs</span><span class="p">}</span>
+    <span class="n">status</span><span class="p">,</span><span class="n">output</span> <span class="o">=</span> <span class="n">curl</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span><span class="n">data</span><span class="p">)</span>
+    <span class="c">#print &#39;SUBMITJOBS CALL --&gt; status: %s - output: %s&#39; % (status, output)</span>
+    <span class="k">if</span> <span class="n">status</span><span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&#39;==============================&#39;</span><span class="p">)</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&#39;submitJobs output: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">output</span><span class="p">)</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&#39;submitJobs status: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">status</span><span class="p">)</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&#39;==============================&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">status</span><span class="p">,</span><span class="bp">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">status</span><span class="p">,</span><span class="n">pickle</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">type</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">traceBack</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;ERROR submitJobs : </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">type</span><span class="p">,</span><span class="n">value</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">EC_Failed</span><span class="p">,</span><span class="bp">None</span>
+
+
+<span class="c"># run brokerage</span></div>
+<div class="viewcode-block" id="runBrokerage"><a class="viewcode-back" href="../PandaServerInterface.html#PandaServerInterface.runBrokerage">[docs]</a><span class="k">def</span> <span class="nf">runBrokerage</span><span class="p">(</span><span class="n">baseURLSSL</span><span class="p">,</span> <span class="n">sites</span><span class="p">,</span> <span class="n">proxy</span><span class="p">,</span>
+                 <span class="n">atlasRelease</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">cmtConfig</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">trustIS</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">cacheVer</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span>
+                 <span class="n">processingType</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">loggingFlag</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">memorySize</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">useDirectIO</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">siteGroup</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">maxCpuCount</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+    <span class="c"># use only directIO sites</span>
+    <span class="n">nonDirectSites</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">useDirectIO</span><span class="p">:</span>
+        <span class="n">tmpNewSites</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">tmpSite</span> <span class="ow">in</span> <span class="n">sites</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">isDirectAccess</span><span class="p">(</span><span class="n">tmpSite</span><span class="p">):</span>
+                <span class="n">tmpNewSites</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmpSite</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">nonDirectSites</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmpSite</span><span class="p">)</span>
+        <span class="n">sites</span> <span class="o">=</span> <span class="n">tmpNewSites</span>
+    <span class="k">if</span> <span class="n">sites</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">loggingFlag</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span><span class="p">,</span><span class="s">&#39;ERROR : no candidate.&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span><span class="p">,{</span><span class="s">&#39;site&#39;</span><span class="p">:</span><span class="s">&#39;ERROR : no candidate.&#39;</span><span class="p">,</span><span class="s">&#39;logInfo&#39;</span><span class="p">:[]}</span>
+    <span class="c">## MATTIA comments this code here below</span>
+    <span class="c"># choose at most 50 sites randomly to avoid too many lookup</span>
+    <span class="c">#random.shuffle(sites)</span>
+    <span class="c">#sites = sites[:50]</span>
+    <span class="c"># serialize</span>
+    <span class="n">strSites</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">sites</span><span class="p">)</span>
+    <span class="c"># instantiate curl</span>
+    <span class="n">curl</span> <span class="o">=</span> <span class="n">_Curl</span><span class="p">()</span>
+    <span class="n">curl</span><span class="o">.</span><span class="n">sslKey</span> <span class="o">=</span> <span class="n">proxy</span>
+    <span class="n">curl</span><span class="o">.</span><span class="n">sslCert</span> <span class="o">=</span> <span class="n">proxy</span>
+    <span class="n">curl</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+    <span class="c"># execute</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">baseURLSSL</span> <span class="o">+</span> <span class="s">&#39;/runBrokerage&#39;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;sites&#39;</span><span class="p">:</span><span class="n">strSites</span><span class="p">,</span>
+            <span class="s">&#39;atlasRelease&#39;</span><span class="p">:</span><span class="n">atlasRelease</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">cmtConfig</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s">&#39;cmtConfig&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cmtConfig</span>
+    <span class="k">if</span> <span class="n">trustIS</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s">&#39;trustIS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">if</span> <span class="n">maxCpuCount</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s">&#39;maxCpuCount&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">maxCpuCount</span>
+    <span class="k">if</span> <span class="n">cacheVer</span> <span class="o">!=</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+        <span class="c"># change format if needed</span>
+        <span class="n">cacheVer</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&#39;^-&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">cacheVer</span><span class="p">)</span>
+        <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s">&#39;^([^_]+)_(\d+\.\d+\.\d+\.\d+\.*\d*)$&#39;</span><span class="p">,</span><span class="n">cacheVer</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">match</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">cacheVer</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">-</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># nightlies</span>
+            <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s">&#39;_(rel_\d+)$&#39;</span><span class="p">,</span><span class="n">cacheVer</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">match</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="c"># use base release as cache version</span>
+                <span class="n">cacheVer</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">atlasRelease</span><span class="p">,</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+        <span class="c"># use cache for brokerage</span>
+        <span class="n">data</span><span class="p">[</span><span class="s">&#39;atlasRelease&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cacheVer</span>
+    <span class="k">if</span> <span class="n">processingType</span> <span class="o">!=</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+        <span class="c"># set processingType mainly for HC</span>
+        <span class="n">data</span><span class="p">[</span><span class="s">&#39;processingType&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">processingType</span>
+    <span class="c"># enable logging</span>
+    <span class="k">if</span> <span class="n">loggingFlag</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s">&#39;loggingFlag&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="c"># memory size</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">memorySize</span> <span class="ow">in</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span><span class="s">&#39;NULL&#39;</span><span class="p">]:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s">&#39;memorySize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">memorySize</span>
+    <span class="c"># site group</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">siteGroup</span> <span class="ow">in</span> <span class="p">[</span><span class="bp">None</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s">&#39;siteGroup&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">siteGroup</span>
+    <span class="n">status</span><span class="p">,</span><span class="n">output</span> <span class="o">=</span> <span class="n">curl</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">loggingFlag</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">status</span><span class="p">,</span><span class="n">output</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">outputPK</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+            <span class="c"># add directIO info</span>
+            <span class="k">if</span> <span class="n">nonDirectSites</span> <span class="o">!=</span> <span class="p">[]:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">outputPK</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s">&#39;logInfo&#39;</span><span class="p">):</span>
+                    <span class="n">outputPK</span><span class="p">[</span><span class="s">&#39;logInfo&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">tmpSite</span> <span class="ow">in</span> <span class="n">nonDirectSites</span><span class="p">:</span>
+                    <span class="n">msgBody</span> <span class="o">=</span> <span class="s">&#39;action=skip site=</span><span class="si">%s</span><span class="s"> reason=nondirect - not directIO site&#39;</span> <span class="o">%</span> <span class="n">tmpSite</span>
+                    <span class="n">outputPK</span><span class="p">[</span><span class="s">&#39;logInfo&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msgBody</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">status</span><span class="p">,</span><span class="n">outputPK</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">type</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">traceBack</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;ERROR runBrokerage : </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">type</span><span class="p">,</span><span class="n">value</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">EC_Failed</span><span class="p">,</span><span class="bp">None</span>
+
+
+<span class="c">####################################################################################</span>
+<span class="c"># Only the following function -getPandIDsWithJobID- is directly called by the REST #</span>
+<span class="c">####################################################################################</span>
+<span class="c"># get PandaIDs for a JobID</span></div>
+<div class="viewcode-block" id="getPandIDsWithJobID"><a class="viewcode-back" href="../PandaServerInterface.html#PandaServerInterface.getPandIDsWithJobID">[docs]</a><span class="k">def</span> <span class="nf">getPandIDsWithJobID</span><span class="p">(</span><span class="n">baseURLSSL</span><span class="p">,</span> <span class="n">jobID</span><span class="p">,</span> <span class="n">dn</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">nJobs</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">userproxy</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">credpath</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="c"># instantiate curl</span>
+    <span class="n">curl</span> <span class="o">=</span> <span class="n">_Curl</span><span class="p">()</span>
+    <span class="n">curl</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+    <span class="c"># execute</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">baseURLSSL</span> <span class="o">+</span> <span class="s">&#39;/getPandIDsWithJobID&#39;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;jobID&#39;</span><span class="p">:</span><span class="n">jobID</span><span class="p">,</span> <span class="s">&#39;nJobs&#39;</span><span class="p">:</span><span class="n">nJobs</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">dn</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s">&#39;dn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dn</span>
+
+    <span class="c"># Temporary solution we cache the proxy file</span>
+    <span class="n">filehandler</span><span class="p">,</span> <span class="n">proxyfile</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkstemp</span><span class="p">(</span><span class="nb">dir</span><span class="o">=</span><span class="n">credpath</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">proxyfile</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">pf</span><span class="p">:</span>
+        <span class="n">pf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">userproxy</span><span class="p">)</span>
+    <span class="n">curl</span><span class="o">.</span><span class="n">sslCert</span> <span class="o">=</span> <span class="n">proxyfile</span>
+    <span class="n">curl</span><span class="o">.</span><span class="n">sslKey</span>  <span class="o">=</span> <span class="n">proxyfile</span>
+
+    <span class="n">status</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c"># call him ...</span>
+        <span class="n">status</span><span class="p">,</span> <span class="n">output</span> <span class="o">=</span> <span class="n">curl</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">type</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">traceBack</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;ERROR getPandIDsWithJobID : </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="c"># Always delete it!</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">filehandler</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">proxyfile</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">status</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">status</span><span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">output</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">status</span><span class="p">,</span> <span class="bp">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">status</span><span class="p">,</span> <span class="n">pickle</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">type</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">traceBack</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;ERROR getPandIDsWithJobID : </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">EC_Failed</span><span class="p">,</span> <span class="bp">None</span>
+
+
+<span class="c"># kill jobs</span></div>
+<div class="viewcode-block" id="killJobs"><a class="viewcode-back" href="../PandaServerInterface.html#PandaServerInterface.killJobs">[docs]</a><span class="k">def</span> <span class="nf">killJobs</span><span class="p">(</span><span class="n">baseURLSSL</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">proxy</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">useMailAsID</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="c"># serialize</span>
+    <span class="n">strIDs</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
+    <span class="c"># instantiate curl</span>
+    <span class="n">curl</span> <span class="o">=</span> <span class="n">_Curl</span><span class="p">()</span>
+    <span class="n">curl</span><span class="o">.</span><span class="n">sslCert</span> <span class="o">=</span> <span class="n">proxy</span>
+    <span class="n">curl</span><span class="o">.</span><span class="n">sslKey</span>  <span class="o">=</span> <span class="n">proxy</span>
+    <span class="n">curl</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+    <span class="c"># execute</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">baseURLSSL</span> <span class="o">+</span> <span class="s">&#39;/killJobs&#39;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;ids&#39;</span><span class="p">:</span><span class="n">strIDs</span><span class="p">,</span><span class="s">&#39;code&#39;</span><span class="p">:</span><span class="n">code</span><span class="p">,</span><span class="s">&#39;useMailAsID&#39;</span><span class="p">:</span><span class="n">useMailAsID</span><span class="p">}</span>
+    <span class="n">status</span><span class="p">,</span><span class="n">output</span> <span class="o">=</span> <span class="n">curl</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">status</span><span class="p">,</span><span class="n">pickle</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">type</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">traceBack</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
+        <span class="n">errStr</span> <span class="o">=</span> <span class="s">&quot;ERROR killJobs : </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">type</span><span class="p">,</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">print</span> <span class="n">errStr</span>
+        <span class="k">return</span> <span class="n">EC_Failed</span><span class="p">,</span><span class="n">output</span><span class="o">+</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">+</span><span class="n">errStr</span>
+
+<span class="c"># get full job status</span></div>
+<div class="viewcode-block" id="getFullJobStatus"><a class="viewcode-back" href="../PandaServerInterface.html#PandaServerInterface.getFullJobStatus">[docs]</a><span class="k">def</span> <span class="nf">getFullJobStatus</span><span class="p">(</span><span class="n">baseURLSSL</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">proxy</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="c"># serialize</span>
+    <span class="n">strIDs</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
+    <span class="c"># instantiate curl</span>
+    <span class="n">curl</span> <span class="o">=</span> <span class="n">_Curl</span><span class="p">()</span>
+    <span class="n">curl</span><span class="o">.</span><span class="n">sslCert</span> <span class="o">=</span> <span class="n">proxy</span>
+    <span class="n">curl</span><span class="o">.</span><span class="n">sslKey</span>  <span class="o">=</span> <span class="n">proxy</span>
+    <span class="n">curl</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+    <span class="c"># execute</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">baseURLSSL</span> <span class="o">+</span> <span class="s">&#39;/getFullJobStatus&#39;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;ids&#39;</span><span class="p">:</span><span class="n">strIDs</span><span class="p">}</span>
+    <span class="n">status</span><span class="p">,</span><span class="n">output</span> <span class="o">=</span> <span class="n">curl</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">status</span><span class="p">,</span><span class="n">pickle</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+        <span class="nb">type</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">traceBack</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;ERROR getFullJobStatus : </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">type</span><span class="p">,</span><span class="n">value</span><span class="p">))</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">traceBack</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="putFile"><a class="viewcode-back" href="../PandaServerInterface.html#PandaServerInterface.putFile">[docs]</a><span class="k">def</span> <span class="nf">putFile</span><span class="p">(</span><span class="n">baseURL</span><span class="p">,</span> <span class="n">baseURLCSRVSSL</span><span class="p">,</span> <span class="nb">file</span><span class="p">,</span> <span class="n">checksum</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">reuseSandbox</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="c"># size check for noBuild</span>
+    <span class="n">sizeLimit</span> <span class="o">=</span> <span class="mi">100</span><span class="o">*</span><span class="mi">1024</span><span class="o">*</span><span class="mi">1024</span>
+
+    <span class="n">fileSize</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="nb">file</span><span class="p">)[</span><span class="n">stat</span><span class="o">.</span><span class="n">ST_SIZE</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">file</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;sources.&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">fileSize</span> <span class="o">&gt;</span> <span class="n">sizeLimit</span><span class="p">:</span>
+            <span class="n">errStr</span>  <span class="o">=</span> <span class="s">&#39;Exceeded size limit (</span><span class="si">%s</span><span class="s">B &gt;</span><span class="si">%s</span><span class="s">B). &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fileSize</span><span class="p">,</span><span class="n">sizeLimit</span><span class="p">)</span>
+            <span class="n">errStr</span> <span class="o">+=</span> <span class="s">&#39;Your working directory contains too large files which cannot be put on cache area. &#39;</span>
+            <span class="n">errStr</span> <span class="o">+=</span> <span class="s">&#39;Please submit job without --noBuild/--libDS so that your files will be uploaded to SE&#39;</span>
+            <span class="c"># get logger</span>
+            <span class="k">raise</span> <span class="n">PanDAException</span><span class="p">(</span><span class="n">errStr</span><span class="p">)</span>
+    <span class="c"># instantiate curl</span>
+    <span class="n">curl</span> <span class="o">=</span> <span class="n">_Curl</span><span class="p">()</span>
+    <span class="n">curl</span><span class="o">.</span><span class="n">sslCert</span> <span class="o">=</span> <span class="n">_x509</span><span class="p">()</span>
+    <span class="n">curl</span><span class="o">.</span><span class="n">sslKey</span>  <span class="o">=</span> <span class="n">_x509</span><span class="p">()</span>
+    <span class="n">curl</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+    <span class="c"># check duplicationn. Need to rewrite the reuseSandbox part</span>
+    <span class="k">if</span> <span class="n">reuseSandbox</span><span class="p">:</span>
+        <span class="c"># get CRC</span>
+        <span class="n">fo</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="nb">file</span><span class="p">)</span>
+        <span class="n">fileContent</span> <span class="o">=</span> <span class="n">fo</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">fo</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">footer</span> <span class="o">=</span> <span class="n">fileContent</span><span class="p">[</span><span class="o">-</span><span class="mi">8</span><span class="p">:]</span>
+        <span class="n">checkSum</span><span class="p">,</span><span class="n">isize</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s">&quot;II&quot;</span><span class="p">,</span><span class="n">footer</span><span class="p">)</span>
+        <span class="c"># check duplication</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">baseURLSSL</span> <span class="o">+</span> <span class="s">&#39;/checkSandboxFile&#39;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;fileSize&#39;</span><span class="p">:</span><span class="n">fileSize</span><span class="p">,</span><span class="s">&#39;checkSum&#39;</span><span class="p">:</span><span class="n">checksum</span><span class="p">}</span>
+        <span class="n">status</span><span class="p">,</span><span class="n">output</span> <span class="o">=</span> <span class="n">curl</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">status</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">PanDAException</span><span class="p">(</span><span class="s">&#39;ERROR: Could not check Sandbox duplication with </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">status</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">output</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;FOUND:&#39;</span><span class="p">):</span>
+            <span class="c"># found reusable sandbox</span>
+            <span class="n">hostName</span><span class="p">,</span><span class="n">reuseFileName</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="n">baseURLCSRV</span>    <span class="o">=</span> <span class="s">&quot;http://</span><span class="si">%s</span><span class="s">:25080/server/panda&quot;</span> <span class="o">%</span> <span class="n">hostName</span>
+            <span class="n">baseURLCSRVSSL</span> <span class="o">=</span> <span class="s">&quot;https://</span><span class="si">%s</span><span class="s">:25443/server/panda&quot;</span> <span class="o">%</span> <span class="n">hostName</span>
+            <span class="c"># return reusable filename</span>
+            <span class="k">return</span> <span class="mi">0</span><span class="p">,</span><span class="s">&quot;NewFileName:</span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">hostName</span><span class="p">,</span> <span class="n">reuseFileName</span><span class="p">)</span>
+    <span class="c">#if no specific cache server is passed through the arguments, then we figure it out by ourselves</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">baseURLCSRVSSL</span><span class="p">:</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">baseURL</span> <span class="o">+</span> <span class="s">&#39;/getServer&#39;</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Contacting </span><span class="si">%s</span><span class="s"> to figure out panda cache location&#39;</span> <span class="o">%</span> <span class="n">url</span><span class="p">)</span>
+        <span class="n">status</span><span class="p">,</span> <span class="n">pandaCacheInstance</span> <span class="o">=</span> <span class="n">curl</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">baseURLCSRVSSL</span> <span class="o">=</span> <span class="s">&#39;https://</span><span class="si">%s</span><span class="s">//server/panda&#39;</span> <span class="o">%</span> <span class="n">pandaCacheInstance</span>
+        <span class="k">if</span> <span class="n">status</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">PanDAException</span><span class="p">(</span><span class="s">&#39;ERROR: Could not get panda cache address </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">status</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Using fixed URL (</span><span class="si">%s</span><span class="s">) as panda cache&#39;</span> <span class="o">%</span> <span class="n">baseURLCSRVSSL</span><span class="p">)</span>
+    <span class="c"># execute</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">baseURLCSRVSSL</span> <span class="o">+</span> <span class="s">&#39;/putFile&#39;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;file&#39;</span><span class="p">:</span><span class="nb">file</span><span class="p">}</span>
+    <span class="n">status</span><span class="p">,</span> <span class="n">output</span> <span class="o">=</span> <span class="n">curl</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">status</span> <span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">PanDAException</span><span class="p">(</span><span class="s">&quot;Failure uploading input file into PanDa&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+       <span class="n">matchURL</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s">&quot;(http.*://[^/]+)/&quot;</span><span class="p">,</span> <span class="n">baseURLCSRVSSL</span><span class="p">)</span>
+       <span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&quot;True:</span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">matchURL</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="nb">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+</div>
+<div class="viewcode-block" id="wrappedUuidGen"><a class="viewcode-back" href="../PandaServerInterface.html#PandaServerInterface.wrappedUuidGen">[docs]</a><span class="k">def</span> <span class="nf">wrappedUuidGen</span><span class="p">():</span>
+    <span class="c"># check if uuidgen is available</span>
+    <span class="n">tmpSt</span><span class="p">,</span><span class="n">tmpOut</span> <span class="o">=</span> <span class="n">commands</span><span class="o">.</span><span class="n">getstatusoutput</span><span class="p">(</span><span class="s">&#39;which uuidgen&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">tmpSt</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c"># use uuidgen</span>
+        <span class="n">st</span><span class="p">,</span> <span class="n">output</span> <span class="o">=</span> <span class="n">commands</span><span class="o">.</span><span class="n">getstatusoutput</span><span class="p">(</span><span class="s">&#39;uuidgen 2&gt;/dev/null&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">st</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">output</span>
+    <span class="c"># use python uuidgen</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">uuid</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">,</span><span class="s">&#39;uuidgen and uuid.py are unavailable on your system. Please install one of them&#39;</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright CERN, INFN and Fermilab.
+      Last updated on Jul 02, 2015.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

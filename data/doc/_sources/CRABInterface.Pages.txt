@@ -1,0 +1,11 @@
+Pages Package
+=============
+
+:mod:`FrontPage` Module
+-----------------------
+
+.. automodule:: CRABInterface.Pages.FrontPage
+    :members:
+    :undoc-members:
+    :show-inheritance:
+

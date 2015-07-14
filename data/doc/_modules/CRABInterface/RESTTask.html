@@ -1,0 +1,322 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>CRABInterface.RESTTask &mdash; CRAB Server 3.3.1507.rc4</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '3.3.1507.rc4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="CRAB Server 3.3.1507.rc4" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for CRABInterface.RESTTask</h1><div class="highlight"><pre>
+<span class="c"># WMCore dependecies here</span>
+<span class="kn">from</span> <span class="nn">WMCore.REST.Server</span> <span class="kn">import</span> <span class="n">RESTEntity</span><span class="p">,</span> <span class="n">restcall</span>
+<span class="kn">from</span> <span class="nn">WMCore.REST.Validation</span> <span class="kn">import</span> <span class="n">validate_str</span><span class="p">,</span> <span class="n">validate_strlist</span><span class="p">,</span> <span class="n">validate_num</span><span class="p">,</span> <span class="n">validate_numlist</span>
+<span class="kn">from</span> <span class="nn">WMCore.REST.Error</span> <span class="kn">import</span> <span class="n">InvalidParameter</span><span class="p">,</span><span class="n">ExecutionError</span>
+
+<span class="kn">from</span> <span class="nn">CRABInterface.Utils</span> <span class="kn">import</span> <span class="n">getDBinstance</span>
+<span class="kn">from</span> <span class="nn">CRABInterface.RESTExtensions</span> <span class="kn">import</span> <span class="n">authz_login_valid</span><span class="p">,</span> <span class="n">authz_owner_match</span>
+<span class="kn">from</span> <span class="nn">CRABInterface.Regexps</span> <span class="kn">import</span> <span class="n">RX_SUBRES_TASK</span><span class="p">,</span> <span class="n">RX_WORKFLOW</span><span class="p">,</span> <span class="n">RX_BLOCK</span><span class="p">,</span> <span class="n">RX_WORKER_NAME</span><span class="p">,</span> <span class="n">RX_STATUS</span><span class="p">,</span> <span class="n">RX_USERNAME</span><span class="p">,</span> <span class="n">RX_TEXT_FAIL</span><span class="p">,</span> <span class="n">RX_DN</span><span class="p">,</span> <span class="n">RX_SUBPOSTWORKER</span><span class="p">,</span> <span class="n">RX_SUBGETWORKER</span><span class="p">,</span> <span class="n">RX_RUNS</span><span class="p">,</span> <span class="n">RX_LUMIRANGE</span><span class="p">,</span> <span class="n">RX_OUT_DATASET</span><span class="p">,</span> <span class="n">RX_URL</span><span class="p">,</span> <span class="n">RX_OUT_DATASET</span><span class="p">,</span> <span class="n">RX_SCHEDD_NAME</span>
+
+<span class="c"># external dependecies here</span>
+<span class="kn">import</span> <span class="nn">cherrypy</span>
+<span class="kn">from</span> <span class="nn">ast</span> <span class="kn">import</span> <span class="n">literal_eval</span>
+<span class="kn">from</span> <span class="nn">base64</span> <span class="kn">import</span> <span class="n">b64decode</span>
+
+
+<div class="viewcode-block" id="RESTTask"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTTask.RESTTask">[docs]</a><span class="k">class</span> <span class="nc">RESTTask</span><span class="p">(</span><span class="n">RESTEntity</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;REST entity to handle interactions between CAFTaskWorker and TaskManager database&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">api</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">mount</span><span class="p">):</span>
+        <span class="n">RESTEntity</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">api</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">mount</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Task</span> <span class="o">=</span> <span class="n">getDBinstance</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s">&#39;TaskDB&#39;</span><span class="p">,</span> <span class="s">&#39;Task&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">JobGroup</span> <span class="o">=</span> <span class="n">getDBinstance</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s">&#39;TaskDB&#39;</span><span class="p">,</span> <span class="s">&#39;JobGroup&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="RESTTask.validate"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTTask.RESTTask.validate">[docs]</a>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apiobj</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">api</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Validating all the input parameter as enforced by the WMCore.REST module&quot;&quot;&quot;</span>
+        <span class="n">authz_login_valid</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;POST&#39;</span><span class="p">]:</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&#39;subresource&#39;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_SUBRES_TASK</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;workflow&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_WORKFLOW</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;warning&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_TEXT_FAIL</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;webdirurl&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_URL</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;scheddname&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_SCHEDD_NAME</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_strlist</span><span class="p">(</span><span class="s">&quot;outputdatasets&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_OUT_DATASET</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;GET&#39;</span><span class="p">]:</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&#39;subresource&#39;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_SUBRES_TASK</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&quot;workflow&quot;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_WORKFLOW</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&#39;taskstatus&#39;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_STATUS</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_USERNAME</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">validate_str</span><span class="p">(</span><span class="s">&#39;minutes&#39;</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">safe</span><span class="p">,</span> <span class="n">RX_RUNS</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</div>
+    <span class="nd">@restcall</span>
+<div class="viewcode-block" id="RESTTask.get"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTTask.RESTTask.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subresource</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Retrieves the server information, like delegateDN, filecacheurls ...</span>
+<span class="sd">           :arg str subresource: the specific server information to be accessed;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">RESTTask</span><span class="p">,</span> <span class="n">subresource</span><span class="p">)(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="RESTTask.allusers"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTTask.RESTTask.allusers">[docs]</a>    <span class="k">def</span> <span class="nf">allusers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="o">.</span><span class="n">ALLUSER_sql</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">rows</span>
+
+</div>
+<div class="viewcode-block" id="RESTTask.allinfo"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTTask.RESTTask.allinfo">[docs]</a>    <span class="k">def</span> <span class="nf">allinfo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="o">.</span><span class="n">IDAll_sql</span><span class="p">,</span> <span class="n">taskname</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;workflow&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">rows</span>
+
+
+	<span class="c">#INSERTED BY ERIC SUMMER STUDENT</span></div>
+<div class="viewcode-block" id="RESTTask.summary"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTTask.RESTTask.summary">[docs]</a>    <span class="k">def</span> <span class="nf">summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Retrieves the data for list all users&quot;&quot;&quot;</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="o">.</span><span class="n">TASKSUMMARY_sql</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">rows</span>
+
+
+    <span class="c">#Quick search api</span></div>
+<div class="viewcode-block" id="RESTTask.search"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTTask.RESTTask.search">[docs]</a>    <span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Retrieves all the columns of a task in the task table (select * from task ...)</span>
+<span class="sd">           The API is (only?) used in the monitor for operator.</span>
+<span class="sd">           curl -X GET &#39;https://mmascher-dev6.cern.ch/crabserver/dev/task?subresource=search&amp;workflow=150224_230633:mmascher_crab_testecmmascher-dev6_3&#39; \</span>
+<span class="sd">                        -k --key /tmp/x509up_u8440 --cert /tmp/x509up_u8440 -v&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="s">&#39;workflow&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;workflow&#39;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="n">InvalidParameter</span><span class="p">(</span><span class="s">&quot;Task name not found in the input parameters&quot;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+           <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="o">.</span><span class="n">QuickSearch_sql</span><span class="p">,</span> <span class="n">taskname</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&quot;workflow&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="s">&quot;Impossible to find task </span><span class="si">%s</span><span class="s"> in the database.&quot;</span> <span class="o">%</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&quot;workflow&quot;</span><span class="p">])</span>
+
+        <span class="k">def</span> <span class="nf">getval</span><span class="p">(</span><span class="n">col</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot; Some columns in oracle can be CLOB and we need to call read on them.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="c">#TODO move the function in ServerUtils and use it when required (e.g.: mysql LONGTEXT does not need read())</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">col</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">getval</span><span class="p">(</span><span class="n">col</span><span class="p">)</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">row</span><span class="p">]</span>
+
+
+    <span class="c">#Get all jobs with a specified status</span></div>
+<div class="viewcode-block" id="RESTTask.taskbystatus"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTTask.RESTTask.taskbystatus">[docs]</a>    <span class="k">def</span> <span class="nf">taskbystatus</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Retrieves all jobs of the specified user with the specified status&quot;&quot;&quot;</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="o">.</span><span class="n">TaskByStatus_sql</span><span class="p">,</span> <span class="n">username_</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&quot;username&quot;</span><span class="p">],</span> <span class="n">taskstatus</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&quot;taskstatus&quot;</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">rows</span>
+
+</div>
+<div class="viewcode-block" id="RESTTask.webdir"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTTask.RESTTask.webdir">[docs]</a>    <span class="k">def</span> <span class="nf">webdir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s">&#39;workflow&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;workflow&#39;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="n">InvalidParameter</span><span class="p">(</span><span class="s">&quot;Task name not found in the input parameters&quot;</span><span class="p">)</span>
+        <span class="n">workflow</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;workflow&#39;</span><span class="p">]</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="o">.</span><span class="n">ID_tuple</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="o">.</span><span class="n">ID_sql</span><span class="p">,</span> <span class="n">taskname</span><span class="o">=</span><span class="n">workflow</span><span class="p">)</span><span class="o">.</span><span class="n">next</span><span class="p">())</span>
+        <span class="k">yield</span> <span class="n">row</span><span class="o">.</span><span class="n">user_webdir</span>
+
+</div>
+<div class="viewcode-block" id="RESTTask.counttasksbystatus"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTTask.RESTTask.counttasksbystatus">[docs]</a>    <span class="k">def</span> <span class="nf">counttasksbystatus</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Retrieves all jobs of the specified user with the specified status</span>
+<span class="sd">           curl -X GET &#39;https://mmascher-dev6.cern.ch/crabserver/dev/task?subresource=counttasksbystatus&amp;minutes=100&#39;\</span>
+<span class="sd">                        -k --key /tmp/x509up_u8440 --cert /tmp/x509up_u8440 -v</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="s">&#39;minutes&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidParameter</span><span class="p">(</span><span class="s">&quot;The parameter minutes is mandatory for the tasksbystatus api&quot;</span><span class="p">)</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="o">.</span><span class="n">CountLastTasksByStatus</span><span class="p">,</span> <span class="n">minutes</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&quot;minutes&quot;</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">rows</span>
+
+</div>
+<div class="viewcode-block" id="RESTTask.lastfailures"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTTask.RESTTask.lastfailures">[docs]</a>    <span class="k">def</span> <span class="nf">lastfailures</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Retrieves all jobs of the specified user with the specified status</span>
+<span class="sd">           curl -X GET &#39;https://mmascher-dev6.cern.ch/crabserver/dev/task?subresource=lastfailures&amp;minutes=100&#39;\</span>
+<span class="sd">                        -k --key /tmp/x509up_u8440 --cert /tmp/x509up_u8440 -v</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="s">&#39;minutes&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidParameter</span><span class="p">(</span><span class="s">&quot;The parameter minutes is mandatory for the tasksbystatus api&quot;</span><span class="p">)</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="o">.</span><span class="n">LastFailures</span><span class="p">,</span> <span class="n">minutes</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&quot;minutes&quot;</span><span class="p">])</span>
+
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">read</span><span class="p">()]</span>
+
+</div>
+    <span class="nd">@restcall</span>
+<div class="viewcode-block" id="RESTTask.post"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTTask.RESTTask.post">[docs]</a>    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subresource</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Updates task information &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">RESTTask</span><span class="p">,</span> <span class="n">subresource</span><span class="p">)(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="RESTTask.addwarning"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTTask.RESTTask.addwarning">[docs]</a>    <span class="k">def</span> <span class="nf">addwarning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Add a warning to the wraning column in the database. Can be tested with:</span>
+<span class="sd">            curl -X POST https://mmascher-poc.cern.ch/crabserver/dev/task -k --key /tmp/x509up_u8440 --cert /tmp/x509up_u8440 \</span>
+<span class="sd">                    -d &#39;subresource=addwarning&amp;workflow=140710_233424_crab3test-5:mmascher_crab_HCprivate12&amp;warning=blahblah&#39; -v</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c">#check if the parameters are there</span>
+        <span class="k">if</span> <span class="s">&#39;warning&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;warning&#39;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="n">InvalidParameter</span><span class="p">(</span><span class="s">&quot;Warning message not found in the input parameters&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&#39;workflow&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;workflow&#39;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="n">InvalidParameter</span><span class="p">(</span><span class="s">&quot;Task name not found in the input parameters&quot;</span><span class="p">)</span>
+
+        <span class="c">#decoding and setting the parameters</span>
+        <span class="n">workflow</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;workflow&#39;</span><span class="p">]</span>
+        <span class="n">authz_owner_match</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="p">,</span> <span class="p">[</span><span class="n">workflow</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="p">)</span> <span class="c">#check that I am modifying my own workflow</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">warning</span> <span class="o">=</span> <span class="n">b64decode</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;warning&#39;</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidParameter</span><span class="p">(</span><span class="s">&quot;Failure message is not in the accepted format&quot;</span><span class="p">)</span>
+
+<span class="c">#        rows = self.api.query(None, None, &quot;SELECT tm_task_warnings FROM tasks WHERE tm_taskname = :workflow&quot;, workflow=workflow)#self.Task.TASKSUMMARY_sql)</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="o">.</span><span class="n">ID_sql</span><span class="p">,</span> <span class="n">taskname</span><span class="o">=</span><span class="n">workflow</span><span class="p">)</span><span class="c">#self.Task.TASKSUMMARY_sql)</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span> <span class="c">#from generator to list</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidParameter</span><span class="p">(</span><span class="s">&quot;Task </span><span class="si">%s</span><span class="s"> not found in the task database&quot;</span> <span class="o">%</span> <span class="n">workflow</span><span class="p">)</span>
+
+        <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="o">.</span><span class="n">ID_tuple</span><span class="p">(</span><span class="o">*</span><span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">warnings</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">task_warnings</span><span class="o">.</span><span class="n">read</span><span class="p">()</span> <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">task_warnings</span> <span class="k">else</span> <span class="s">&#39;[]&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">warnings</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">10</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="s">&quot;You cannot add more than 10 warnings to a task&quot;</span><span class="p">)</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">warning</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="o">.</span><span class="n">SetWarnings_sql</span><span class="p">,</span> <span class="n">warnings</span><span class="o">=</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">warnings</span><span class="p">)],</span> <span class="n">workflow</span><span class="o">=</span><span class="p">[</span><span class="n">workflow</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="p">[]</span>
+
+</div>
+<div class="viewcode-block" id="RESTTask.updateschedd"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTTask.RESTTask.updateschedd">[docs]</a>    <span class="k">def</span> <span class="nf">updateschedd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Change scheduler for task submission.</span>
+<span class="sd">            curl -X POST https://balcas-crab.cern.ch/crabserver/dev/task -ks --key $X509_USER_PROXY --cert $X509_USER_PROXY --cacert $X509_USER_PROXY \</span>
+<span class="sd">                 -d &#39;subresource=updateschedd&amp;workflow=150316_221646:jbalcas_crab_test_submit-5-274334&amp;scheddname=vocms095.asdadasdasdacern.ch&#39; -v</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="s">&#39;scheddname&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;scheddname&#39;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="n">InvalidParameter</span><span class="p">(</span><span class="s">&quot;Schedd name not found in the input parameters&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&#39;workflow&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;workflow&#39;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="n">InvalidParameter</span><span class="p">(</span><span class="s">&quot;Task name not found in the input parameters&quot;</span><span class="p">)</span>
+
+        <span class="n">workflow</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;workflow&#39;</span><span class="p">]</span>
+        <span class="n">authz_owner_match</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="p">,</span> <span class="p">[</span><span class="n">workflow</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="p">)</span> <span class="c">#check that I am modifying my own workflow</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="o">.</span><span class="n">UpdateSchedd_sql</span><span class="p">,</span> <span class="n">scheddname</span><span class="o">=</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;scheddname&#39;</span><span class="p">])],</span> <span class="n">workflow</span><span class="o">=</span><span class="p">[</span><span class="n">workflow</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="p">[]</span>
+
+</div>
+<div class="viewcode-block" id="RESTTask.addwebdir"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTTask.RESTTask.addwebdir">[docs]</a>    <span class="k">def</span> <span class="nf">addwebdir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Add web directory to web_dir column in the database. Can be tested with:</span>
+<span class="sd">            curl -X POST https://balcas-crab.cern.ch/crabserver/dev/task -k --key $X509_USER_PROXY --cert $X509_USER_PROXY \</span>
+<span class="sd">                    -d &#39;subresource=addwebdir&amp;workflow=140710_233424_crab3test-5:mmascher_crab_HCprivate12&amp;webdirurl=http://cmsweb.cern.ch/crabserver/testtask&#39; -v</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c">#check if the parameters are there</span>
+        <span class="k">if</span> <span class="s">&#39;webdirurl&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;webdirurl&#39;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="n">InvalidParameter</span><span class="p">(</span><span class="s">&quot;Web directory url not found in the input parameters&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&#39;workflow&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;workflow&#39;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="n">InvalidParameter</span><span class="p">(</span><span class="s">&quot;Task name not found in the input parameters&quot;</span><span class="p">)</span>
+
+        <span class="n">workflow</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;workflow&#39;</span><span class="p">]</span>
+        <span class="n">authz_owner_match</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="p">,</span> <span class="p">[</span><span class="n">workflow</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="p">)</span> <span class="c">#check that I am modifying my own workflow</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="o">.</span><span class="n">UpdateWebUrl_sql</span><span class="p">,</span> <span class="n">webdirurl</span><span class="o">=</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;webdirurl&#39;</span><span class="p">])],</span> <span class="n">workflow</span><span class="o">=</span><span class="p">[</span><span class="n">workflow</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="p">[]</span>
+
+</div>
+<div class="viewcode-block" id="RESTTask.addoutputdatasets"><a class="viewcode-back" href="../../CRABInterface.html#CRABInterface.RESTTask.RESTTask.addoutputdatasets">[docs]</a>    <span class="k">def</span> <span class="nf">addoutputdatasets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s">&#39;outputdatasets&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;outputdatasets&#39;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="n">InvalidParameter</span><span class="p">(</span><span class="s">&quot;Output datasets not found in the input parameters&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&#39;workflow&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;workflow&#39;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="n">InvalidParameter</span><span class="p">(</span><span class="s">&quot;Task name not found in the input parameters&quot;</span><span class="p">)</span>
+
+        <span class="n">workflow</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;workflow&#39;</span><span class="p">]</span>
+        <span class="n">authz_owner_match</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="p">,</span> <span class="p">[</span><span class="n">workflow</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="p">)</span> <span class="c">#check that I am modifying my own workflow</span>
+
+        <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="o">.</span><span class="n">ID_tuple</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="o">.</span><span class="n">ID_sql</span><span class="p">,</span> <span class="n">taskname</span><span class="o">=</span><span class="n">workflow</span><span class="p">)</span><span class="o">.</span><span class="n">next</span><span class="p">())</span>
+        <span class="n">outputdatasets</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">output_dataset</span><span class="o">.</span><span class="n">read</span><span class="p">()</span> <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">output_dataset</span> <span class="k">else</span> <span class="s">&#39;[]&#39;</span><span class="p">)</span>
+        <span class="n">outputdatasets</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">outputdatasets</span> <span class="o">+</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;outputdatasets&#39;</span><span class="p">])))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Task</span><span class="o">.</span><span class="n">SetUpdateOutDataset_sql</span><span class="p">,</span> <span class="n">tm_output_dataset</span><span class="o">=</span><span class="p">[</span><span class="n">outputdatasets</span><span class="p">],</span> <span class="n">tm_taskname</span><span class="o">=</span><span class="p">[</span><span class="n">workflow</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="p">[]</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright CERN, INFN and Fermilab.
+      Last updated on Jul 02, 2015.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,10 @@
+CRABQuality Module
+==================
+
+:mod:`CRABQuality` Module
+-------------------------
+
+.. automodule:: CRABQuality
+    :members:
+    :undoc-members:
+    :show-inheritance:

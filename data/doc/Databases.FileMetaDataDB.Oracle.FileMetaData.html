@@ -1,0 +1,287 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>FileMetaData Package &mdash; CRAB Server 3.3.1507.rc4</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '3.3.1507.rc4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="CRAB Server 3.3.1507.rc4" href="index.html" />
+    <link rel="up" title="Oracle Package" href="Databases.FileMetaDataDB.Oracle.html" />
+    <link rel="next" title="TaskDB Package" href="Databases.TaskDB.html" />
+    <link rel="prev" title="Oracle Package" href="Databases.FileMetaDataDB.Oracle.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Databases.TaskDB.html" title="TaskDB Package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="Databases.FileMetaDataDB.Oracle.html" title="Oracle Package"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="modules.html" >Project Modules</a> &raquo;</li>
+          <li><a href="Databases.html" >Databases Package</a> &raquo;</li>
+          <li><a href="Databases.FileMetaDataDB.html" >FileMetaDataDB Package</a> &raquo;</li>
+          <li><a href="Databases.FileMetaDataDB.Oracle.html" accesskey="U">Oracle Package</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">FileMetaData Package</a><ul>
+<li><a class="reference internal" href="#module-Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData"><tt class="docutils literal"><span class="pre">FileMetaData</span></tt> Module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="Databases.FileMetaDataDB.Oracle.html"
+                        title="previous chapter">Oracle Package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="Databases.TaskDB.html"
+                        title="next chapter">TaskDB Package</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="filemetadata-package">
+<h1>FileMetaData Package<a class="headerlink" href="#filemetadata-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData">
+<span id="filemetadata-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">FileMetaData</span></tt> Module<a class="headerlink" href="#module-Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.FileMetaData">
+<em class="property">class </em><tt class="descclassname">Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.</tt><tt class="descname">FileMetaData</tt><a class="reference internal" href="_modules/Databases/FileMetaDataDB/Oracle/FileMetaData/FileMetaData.html#FileMetaData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.FileMetaData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></a></p>
+<dl class="attribute">
+<dt id="Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.FileMetaData.ChangeFileState_sql">
+<tt class="descname">ChangeFileState_sql</tt><em class="property"> = 'UPDATE filemetadata SET fmd_filestate=:filestate                              WHERE fmd_lfn=:outlfn and tm_taskname=:taskname '</em><a class="headerlink" href="#Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.FileMetaData.ChangeFileState_sql" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.FileMetaData.DeleteFilesByTime_sql">
+<tt class="descname">DeleteFilesByTime_sql</tt><em class="property"> = 'DELETE FROM filemetadata WHERE fmd_creation_time &lt; sysdate - (:hours/24)'</em><a class="headerlink" href="#Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.FileMetaData.DeleteFilesByTime_sql" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.FileMetaData.DeleteTaskFiles_sql">
+<tt class="descname">DeleteTaskFiles_sql</tt><em class="property"> = 'DELETE FROM filemetadata WHERE tm_taskname = :taskname'</em><a class="headerlink" href="#Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.FileMetaData.DeleteTaskFiles_sql" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.FileMetaData.GetCurrent_sql">
+<tt class="descname">GetCurrent_sql</tt><em class="property"> = 'SELECT panda_job_id from filemetadata WHERE tm_taskname = :taskname AND fmd_lfn = :outlfn'</em><a class="headerlink" href="#Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.FileMetaData.GetCurrent_sql" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.FileMetaData.GetFromTaskAndType_sql">
+<tt class="descname">GetFromTaskAndType_sql</tt><em class="property"> = &quot;SELECT panda_job_id AS pandajobid,                            fmd_outdataset AS outdataset,                            fmd_acq_era AS acquisitionera,                            fmd_sw_ver AS swversion,                            fmd_in_events AS inevents,                            fmd_global_tag AS globaltag,                            fmd_publish_name AS publishname,                            fmd_location AS location,                            fmd_tmp_location AS tmplocation,                            fmd_runlumi AS runlumi,                            fmd_adler32 AS adler32,                            fmd_cksum AS cksum,                            fmd_md5 AS md5,                            fmd_lfn AS lfn,                            fmd_size AS filesize,                            fmd_parent AS parents,                            fmd_filestate AS state,                            fmd_creation_time AS created,                            fmd_tmplfn AS tmplfn,                            fmd_type AS type,                            fmd_direct_stageout AS directstageout\n                    FROM filemetadata                     WHERE tm_taskname = :taskname                     AND fmd_type IN (SELECT REGEXP_SUBSTR(:filetype, '[^,]+', 1, LEVEL) FROM DUAL CONNECT BY LEVEL &lt;= REGEXP_COUNT(:filetype, ',') + 1)                     ORDER BY fmd_creation_time DESC\n             &quot;</em><a class="headerlink" href="#Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.FileMetaData.GetFromTaskAndType_sql" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.FileMetaData.New_sql">
+<tt class="descname">New_sql</tt><em class="property"> = 'INSERT INTO filemetadata (                tm_taskname, panda_job_id, fmd_outdataset, fmd_acq_era, fmd_sw_ver, fmd_in_events, fmd_global_tag,               fmd_publish_name, fmd_location, fmd_tmp_location, fmd_runlumi, fmd_adler32, fmd_cksum, fmd_md5, fmd_lfn, fmd_size,               fmd_type, fmd_parent, fmd_creation_time, fmd_filestate, fmd_direct_stageout, fmd_tmplfn)                VALUES (:taskname, :pandajobid, :outdatasetname, :acquisitionera, :appver, :events, :globalTag,                       :publishdataname, :outlocation, :outtmplocation, :runlumi, :checksumadler32, :checksumcksum, :checksummd5, :outlfn, :outsize,                       :outtype, :inparentlfns, SYS_EXTRACT_UTC(SYSTIMESTAMP), :filestate, :directstageout, :outtmplfn)'</em><a class="headerlink" href="#Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.FileMetaData.New_sql" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.FileMetaData.Update_sql">
+<tt class="descname">Update_sql</tt><em class="property"> = 'UPDATE filemetadata SET fmd_tmp_location = :outtmplocation, fmd_size = :outsize, fmd_creation_time = SYS_EXTRACT_UTC(SYSTIMESTAMP), fmd_tmplfn = :outtmplfn                     WHERE tm_taskname = :taskname AND fmd_lfn = :outlfn'</em><a class="headerlink" href="#Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.FileMetaData.Update_sql" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType">
+<em class="property">class </em><tt class="descclassname">Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.</tt><tt class="descname">GetFromTaskAndType</tt><a class="reference internal" href="_modules/Databases/FileMetaDataDB/Oracle/FileMetaData/FileMetaData.html#GetFromTaskAndType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used for indexing columns retrieved by the GetFromTaskAndType_sql query
+Order of parameters must be the same as it is in query GetFromTaskAndType_sql</p>
+<dl class="attribute">
+<dt id="Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.ACQERA">
+<tt class="descname">ACQERA</tt><em class="property"> = 2</em><a class="headerlink" href="#Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.ACQERA" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.ADLER32">
+<tt class="descname">ADLER32</tt><em class="property"> = 10</em><a class="headerlink" href="#Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.ADLER32" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.CKSUM">
+<tt class="descname">CKSUM</tt><em class="property"> = 11</em><a class="headerlink" href="#Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.CKSUM" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.CREATIONTIME">
+<tt class="descname">CREATIONTIME</tt><em class="property"> = 17</em><a class="headerlink" href="#Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.CREATIONTIME" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.DIRECTSTAGEOUT">
+<tt class="descname">DIRECTSTAGEOUT</tt><em class="property"> = 20</em><a class="headerlink" href="#Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.DIRECTSTAGEOUT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.GLOBALTAG">
+<tt class="descname">GLOBALTAG</tt><em class="property"> = 5</em><a class="headerlink" href="#Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.GLOBALTAG" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.INEVENTS">
+<tt class="descname">INEVENTS</tt><em class="property"> = 4</em><a class="headerlink" href="#Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.INEVENTS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.LFN">
+<tt class="descname">LFN</tt><em class="property"> = 13</em><a class="headerlink" href="#Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.LFN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.LOCATION">
+<tt class="descname">LOCATION</tt><em class="property"> = 7</em><a class="headerlink" href="#Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.LOCATION" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.MD5">
+<tt class="descname">MD5</tt><em class="property"> = 12</em><a class="headerlink" href="#Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.MD5" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.OUTDS">
+<tt class="descname">OUTDS</tt><em class="property"> = 1</em><a class="headerlink" href="#Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.OUTDS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.PANDAID">
+<tt class="descname">PANDAID</tt><em class="property"> = 0</em><a class="headerlink" href="#Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.PANDAID" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.PARENTS">
+<tt class="descname">PARENTS</tt><em class="property"> = 15</em><a class="headerlink" href="#Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.PARENTS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.PUBLISHNAME">
+<tt class="descname">PUBLISHNAME</tt><em class="property"> = 6</em><a class="headerlink" href="#Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.PUBLISHNAME" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.RUNLUMI">
+<tt class="descname">RUNLUMI</tt><em class="property"> = 9</em><a class="headerlink" href="#Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.RUNLUMI" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.SIZE">
+<tt class="descname">SIZE</tt><em class="property"> = 14</em><a class="headerlink" href="#Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.SIZE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.STATE">
+<tt class="descname">STATE</tt><em class="property"> = 16</em><a class="headerlink" href="#Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.STATE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.SWVER">
+<tt class="descname">SWVER</tt><em class="property"> = 3</em><a class="headerlink" href="#Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.SWVER" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.TMPLFN">
+<tt class="descname">TMPLFN</tt><em class="property"> = 18</em><a class="headerlink" href="#Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.TMPLFN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.TMPLOCATION">
+<tt class="descname">TMPLOCATION</tt><em class="property"> = 8</em><a class="headerlink" href="#Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.TMPLOCATION" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.TYPE">
+<tt class="descname">TYPE</tt><em class="property"> = 19</em><a class="headerlink" href="#Databases.FileMetaDataDB.Oracle.FileMetaData.FileMetaData.GetFromTaskAndType.TYPE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Databases.TaskDB.html" title="TaskDB Package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="Databases.FileMetaDataDB.Oracle.html" title="Oracle Package"
+             >previous</a> |</li>
+        <li><a href="index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="modules.html" >Project Modules</a> &raquo;</li>
+          <li><a href="Databases.html" >Databases Package</a> &raquo;</li>
+          <li><a href="Databases.FileMetaDataDB.html" >FileMetaDataDB Package</a> &raquo;</li>
+          <li><a href="Databases.FileMetaDataDB.Oracle.html" >Oracle Package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright CERN, INFN and Fermilab.
+      Last updated on Jul 02, 2015.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

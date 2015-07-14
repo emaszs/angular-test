@@ -1,0 +1,184 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Oracle Package &mdash; CRAB Server 3.3.1507.rc4</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '3.3.1507.rc4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="CRAB Server 3.3.1507.rc4" href="index.html" />
+    <link rel="up" title="TaskDB Package" href="Databases.TaskDB.html" />
+    <link rel="next" title="JobGroup Package" href="Databases.TaskDB.Oracle.JobGroup.html" />
+    <link rel="prev" title="TaskDB Package" href="Databases.TaskDB.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Databases.TaskDB.Oracle.JobGroup.html" title="JobGroup Package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="Databases.TaskDB.html" title="TaskDB Package"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="modules.html" >Project Modules</a> &raquo;</li>
+          <li><a href="Databases.html" >Databases Package</a> &raquo;</li>
+          <li><a href="Databases.TaskDB.html" accesskey="U">TaskDB Package</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Oracle Package</a><ul>
+<li><a class="reference internal" href="#id1"><tt class="docutils literal"><span class="pre">Oracle</span></tt> Package</a></li>
+<li><a class="reference internal" href="#module-Databases.TaskDB.Oracle.Create"><tt class="docutils literal"><span class="pre">Create</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-Databases.TaskDB.Oracle.Destroy"><tt class="docutils literal"><span class="pre">Destroy</span></tt> Module</a></li>
+<li><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="Databases.TaskDB.html"
+                        title="previous chapter">TaskDB Package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="Databases.TaskDB.Oracle.JobGroup.html"
+                        title="next chapter">JobGroup Package</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="oracle-package">
+<h1>Oracle Package<a class="headerlink" href="#oracle-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2><tt class="xref py py-mod docutils literal"><span class="pre">Oracle</span></tt> Package<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-Databases.TaskDB.Oracle"></span></div>
+<div class="section" id="module-Databases.TaskDB.Oracle.Create">
+<span id="create-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">Create</span></tt> Module<a class="headerlink" href="#module-Databases.TaskDB.Oracle.Create" title="Permalink to this headline">¶</a></h2>
+<p>_Databases.TaskDB.Oracle_</p>
+<p>Oracle Compatibility layer for Task Manager DB</p>
+<dl class="class">
+<dt id="Databases.TaskDB.Oracle.Create.Create">
+<em class="property">class </em><tt class="descclassname">Databases.TaskDB.Oracle.Create.</tt><tt class="descname">Create</tt><big>(</big><em>logger=None</em>, <em>dbi=None</em>, <em>param=None</em><big>)</big><a class="reference internal" href="_modules/Databases/TaskDB/Oracle/Create.html#Create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Databases.TaskDB.Oracle.Create.Create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">WMCore.Database.DBCreator.DBCreator</span></tt></p>
+<p>Implementation of TaskMgr DB for Oracle</p>
+<dl class="attribute">
+<dt id="Databases.TaskDB.Oracle.Create.Create.requiredTables">
+<tt class="descname">requiredTables</tt><em class="property"> = ['tasks', 'jobgroups', 'jobgroups_id_seq']</em><a class="headerlink" href="#Databases.TaskDB.Oracle.Create.Create.requiredTables" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-Databases.TaskDB.Oracle.Destroy">
+<span id="destroy-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">Destroy</span></tt> Module<a class="headerlink" href="#module-Databases.TaskDB.Oracle.Destroy" title="Permalink to this headline">¶</a></h2>
+<p>_Destroy_</p>
+<dl class="class">
+<dt id="Databases.TaskDB.Oracle.Destroy.Destroy">
+<em class="property">class </em><tt class="descclassname">Databases.TaskDB.Oracle.Destroy.</tt><tt class="descname">Destroy</tt><big>(</big><em>logger=None</em>, <em>dbi=None</em>, <em>param=None</em><big>)</big><a class="reference internal" href="_modules/Databases/TaskDB/Oracle/Destroy.html#Destroy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Databases.TaskDB.Oracle.Destroy.Destroy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">WMCore.Database.DBCreator.DBCreator</span></tt></p>
+<p>_init_</p>
+<p>Call the base class&#8217;s constructor and add all necessary tables for
+deletion</p>
+</dd></dl>
+
+</div>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Databases.TaskDB.Oracle.JobGroup.html">JobGroup Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Databases.TaskDB.Oracle.JobGroup.html#id1"><tt class="docutils literal"><span class="pre">JobGroup</span></tt> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Databases.TaskDB.Oracle.JobGroup.html#module-Databases.TaskDB.Oracle.JobGroup.JobGroup"><tt class="docutils literal"><span class="pre">JobGroup</span></tt> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Databases.TaskDB.Oracle.Task.html">Task Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Databases.TaskDB.Oracle.Task.html#id1"><tt class="docutils literal"><span class="pre">Task</span></tt> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Databases.TaskDB.Oracle.Task.html#module-Databases.TaskDB.Oracle.Task.Task"><tt class="docutils literal"><span class="pre">Task</span></tt> Module</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Databases.TaskDB.Oracle.JobGroup.html" title="JobGroup Package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="Databases.TaskDB.html" title="TaskDB Package"
+             >previous</a> |</li>
+        <li><a href="index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="modules.html" >Project Modules</a> &raquo;</li>
+          <li><a href="Databases.html" >Databases Package</a> &raquo;</li>
+          <li><a href="Databases.TaskDB.html" >TaskDB Package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright CERN, INFN and Fermilab.
+      Last updated on Jul 02, 2015.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

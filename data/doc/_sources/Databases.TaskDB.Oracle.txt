@@ -1,0 +1,35 @@
+Oracle Package
+==============
+
+:mod:`Oracle` Package
+---------------------
+
+.. automodule:: Databases.TaskDB.Oracle
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`Create` Module
+--------------------
+
+.. automodule:: Databases.TaskDB.Oracle.Create
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`Destroy` Module
+---------------------
+
+.. automodule:: Databases.TaskDB.Oracle.Destroy
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+
+    Databases.TaskDB.Oracle.JobGroup
+    Databases.TaskDB.Oracle.Task
+

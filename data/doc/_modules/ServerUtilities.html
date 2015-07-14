@@ -1,0 +1,147 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ServerUtilities &mdash; CRAB Server 3.3.1507.rc4</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '3.3.1507.rc4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="CRAB Server 3.3.1507.rc4" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for ServerUtilities</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This contains some utility methods to share between the server and the client, or by the server components themself</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+
+<div class="viewcode-block" id="checkOutLFN"><a class="viewcode-back" href="../ServerUtilities.html#ServerUtilities.checkOutLFN">[docs]</a><span class="k">def</span> <span class="nf">checkOutLFN</span><span class="p">(</span><span class="n">lfn</span><span class="p">,</span> <span class="n">username</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">lfn</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;/store/user/&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">lfn</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="n">username</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+    <span class="k">elif</span> <span class="n">lfn</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;/store/group/&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">lfn</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;/store/local/&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">lfn</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span>
+    <span class="k">return</span> <span class="bp">True</span>
+
+
+<span class="c">#setDashboardLogs function is shared between the postjob and the job wrapper. Sharing it here</span></div>
+<div class="viewcode-block" id="setDashboardLogs"><a class="viewcode-back" href="../ServerUtilities.html#ServerUtilities.setDashboardLogs">[docs]</a><span class="k">def</span> <span class="nf">setDashboardLogs</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">webdir</span><span class="p">,</span> <span class="n">jobid</span><span class="p">,</span> <span class="n">retry</span><span class="p">):</span>
+    <span class="n">log_files</span> <span class="o">=</span> <span class="p">[(</span><span class="s">&quot;job_out&quot;</span><span class="p">,</span> <span class="s">&quot;txt&quot;</span><span class="p">),</span> <span class="p">(</span><span class="s">&quot;postjob&quot;</span><span class="p">,</span> <span class="s">&quot;txt&quot;</span><span class="p">)]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">log_file</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">log_files</span><span class="p">):</span>
+        <span class="n">log_file_basename</span><span class="p">,</span> <span class="n">log_file_extension</span> <span class="o">=</span> <span class="n">log_file</span>
+        <span class="n">log_file_name</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">.</span><span class="si">%d</span><span class="s">.</span><span class="si">%d</span><span class="s">.</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">webdir</span><span class="p">,</span> \
+                                            <span class="n">log_file_basename</span><span class="p">,</span> <span class="n">jobid</span><span class="p">,</span> \
+                                            <span class="n">retry</span><span class="p">,</span> \
+                                            <span class="n">log_file_extension</span><span class="p">)</span>
+        <span class="n">log_files</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">log_file_name</span>
+    <span class="n">params</span><span class="p">[</span><span class="s">&#39;StatusLogFile&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">log_files</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="getWebdirForDb"><a class="viewcode-back" href="../ServerUtilities.html#ServerUtilities.getWebdirForDb">[docs]</a><span class="k">def</span> <span class="nf">getWebdirForDb</span><span class="p">(</span><span class="n">reqname</span><span class="p">,</span> <span class="n">storage_rules</span><span class="p">):</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s">&quot;~/</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">reqname</span><span class="p">)</span>
+    <span class="n">sinfo</span> <span class="o">=</span> <span class="n">storage_rules</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;,&quot;</span><span class="p">)</span>
+    <span class="n">storage_re</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">sinfo</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="n">storage_re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">sinfo</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">path</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">val</span>
+</div>
+<div class="viewcode-block" id="cmd_exist"><a class="viewcode-back" href="../ServerUtilities.html#ServerUtilities.cmd_exist">[docs]</a><span class="k">def</span> <span class="nf">cmd_exist</span><span class="p">(</span><span class="n">cmd</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check if linux command exist</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">null</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&quot;/dev/null&quot;</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">)</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="s">&quot;/usr/bin/which </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">null</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">null</span><span class="p">)</span>
+        <span class="n">null</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">CRAB Server 3.3.1507.rc4</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright CERN, INFN and Fermilab.
+      Last updated on Jul 02, 2015.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
