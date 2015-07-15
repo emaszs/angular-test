@@ -10,7 +10,7 @@
 	<meta name="author" content="">
 	<link rel="icon" href="../../favicon.ico">
 
-	<title>CRABMonitor config</title>
+	<title>CRABMonitor</title>
 
 	<!-- Bootstrap core CSS -->
 	<link href="/crabserver/ui/static?css/bootstrap.min.css" rel="stylesheet">
@@ -40,9 +40,9 @@
 			</div>
 			<div id="navbar" class="collapse navbar-collapse">
 				<ul class="nav navbar-nav">
-					<li class="active"><a href="/crabserver/ui/static?test/task_info_basic.html">Task info</a>
+					<li class="active"><a href="#">Task info</a>
 					</li>
-					<li><a href="#">About</a>
+					<li><a href="/crabserver/ui/static?test/other_view.html">About</a>
 					</li>
 					<li><a href="#contact">Contact</a>
 					</li>
@@ -53,26 +53,21 @@
 	</nav>
 
 	<div class="container">
-		<!-- Task search tabs -->
+		<!-- Task nav tabs -->
 
 		<ul id="task-nav-tabs" class="nav nav-tabs">
-			<li class="active"><a href="/crabserver/ui/static?test/task_info_basic.html">Basic info</a>
+			<li class="nav active"><a href="#task-info-tab" data-toggle="tab">Home</a>
 			</li>
-			<li><a href="/crabserver/ui/static?test/other_view.html">Config</a>
+			<li class="nav"><a href="#task-config-tab" data-toggle="tab">Config</a>
 			</li>
-			<li><a href="#">Pset</a>
+			<li class="nav"><a href="#" data-toggle="tab">Stuff</a>
 			</li>
 		</ul>
+		<!--/ Task nav tabs -->
 
 
-
-
-
-
+		<!-- Task search form -->
 		<div class="padded-form">
-
-
-
 			<form id="task-search-form" name="searchForm">
 				<div class="input-group">
 					<input id="task-search-form-input" type="text" class="form-control" autofocus="" placeholder="Enter task name...">
@@ -85,25 +80,43 @@
 			<!-- /.col-lg-6 -->
 
 
-			<div id="task-info-table" class="col-lg-12">
-				<h2>Task Info</h2>
-				<table class="table">
-					<thead>
-						<tr>
-							<th>Name</th>
-							<th>Value</th>
-						</tr>
-					</thead>
-					<tbody>
-					</tbody>
-				</table>
-			</div>
 		</div>
+		<!--/ Task search form -->
+
+
+
+		<!-- Tab panes -->
+		<div class="tab-content">
+			<div class="tab-pane fade in active" id="task-info-tab">
+				<!-- Task info tab -->
+
+				<div id="task-search-error-box">
+					<div class="alert alert-warning" id="task-search-error-message" role="alert"></div>
+				</div>
+
+				<!-- Task info table -->
+				<div id="task-info-table" class="col-lg-12">
+					<h2>Task Info</h2>
+					<table class="table">
+						<thead>
+							<tr>
+								<th>Name</th>
+								<th>Value</th>
+							</tr>
+						</thead>
+						<tbody>
+						</tbody>
+					</table>
+				</div>
+				<!--/ Task info table -->
+				<!--/ Task info tab -->
+			</div>
+			<div class="tab pane fade" id="task-config-tab">Task config, etc.</div>
+		</div>
+		<!--/ Tab Panes -->
+
 	</div>
-
-
 	<!-- /.container -->
-
 
 	<!-- Bootstrap core JavaScript
 		================================================== -->
@@ -112,6 +125,7 @@
 	<script src="https://mmascher-mon.cern.ch/crabserver/ui/static?script/misc/bootstrap.min.js"></script>
 
 	<script type="text/javascript" src="/crabserver/ui/static?test/search.js"></script>
+	<script type="text/javascript" src="/crabserver/ui/static?test/gzip.js"></script>
 
 	<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
 	<script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
