@@ -1,13 +1,14 @@
 $(document).ready(function () {
 
+	var searchPhrase = $("#task-search-form-input").val();
+
 	/**
 	 * Called on task info search form submission. It then fetches JSON data
 	 * and inserts it into the task_info.html #task-info-table.
 	 */
-	function displayTaskInfo() {
-		var searchPhrase = $("#task-search-form-input").val();
-		var xmlhttp = new XMLHttpRequest();
-		var url = "https://mmascher-mon.cern.ch/crabserver/dev/task?subresource=search&workflow=";
+	 function displayTaskInfo() {
+	 	var xmlhttp = new XMLHttpRequest();
+	 	var url = "https://mmascher-mon.cern.ch/crabserver/dev/task?subresource=search&workflow=";
 
 		// Response processing
 		xmlhttp.onreadystatechange = function () {
@@ -29,7 +30,7 @@ $(document).ready(function () {
 					// Displaying error message from response
 					console.log("Error");
 					$("#task-search-error-message").css("display", "inline")
-						.text(xmlhttp.status + " " + xmlhttp.statusText);
+					.text(xmlhttp.status + " " + xmlhttp.statusText);
 				}
 			}
 		};
@@ -39,7 +40,7 @@ $(document).ready(function () {
 		function insertDataToView(data) {
 			for (i = 0; i < data.desc.columns.length; i++) {
 				$("#task-info-table tbody")
-					.append("<tr><td>" + data.desc.columns[i] + "</td><td>" + data.result[i] + "</td></tr>");
+				.append("<tr><td>" + data.desc.columns[i] + "</td><td>" + data.result[i] + "</td></tr>");
 			}
 		}
 
@@ -48,27 +49,34 @@ $(document).ready(function () {
 		xmlhttp.send();
 	}
 
+	function displayTaskWorkerLog() {
+		var searchPhrase = $("#task-search-form-input").val();
+	}
+
 	/**
-	 * Task info search form listener
-	 */
+	* Task info search form listener
+	*/
 	$("#task-search-form").submit(function () {
 		displayTaskInfo();
+		// displayTaskWorkerLog();
+		// displayGraphs();
+		// displayConfigs();
 		return false;
 	});
-
-
-
-
 })
 
+
 function untarTest() {
-	GZip.load("//vocms059.cern.ch/mon/cms1425/" +
-		+"150714_090340:erupeika_crab_tutorial_May2015_MC_analysis/sandbox.tar.gz",
+	GZip.load("/crabserver/ui/static?test/sandbox.tar.gz",
 		function (h) {
 			var tar = new TarGZ;
 			tar.parseTar(h.data.join(''));
 			tar.files.forEach(console.log("success"));
 		}, null, null);
-
-
 }
+
+$.ajax({  
+   url: "https://mmascher-mon.cern.ch/crabcache/logfile?name=150714_090340:erupeika_crab_tutorial_May2015_MC_analysis_TaskWorker.log&username=erupeika",  
+   dataType: "text",  
+   success: function(data) { console.log(data); }  
+});  
