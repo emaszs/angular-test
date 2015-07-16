@@ -1,26 +1,22 @@
-.column-value {
-	padding-left: 10em;
-}
-
 /* hiding things before there is any data to display */
-
 #task-info-table, #task-search-error-message {
 	display: none;
 }
 
-#task-search-error-box {
+/*#task-search-error-box {
 	padding-top: 2em;
-}
+}*/
 
-
-/* some space between the task info tabs and search box */
-
+ /*some space between the task info tabs and search box */
 .padded-form {
 	padding-top: 1em;
 }
 
-/* to prevent the scrollbar from slightly shifting page content */
+#task-nav-tabs {
+	padding-top: 1em;
+}
 
+/* to prevent the scrollbar from slightly shifting page content */
 html {
   overflow-y: scroll;
 }

@@ -46,60 +46,90 @@
 				<!--/.nav-collapse -->
 			</div>
 		</nav>
+
+
+
 		<div class="container">
-			<!-- Task nav tabs -->
-			<ul id="task-nav-tabs" class="nav nav-tabs">
-				<li class="nav active"><a href="#task-info-tab" data-toggle="tab">Home</a>
-				</li>
-				<li class="nav"><a href="#task-config-tab" data-toggle="tab">Config</a>
-				</li>
-				<li class="nav"><a href="#task-graph-tab" data-toggle="tab">TaskWorker log</a>
-				</li>
-			</ul>
-			<!--/ Task nav tabs -->
-			
-			<div class="padded-form"> <!-- Task search form -->
-				<form id="task-search-form" name="searchForm">
-					<div class="input-group">
-						<input id="task-search-form-input" type="text" class="form-control" autofocus="" placeholder="Enter task name...">
-						<span class="input-group-btn">
-							<button class="btn btn-default" type="submit">Search</button>
-						</span>
+			<div>
+
+
+				<div class="padded-form"> <!-- Task search form -->
+					<form id="task-search-form" name="searchForm">
+						<div class="input-group">
+							<input id="task-search-form-input" type="text" class="form-control" autofocus="" placeholder="Enter task name...">
+							<span class="input-group-btn">
+								<button class="btn btn-default" type="submit">Search</button>
+							</span>
+						</div>
+						<!-- /input-group -->
+					</form>
+					<!-- /.col-lg-6 -->
+				</div> <!--/ Task search form -->
+
+
+
+
+
+
+
+
+
+
+
+				<!-- Nav tabs -->
+				<ul class="nav nav-tabs" role="tablist" id="task-nav-tabs">
+					<li role="presentation" class="active"><a href="#task-info" aria-controls="task-info-tab" role="tab" data-toggle="tab">Task Info</a></li>
+					<li role="presentation"><a href="#task-config" aria-controls="task-config" role="tab" data-toggle="tab">Config</a></li>
+					<li role="presentation"><a href="#task-pset" aria-controls="task-pset" role="tab" data-toggle="tab">PSet</a></li>
+					<li role="presentation"><a href="#taskworker-log" aria-controls="taskworker-log" role="tab" data-toggle="tab">TaskWorker log</a></li>
+				</ul>
+
+
+				<!-- Tab panes -->
+				<div class="tab-content">
+					<div role="tabpanel" class="tab-pane active" id="task-info">
+						
+						<h3>Task Info</h3>
+						<div id="task-info-table"> <!-- Task info table -->
+							<table class="table table-condensed">
+								<thead>
+									<tr>
+										<th>Name</th>
+										<th>Value</th>
+									</tr>
+								</thead>
+								<tbody>
+								</tbody>
+							</table>
+						</div> <!--/ Task info table -->
+
 					</div>
-					<!-- /input-group -->
-				</form>
-				<!-- /.col-lg-6 -->
-			</div> <!--/ Task search form -->
-			
-			<!-- Tab panes -->
-			<div class="tab-content">
-				<div class="tab-pane fade in active" id="task-info-tab"> <!-- Task info tab -->
-					<div id="task-search-error-box">
-						<div class="alert alert-warning" id="task-search-error-message" role="alert"></div>
+
+					<div role="tabpanel" class="tab-pane" id="task-config">
+						
+						<h3>Task config</h3>
+						<pre>
+						<p id="task-config-paragraph"></p>
+						</pre>
+
 					</div>
-					<div id="task-info-table" class="col-lg-12"> <!-- Task info table -->
-						<h2>Task Info</h2>
-						<table class="table">
-							<thead>
-								<tr>
-									<th>Name</th>
-									<th>Value</th>
-								</tr>
-							</thead>
-							<tbody>
-							</tbody>
-						</table>
-					</div> <!--/ Task info table -->
-				</div> <!--/ Task info tab -->
-				<div class="tab pane fade" id="task-config-tab"> <!-- Task config tab -->
-					test
-				</div> <!--/ Task config tab -->
-				<div class="tab pane fade" id="task-graph-tab"> <!-- Task graph tab -->
-					<img src="http://gwmsmon.cern.ch/analysisview/graphs/sciaba/150713_174939sciaba_HC-139-AnySite-17015-20150712140303-T2_RU_INR" alt="graph">
-				</div> <!--/ Task graph tab-->
+					<div role="tabpanel" class="tab-pane" id="task-pset">
+						<h3>Task PSet</h3>
+						<pre>
+						<p id="task-pset-paragraph"></p>
+						</pre>
+					</div>
+					<div role="tabpanel" class="tab-pane" id="taskworker-log">
+						<h3>TaskWorker log</h3>
+						<pre>
+						<p id="taskworker-log-paragraph"></p>
+						</pre>
+					</div>
+				</div>
+
 			</div>
-			<!--/ Tab Panes -->
 		</div>
+
 		<!-- /.container -->
 <!-- Bootstrap core JavaScript
 	================================================== -->
