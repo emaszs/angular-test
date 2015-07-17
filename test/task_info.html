@@ -37,10 +37,6 @@
 					<ul class="nav navbar-nav">
 						<li class="active"><a href="#">Task info</a>
 						</li>
-						<li><a href="/crabserver/ui/static?test/other_view.html">About</a>
-						</li>
-						<li><a href="#contact">Contact</a>
-						</li>
 					</ul>
 				</div>
 				<!--/.nav-collapse -->
@@ -48,10 +44,8 @@
 		</nav>
 
 
-
 		<div class="container">
 			<div>
-
 
 				<div class="padded-form"> <!-- Task search form -->
 					<form id="task-search-form" name="searchForm">
@@ -68,14 +62,6 @@
 
 
 
-
-
-
-
-
-
-
-
 				<!-- Nav tabs -->
 				<ul class="nav nav-tabs" role="tablist" id="task-nav-tabs">
 					<li role="presentation" class="active"><a href="#task-info" aria-controls="task-info-tab" role="tab" data-toggle="tab">Task Info</a></li>
@@ -88,8 +74,12 @@
 				<!-- Tab panes -->
 				<div class="tab-content">
 					<div role="tabpanel" class="tab-pane active" id="task-info">
+
+						<!-- Error box -->
+						<div  id="task-info-error-box" class="alert alert-warning" role="alert"></div>
 						
 						<h3>Task Info</h3>
+
 						<div id="task-info-table"> <!-- Task info table -->
 							<table class="table table-condensed">
 								<thead>
@@ -106,23 +96,31 @@
 					</div>
 
 					<div role="tabpanel" class="tab-pane" id="task-config">
-						
+						<div ><div id="task-config-error-box" class="alert alert-warning" role="alert">...</div></div>
+
 						<h3>Task config</h3>
+
 						<pre>
-						<p id="task-config-paragraph"></p>
+							<p id="task-config-paragraph"></p>
 						</pre>
 
 					</div>
 					<div role="tabpanel" class="tab-pane" id="task-pset">
+						<div ><div id="task-pset-error-box" class="alert alert-warning" role="alert">...</div></div>
+
 						<h3>Task PSet</h3>
+
 						<pre>
-						<p id="task-pset-paragraph"></p>
+							<p id="task-pset-paragraph"></p>
 						</pre>
 					</div>
 					<div role="tabpanel" class="tab-pane" id="taskworker-log">
+						<div ><div id="taskworker-log-error-box" class="alert alert-warning" role="alert">...</div></div>
+
 						<h3>TaskWorker log</h3>
+
 						<pre>
-						<p id="taskworker-log-paragraph"></p>
+							<p id="taskworker-log-paragraph"></p>
 						</pre>
 					</div>
 				</div>

@@ -1,11 +1,17 @@
 /* hiding things before there is any data to display */
-#task-info-table, #task-search-error-message {
+#task-info-error-box, #task-config-error-box,
+#task-pset-error-box, #taskworker-log-error-box  {
 	display: none;
 }
 
 /*#task-search-error-box {
 	padding-top: 2em;
 }*/
+
+#task-info-error-box, #taskworker-log-error-box {
+	white-space: pre-wrap;
+}
+
 
  /*some space between the task info tabs and search box */
 .padded-form {
@@ -19,4 +25,17 @@
 /* to prevent the scrollbar from slightly shifting page content */
 html {
   overflow-y: scroll;
+}
+
+#error-box {
+	padding-top: 1em;
+}
+
+:focus {outline:none;}
+::-moz-focus-inner {border:0;}
+
+/* Formatting the error boxes.*/
+#spaced-span{
+	float: left;
+	width: 8em;
 }
