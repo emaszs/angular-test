@@ -37,21 +37,6 @@ $(document).ready(function() {
                     var headers = xmlhttp.getAllResponseHeaders().toLowerCase();
                     // console.log("throwing exception");
                     errHandler.call(this, new ServerError(headers));
-
-                    // // Displaying error message from response
-                    // console.log("Error");
-                    // $("#task-info-error-box").empty().css("display", "inherit");
-                    // var headers = xmlhttp.getAllResponseHeaders().toLowerCase();
-                    // var headerArray = processErrorHeaders(headers);
-                    // console.log(headerArray);
-                    // for (var i = 0; i < headerArray.length; i++) {
-                    //     var colonIndex = headerArray[i].search(":");
-                    //     //$("#task-info-error-box").text(headerString);    
-                    //     console.log("test");
-                    //     $("#task-info-error-box").append("<span id=\"spaced-span\">" + headerArray[i].substr(0, colonIndex+1) 
-                    //         + "</span><span>" + headerArray[i].substr(colonIndex+1) + "</span>\n");
-                    // }
-                    
                 }
             }
         };
@@ -76,7 +61,6 @@ $(document).ready(function() {
         }
         
     }
-
 
 
     /**
@@ -115,20 +99,14 @@ $(document).ready(function() {
     	var url = urlStart + urlMiddle + urlEnd;
 
     	var tgz = TarGZ.stream(url, function(f, h) {
-    		// console.log(f.filename);
     		if (f.filename == "debug/crabConfig.py") {
     			$("#task-config-paragraph").text(f.data);
-            	// console.log(f.data);
             }
 
             if (f.filename == "debug/originalPSet.py") {
     			$("#task-pset-paragraph").text(f.data);
-            	// console.log(f.data);
             }
     	}, null, handleTarGZCallbackErr);
-
-    	// console.log(url);
-    	// console.log("eh");
     }
 
 
@@ -156,7 +134,6 @@ $(document).ready(function() {
         
         var url = "https://" + document.domain + "/crabcache/logfile?name=" +
             inputTaskName + "_TaskWorker.log&username=" + username;
-        //console.log(url);
 
         var log = "";
 
@@ -172,19 +149,6 @@ $(document).ready(function() {
                 } else {
                     var headers = xmlhttp.getAllResponseHeaders().toLowerCase();
                     errHandler.call(this, new ServerError(headers));
-                    // $("#taskworker-log-error-box").empty().css("display", "inherit");
-                    // var headers = xmlhttp.getAllResponseHeaders().toLowerCase();
-                    // var headerArray = processErrorHeaders(headers);
-
-                    // for (var i = 0; i < headerArray.length; i++) {
-                    //     var colonIndex = headerArray[i].search(":");
-                    //     //$("#task-info-error-box").text(headerString);    
-                    //     console.log("test");
-                    //     $("#taskworker-log-error-box").append("<span id=\"spaced-span\">" + headerArray[i].substr(0, colonIndex+1) 
-                    //         + "</span><span>" + headerArray[i].substr(colonIndex+1) + "</span>\n");
-                    // }
-
-
                 }
             }
         }
@@ -200,7 +164,7 @@ $(document).ready(function() {
      * Splits the header string and returns an array with only the interesting headers
      * 
      * @param  {String} The string with all the response headers
-     * @return {String} Header string with some headers removed
+     * @return {Array} Array of header strings with some of them removed.
      */
     function processErrorHeaders(headers) {
         var headerArray = headers.split("\r\n");
@@ -271,7 +235,6 @@ $(document).ready(function() {
 
             for (var i = 0; i < headerArray.length; i++) {
                 var colonIndex = headerArray[i].search(":");
-                //$("#task-info-error-box").text(headerString);    
                 $("#taskworker-log-error-box").append("<span id=\"spaced-span\">" + headerArray[i].substr(0, colonIndex+1) 
                    + "</span><span>" + headerArray[i].substr(colonIndex+1) + "</span>\n");
             }
@@ -285,8 +248,14 @@ $(document).ready(function() {
         $("#task-pset-error-box").css("display", "inherit").text("Task Info not loaded, can't get PSet")
     }
 
+    /**
+     * Callback function for handling tar file related problems. (404 not found for example)
+     * Not as verbose as html headers.
+     */
     function handleTarGZCallbackErr(xhr, err) {
-        console.log(err ? err : xhr.status);
+        //console.log(err ? err : xhr.status);
+        $("#task-config-error-box").css("display", "inherit").text(err ? err : xhr.status);
+        $("#task-pset-error-box").css("display", "inherit").text(err ? err : xhr.status);
     }
 
     function ServerError(headers) {
@@ -302,10 +271,6 @@ $(document).ready(function() {
     function TaskInfoUndefinedError() {
         this.name = "TaskInfoUndefinedError";
     }
-
- 
-
-
 })
 
 
