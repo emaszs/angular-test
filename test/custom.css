@@ -39,3 +39,7 @@ html {
 	float: left;
 	width: 8em;
 }
+
+body {
+	padding-top: 0px;
+}
