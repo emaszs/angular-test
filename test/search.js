@@ -21,7 +21,7 @@ $(document).ready(function() {
         xmlhttp.onreadystatechange = function() {
             if (xmlhttp.readyState == 4) {
                 if (xmlhttp.status == 200) {
-                    console.log("OK");
+                    // console.log("OK");
                     var data = JSON.parse(xmlhttp.response);
 
                     // Storing the data for the use of other display functions
@@ -53,13 +53,7 @@ $(document).ready(function() {
         // Synchronous request.
         // Sends get request for JSON data
         xmlhttp.open("GET", url + inputTaskName, false);
-        try {
-            xmlhttp.send();    
-        }
-        catch (err) {
-            console.log("caught" + err.name);
-        }
-        
+        xmlhttp.send();        
     }
 
 
@@ -76,9 +70,9 @@ $(document).ready(function() {
         $("#task-pset-error-box").css("display", "none");
 
     	
-        console.log(taskInfo);
+        // console.log(taskInfo);
         if (taskInfo === "undefined" || taskInfo === "") {
-            console.log("undef!");
+            // console.log("undef!");
             err.call(this, new TaskInfoUndefinedError());
             return;
         }
@@ -144,7 +138,7 @@ $(document).ready(function() {
                     
                     // console.log(xmlhttp.response);
                     log = xmlhttp.response;
-                     console.log(log);
+                    // console.log(log);
                     $("#taskworker-log-paragraph").text(log);
                 } else {
                     var headers = xmlhttp.getAllResponseHeaders().toLowerCase();
@@ -169,7 +163,7 @@ $(document).ready(function() {
     function processErrorHeaders(headers) {
         var headerArray = headers.split("\r\n");
         var resultArray = [];
-        console.log(headerArray);
+        // console.log(headerArray);
 
         for (var i = 0; i < headerArray.length; i++) {
             var str = headerArray[i];
@@ -195,22 +189,17 @@ $(document).ready(function() {
         displayTaskInfo(handleTaskInfoErr);
 
 
-        try {
-            displayConfigAndPSet(handleConfigPSetErr);  
-        } catch (err) {
-            console.log(err);
-        }
+        displayConfigAndPSet(handleConfigPSetErr);  
+
         displayTaskWorkerLog(handleTaskWorkerLogErr);
     });
     
     function handleTaskInfoErr(err) {
-        console.log(err);
-
-        console.log("Error");
+        // console.log("Error");
         $("#task-info-error-box").empty().css("display", "inherit");
         var headers = err.headers;
         var headerArray = processErrorHeaders(headers);
-        console.log(headerArray);
+        // console.log(headerArray);
         for (var i = 0; i < headerArray.length; i++) {
             var colonIndex = headerArray[i].search(":");
             //$("#task-info-error-box").text(headerString);    
@@ -227,7 +216,7 @@ $(document).ready(function() {
             $("#taskworker-log-error-box").css("display", "inherit").text("Invalid query");
         } else if (err instanceof ServerError) {
             // When a server response code is not equal to 200 - something went wrong.
-            console.log("TWL err");
+            // console.log("TWL err");
 
             $("#taskworker-log-error-box").empty().css("display", "inherit");
             var headers = err.headers;
@@ -274,19 +263,19 @@ $(document).ready(function() {
 })
 
 
-function untarTest() {
-    var tgz = TarGZ.stream("https://mmascher-mon.cern.ch/scheddmon/5/cms1425/150714_090340:erupeika_crab_tutorial_May2015_MC_analyss/sandbox.tar.gz",
-        function(f, h) {
-            //var tar = new TarGZ;
-            // tar.parseTar(h.data.join(''));;
-            if (f.filename == "debug/crabConfig.py") {
-            	console.log(f.data);
-            }
-            // console.log(h);
-            // tar.files.forEach(function(f) {
-            // 	console.log(f.filename);
-            }, null, function(xhr, e){ alert(e ? e : xhr.status); });
-}
+// function untarTest() {
+//     var tgz = TarGZ.stream("https://mmascher-mon.cern.ch/scheddmon/5/cms1425/150714_090340:erupeika_crab_tutorial_May2015_MC_analyss/sandbox.tar.gz",
+//         function(f, h) {
+//             //var tar = new TarGZ;
+//             // tar.parseTar(h.data.join(''));;
+//             if (f.filename == "debug/crabConfig.py") {
+//             	console.log(f.data);
+//             }
+//             // console.log(h);
+//             // tar.files.forEach(function(f) {
+//             // 	console.log(f.filename);
+//             }, null, function(xhr, e){ alert(e ? e : xhr.status); });
+// }
 
 // $.ajax({
 //     url: "https://mmascher-mon.cern.ch/crabcache/logfile?name=150714_090340:erupeika_crab_tutorial_May2015_MC_analysis_TaskWorker.log&username=erupeika",
