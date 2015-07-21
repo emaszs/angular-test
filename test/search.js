@@ -6,6 +6,24 @@ $(document).ready(function() {
     // for loading the config and pset files.
     var taskInfo = "";
 
+
+    /**
+     * Task search form listener - the starting point of control flow.
+     */
+    $("#task-search-form").submit(function(e) {
+        e.preventDefault();
+        inputTaskName = $("#task-search-form-input").val();
+
+        taskInfo = "";
+
+        displayTaskInfo(handleTaskInfoErr);
+
+        displayConfigAndPSet(handleConfigPSetErr);  
+
+        displayTaskWorkerLog(handleTaskWorkerLogErr);
+    });
+
+
     /**
      * Called on task info search form submission. It then fetches JSON data
      * and inserts it into the task_info.html #task-info-table.
@@ -28,7 +46,7 @@ $(document).ready(function() {
                     taskInfo = data;
                     
                     // Creating table contents
-                    insertDataToView(data);
+                    insertDataIntoPage(data);
 
                     $("#task-info-error-box").css("display", "none");
                     // Show table now that info has been loaded and inserted
@@ -36,7 +54,7 @@ $(document).ready(function() {
                 } else {
                     var headers = xmlhttp.getAllResponseHeaders().toLowerCase();
                     // console.log("throwing exception");
-                    errHandler.call(this, new ServerError(headers));
+                    errHandler(new ServerError(headers));
                 }
             }
         };
@@ -47,7 +65,7 @@ $(document).ready(function() {
 
         // Helper function.
         // Inserts task info column names and values into #task-info-table.
-        function insertDataToView(data) {
+        function insertDataIntoPage(data) {
             for (i = 0; i < data.desc.columns.length; i++) {
                 $("#task-info-table tbody")
                     .append("<tr><td>" + data.desc.columns[i] + "</td><td>" + data.result[i] + "</td></tr>");
@@ -64,7 +82,7 @@ $(document).ready(function() {
     /**
     * Fetches and displays the config file for given task.
     */
-    function displayConfigAndPSet(err) {
+    function displayConfigAndPSet(errHandler) {
     	var userWebDir = "";
 
         // Hiding error boxes and emptying content
@@ -74,7 +92,7 @@ $(document).ready(function() {
         $("#task-pset-error-box").css("display", "none");
 
         if (taskInfo === "undefined" || taskInfo === "") {
-            err.call(this, new TaskInfoUndefinedError());
+            errHandler(new TaskInfoUndefinedError());
             return;
         }
 
@@ -121,14 +139,12 @@ $(document).ready(function() {
         try {
             username = usernameRegExp.exec(inputTaskName)[1];    
         } catch (e) {
-            errHandler.call(this, new InvalidQueryError());
+            errHandler(new InvalidQueryError());
             return;
         }
         
         var url = "https://" + document.domain + "/crabcache/logfile?name=" +
             inputTaskName + "_TaskWorker.log&username=" + username;
-
-        // var log = "";
 
         xmlhttp.onreadystatechange = function() {
 
@@ -138,7 +154,7 @@ $(document).ready(function() {
                     $("#taskworker-log-paragraph").text(log);
                 } else {
                     var headers = xmlhttp.getAllResponseHeaders().toLowerCase();
-                    errHandler.call(this, new ServerError(headers));
+                    errHandler(new ServerError(headers));
                 }
             }
         }
@@ -152,7 +168,6 @@ $(document).ready(function() {
         xmlhttp.open("GET", url, false);
         xmlhttp.send();
     }
-
     
     
     /**
@@ -176,25 +191,10 @@ $(document).ready(function() {
         return resultArray;
     }
 
-
-    /**
-     * Task search form listener
-     */
-    $("#task-search-form").submit(function(e) {
-    	e.preventDefault();
-        inputTaskName = $("#task-search-form-input").val();
-
-        taskInfo = "";
-
-        displayTaskInfo(handleTaskInfoErr);
-
-        displayConfigAndPSet(handleConfigPSetErr);  
-
-        displayTaskWorkerLog(handleTaskWorkerLogErr);
-    });
     
     function handleTaskInfoErr(err) {
         $("#task-info-error-box").empty().css("display", "inherit");
+
         var headers = err.headers;
         var headerArray = processErrorHeaders(headers);
         for (var i = 0; i < headerArray.length; i++) {
@@ -226,8 +226,6 @@ $(document).ready(function() {
     }
 
     function handleConfigPSetErr(err) {
-        // console.log(e ? e : xhr.status); 
-
         $("#task-config-error-box").css("display", "inherit").text("Task Info not loaded, can't get config");
         $("#task-pset-error-box").css("display", "inherit").text("Task Info not loaded, can't get PSet")
     }
@@ -237,7 +235,6 @@ $(document).ready(function() {
      * Not as verbose as html headers.
      */
     function handleTarGZCallbackErr(xhr, err) {
-        //console.log(err ? err : xhr.status);
         $("#task-config-error-box").css("display", "inherit").text(err ? err : xhr.status);
         $("#task-pset-error-box").css("display", "inherit").text(err ? err : xhr.status);
     }
