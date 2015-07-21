@@ -41,6 +41,10 @@ $(document).ready(function() {
             }
         };
 
+        xmlhttp.onerror = function () {
+            console.log("Network error while fetching Task Info");
+        }
+
         // Helper function.
         // Inserts task info column names and values into #task-info-table.
         function insertDataToView(data) {
@@ -138,6 +142,11 @@ $(document).ready(function() {
                 }
             }
         }
+
+        xmlhttp.onerror = function () {
+            console.log("Network error while fetching TaskWorker log");
+        }
+
 
         // Synchronous request. Has to be loaded before config and pset, because they depend on this information.
         xmlhttp.open("GET", url, false);
