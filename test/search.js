@@ -63,16 +63,13 @@ $(document).ready(function() {
     function displayConfigAndPSet(err) {
     	var userWebDir = "";
 
+        // Hiding error boxes and emptying content
         $("#task-config-paragraph").empty();
         $("#task-pset-paragraph").empty();
-
         $("#task-config-error-box").css("display", "none");
         $("#task-pset-error-box").css("display", "none");
 
-    	
-        // console.log(taskInfo);
         if (taskInfo === "undefined" || taskInfo === "") {
-            // console.log("undef!");
             err.call(this, new TaskInfoUndefinedError());
             return;
         }
@@ -83,8 +80,6 @@ $(document).ready(function() {
     			userWebDir = taskInfo.result[i];
     		}
     	}
-
-    	// console.log(userWebDir);
 
     	var urlEnd = "/sandbox.tar.gz";
     	var urlMiddle = userWebDir.split("mon")[1];
@@ -110,7 +105,7 @@ $(document).ready(function() {
     function displayTaskWorkerLog(errHandler) {
         var xmlhttp = new XMLHttpRequest();
 
-
+        // Hiding error boxes and emptying content
         $("#taskworker-log-paragraph").empty();
         $("#taskworker-log-error-box").css("display", "none");
 
@@ -118,7 +113,7 @@ $(document).ready(function() {
         var usernameRegExp = /.*:([a-zA-Z0-9]+)/;
         var username = "";
 
-
+        // The query might not be valid and not have any username.
         try {
             username = usernameRegExp.exec(inputTaskName)[1];    
         } catch (e) {
@@ -129,16 +124,13 @@ $(document).ready(function() {
         var url = "https://" + document.domain + "/crabcache/logfile?name=" +
             inputTaskName + "_TaskWorker.log&username=" + username;
 
-        var log = "";
+        // var log = "";
 
         xmlhttp.onreadystatechange = function() {
 
             if (xmlhttp.readyState == 4) {
                 if (xmlhttp.status == 200) {
-                    
-                    // console.log(xmlhttp.response);
-                    log = xmlhttp.response;
-                    // console.log(log);
+                    var log = xmlhttp.response;
                     $("#taskworker-log-paragraph").text(log);
                 } else {
                     var headers = xmlhttp.getAllResponseHeaders().toLowerCase();
@@ -163,7 +155,6 @@ $(document).ready(function() {
     function processErrorHeaders(headers) {
         var headerArray = headers.split("\r\n");
         var resultArray = [];
-        // console.log(headerArray);
 
         for (var i = 0; i < headerArray.length; i++) {
             var str = headerArray[i];
@@ -188,23 +179,19 @@ $(document).ready(function() {
 
         displayTaskInfo(handleTaskInfoErr);
 
-
         displayConfigAndPSet(handleConfigPSetErr);  
 
         displayTaskWorkerLog(handleTaskWorkerLogErr);
     });
     
     function handleTaskInfoErr(err) {
-        // console.log("Error");
         $("#task-info-error-box").empty().css("display", "inherit");
         var headers = err.headers;
         var headerArray = processErrorHeaders(headers);
-        // console.log(headerArray);
         for (var i = 0; i < headerArray.length; i++) {
-            var colonIndex = headerArray[i].search(":");
-            //$("#task-info-error-box").text(headerString);    
+            var colonIndex = headerArray[i].search(":");    
             $("#task-info-error-box").append("<span id=\"spaced-span\">" + headerArray[i].substr(0, colonIndex+1) 
-            + "</span><span>" + headerArray[i].substr(colonIndex+1) + "</span>\n");
+                + "</span><span>" + headerArray[i].substr(colonIndex+1) + "</span>\n");
         } 
     }
 
@@ -216,8 +203,7 @@ $(document).ready(function() {
             $("#taskworker-log-error-box").css("display", "inherit").text("Invalid query");
         } else if (err instanceof ServerError) {
             // When a server response code is not equal to 200 - something went wrong.
-            // console.log("TWL err");
-
+            
             $("#taskworker-log-error-box").empty().css("display", "inherit");
             var headers = err.headers;
             var headerArray = processErrorHeaders(headers);
