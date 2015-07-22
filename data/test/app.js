@@ -38,11 +38,10 @@ app.controller('TaskSearchController', ['$scope', '$http', '$location', function
 
 app.controller('OtherViewController', ['$location', '$scope',
 								  function ($location, $scope) {
-
-		$scope.showSomethingElse = function () {
-			$location.path('/other_view');
-			console.log("testing");
-		}
+//		$scope.showSomethingElse = function () {
+//			$location.path('/other_view');
+//			console.log("testing");
+//		}
 								  }]);
 
 app.config(['$routeProvider', function ($routeProvider) {

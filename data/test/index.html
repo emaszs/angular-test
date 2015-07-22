@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en-US" ng-app="CRABMonitor">
+	<script src="https://mmascher-mon.cern.ch/crabserver/ui/static?test/angular.min.js"></script>
+	<body>
+	testing with remote mounting
+
+	<div ng-controller="DataController as data">
+
+	{{taskName}}
+		<div ng-repeat="name in data.desc.columns">
+			<p>{{ name + ", " +  data.result[$index] }}</p>
+		</div>
+	
+	</div>
+	</body>
+<script type="text/javascript" src="https://mmascher-mon.cern.ch/crabserver/ui/static?test/DataController.js"></script>
+</html>
