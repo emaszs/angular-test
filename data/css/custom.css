@@ -41,17 +41,12 @@ body {
 	padding-top: 0px;
 }
 
-/*#task-search-form-input {
-	width: 150%;
-}*/
-#db-selector1{
+/* for preventing a double border between form input and selector */
+#task-search-form-input {
+	width: 101%;
+}
+#db-selector{
 	width: 8%;
 	/*margin-left: -1px;*/
-
-}
-
-/* for preventing a double border between form input and selector */
-#db-selector2{
-	margin-left: -1px;
 
 }

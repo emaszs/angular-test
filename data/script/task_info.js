@@ -8,13 +8,23 @@ $(document).ready(function() {
 
     var dbVersion = "";
 
+    var taskInfoUrl = "";
+
+    // In most cases the user won't want to override the default database
+    setDefaultDbVersionSelector();
+
+    // If a parameter "task" exists, tries to load task info the same way a form submit loads it.
+    processPageUrl();
+
     /**
      * Task search form listener - the starting point of control flow.
      */
     $("#task-search-form").submit(function(e) {
         e.preventDefault();
         inputTaskName = $("#task-search-form-input").val();
-        dbVersion = $()
+        dbVersion = $("#db-selector-box").val();
+
+        setUrls(dbVersion);
 
         taskInfo = "";
 
@@ -26,14 +36,16 @@ $(document).ready(function() {
     });
 
 
+
     /**
      * Called on task info search form submission. It then fetches JSON data
      * and inserts it into the task_info.html #task-info-table.
      */
     function displayTaskInfo(errHandler) {
         var xmlhttp = new XMLHttpRequest();
-        var url = "https://mmascher-mon.cern.ch/crabserver/dev/task?subresource=search&workflow=";
-
+        // var url = "https://mmascher-mon.cern.ch/crabserver/dev/task?subresource=search&workflow=";
+        var url = taskInfoUrl + inputTaskName;
+        console.log(url);
         // Emptying table in case of previous request
         $("#task-info-table tbody").empty();    
 
@@ -76,7 +88,7 @@ $(document).ready(function() {
 
         // Synchronous request.
         // Sends get request for JSON data
-        xmlhttp.open("GET", url + inputTaskName, false);
+        xmlhttp.open("GET", url, false);
         xmlhttp.send();        
     }
 
@@ -253,6 +265,59 @@ $(document).ready(function() {
 
     function TaskInfoUndefinedError() {
         this.name = "TaskInfoUndefinedError";
+    }
+
+    function setUrls(dbVersion) {
+        switch(dbVersion) {
+            case "prod":
+                taskInfoUrl = "https://" + document.domain + "/crabserver/prod/task?subresource=search&workflow=";
+                break;
+            case "preprod":
+                taskInfoUrl = "https://" + document.domain + "/crabserver/preprod/task?subresource=search&workflow=";
+                break;
+            case "dev":
+                console.log("setting dev url");
+                taskInfoUrl = "https://" + document.domain + "/crabserver/dev/task?subresource=search&workflow=";
+                break;
+        }
+    }
+
+    function setDefaultDbVersionSelector() {
+        switch(document.domain) {
+            case "cmsweb.cern.ch":
+                $("#db-selector-box").val("prod");
+                break;
+            case "cmsweb-testbed.cern.ch":
+                $("#db-selector-box").val("preprod");
+                break;
+            case "mmascher-mon.cern.ch":
+                $("#db-selector-box").val("dev")
+                break;
+
+        }
+    }
+
+    // Loads a task based on the name parameter the url contains.
+    function processPageUrl() {
+        var re = /task\/(.+)/;
+        var result = re.exec(window.location.href);
+        if (result !== undefined && result !== null) {
+            inputTaskName = result[1];
+            console.log(inputTaskName);
+
+            // Set on pageload by setDefaultDnVersionSelector()
+            dbVersion = $("#db-selector-box").val();
+            setUrls(dbVersion);
+
+            // TODO - refactor a bit?
+            $("#task-search-form-input").val(inputTaskName);
+            displayTaskInfo(handleTaskInfoErr);
+            //$("#task-search-form").submit();
+            
+            displayConfigAndPSet(handleConfigPSetErr);  
+
+            displayTaskWorkerLog(handleTaskWorkerLogErr);
+        }
     }
 })
 
