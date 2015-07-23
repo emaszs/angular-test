@@ -10,9 +10,11 @@ $(document).ready(function() {
 
     var taskInfoUrl = "";
 
-    var cacheUrl = "";                                                                                                                                                                                                                                                                                                                                                                                                  
+    var cacheUrl = "";
 
     var username = "";
+
+    var userWebDir = "";
 
     // In most cases the user won't want to override the default database
     setDefaultDbVersionSelector();
@@ -24,7 +26,7 @@ $(document).ready(function() {
     /**
      * Task search form listener - the starting point of control flow.
      */
-     $("#task-search-form").submit(function(e) {
+    $("#task-search-form").submit(function(e) {
         e.preventDefault();
         inputTaskName = $("#task-search-form-input").val();
         dbVersion = $("#db-selector-box").val();
@@ -34,7 +36,7 @@ $(document).ready(function() {
         taskInfo = "";
 
         // Change the URL so that it can be copied/pasted more easily
-        
+
 
         var temp = window.location.href.split("/ui/")[0] + "/ui/task/" + inputTaskName;
         //window.location.href = temp;
@@ -42,31 +44,65 @@ $(document).ready(function() {
         // TODO - is this hack ok?
         window.history.pushState("", "", temp);
         console.log("test");
-        displayTaskInfo(handleTaskInfoErr);
+        
 
-        displayConfigAndPSet(handleConfigPSetErr);  
+        
 
-        displayTaskWorkerLog(handleTaskWorkerLogErr);
+        
+
+        try {
+            displayTaskInfo(handleTaskInfoErr);
+            loadGlobalDataFromTaskInfo();
+            displayConfigAndPSet(handleConfigPSetErr);
+            displayTaskWorkerLog(handleTaskWorkerLogErr);
+        } catch (e) {
+            console.log(e);
+        }
+
+        displayUploadLog(handleUploadLogErr);
 
         // displayUploadLog();
         //document.location.hash = "/task/" + inputTaskName;
         console.log(inputTaskName);
-        
+
     });
 
+    // Has to be run after displayTaskInfo
+    function loadGlobalDataFromTaskInfo() {
+        userWebDir = "";
+        username = "";
+        cacheUrl = "";
 
+        if (taskInfo != "undefined" && taskInfo != "") {
+            for (var i = 0; i < taskInfo.desc.columns.length; i++) {
+                switch (taskInfo.desc.columns[i]) {
+                    case "tm_user_webdir":
+                        userWebDir = taskInfo.result[i];
+                        break;
+                    case "tm_username":
+                        username = taskInfo.result[i];
+                        break;
+                    case "tm_cache_url":
+                        cacheUrl = taskInfo.result[i];
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    }
 
     /**
      * Called on task info search form submission. It then fetches JSON data
      * and inserts it into the task_info.html #task-info-table.
      */
-     function displayTaskInfo(errHandler) {
+    function displayTaskInfo(errHandler) {
         var xmlhttp = new XMLHttpRequest();
         // var url = "https://mmascher-mon.cern.ch/crabserver/dev/task?subresource=search&workflow=";
         var url = taskInfoUrl + inputTaskName;
         console.log(url);
         // Emptying table in case of previous request
-        $("#task-info-table tbody").empty();    
+        $("#task-info-table tbody").empty();
 
         // Response processing
         xmlhttp.onreadystatechange = function() {
@@ -77,7 +113,7 @@ $(document).ready(function() {
 
                     // Storing the data for the use of other display functions
                     taskInfo = data;
-                    console.log(data);
+                    // console.log(data);
                     // Creating table contents
                     insertDataIntoPage(data);
 
@@ -92,7 +128,7 @@ $(document).ready(function() {
             }
         };
 
-        xmlhttp.onerror = function () {
+        xmlhttp.onerror = function() {
             console.log("Network error while fetching Task Info");
         }
 
@@ -101,22 +137,22 @@ $(document).ready(function() {
         function insertDataIntoPage(data) {
             for (i = 0; i < data.desc.columns.length; i++) {
                 $("#task-info-table tbody")
-                .append("<tr><td>" + data.desc.columns[i] + "</td><td>" + data.result[i] + "</td></tr>");
+                    .append("<tr><td>" + data.desc.columns[i] + "</td><td>" + data.result[i] + "</td></tr>");
             }
         }
 
         // Synchronous request.
         // Sends get request for JSON data
         xmlhttp.open("GET", url, false);
-        xmlhttp.send();        
+        xmlhttp.send();
     }
 
 
     /**
-    * Fetches and displays the config file for given task.
-    */
+     * Fetches and displays the config file for given task.
+     */
     function displayConfigAndPSet(errHandler) {
-    	var userWebDir = "";
+        // var userWebDir = "";
 
         // Hiding error boxes and emptying content
         $("#task-config-paragraph").empty();
@@ -124,39 +160,39 @@ $(document).ready(function() {
         $("#task-config-error-box").css("display", "none");
         $("#task-pset-error-box").css("display", "none");
 
-        if (taskInfo === "undefined" || taskInfo === "") {
+        if (userWebDir === "undefined" || userWebDir === "") {
             errHandler(new TaskInfoUndefinedError());
             return;
         }
         // Searching for the user webdir field in stored TaskInfo data.
-        for (var i = 0; i < taskInfo.desc.columns.length; i++) {
-          if (taskInfo.desc.columns[i] == "tm_user_webdir") {
-           userWebDir = taskInfo.result[i];
-       }
-   }
+        // for (var i = 0; i < taskInfo.desc.columns.length; i++) {
+        //     if (taskInfo.desc.columns[i] == "tm_user_webdir") {
+        //         userWebDir = taskInfo.result[i];
+        //     }
+        // }
 
-   var urlEnd = "/sandbox.tar.gz";
-   var urlMiddle = userWebDir.split("mon")[1];
-   var urlStart = "https://mmascher-mon.cern.ch/scheddmon/5";
+        var urlEnd = "/sandbox.tar.gz";
+        var urlMiddle = userWebDir.split("mon")[1];
+        var urlStart = "https://mmascher-mon.cern.ch/scheddmon/5";
 
-   var url = urlStart + urlMiddle + urlEnd;
+        var url = urlStart + urlMiddle + urlEnd;
 
-   var tgz = TarGZ.stream(url, function(f, h) {
-      if (f.filename == "debug/crabConfig.py") {
-       $("#task-config-paragraph").text(f.data);
-   }
+        var tgz = TarGZ.stream(url, function(f, h) {
+            if (f.filename == "debug/crabConfig.py") {
+                $("#task-config-paragraph").text(f.data);
+            }
 
-   if (f.filename == "debug/originalPSet.py") {
-       $("#task-pset-paragraph").text(f.data);
-   }
-}, null, handleTarGZCallbackErr);
-}
+            if (f.filename == "debug/originalPSet.py") {
+                $("#task-pset-paragraph").text(f.data);
+            }
+        }, null, handleTarGZCallbackErr);
+    }
 
 
     /**
      * Fetches and displays TaskWorker log for given task
      */
-     function displayTaskWorkerLog(errHandler) {
+    function displayTaskWorkerLog(errHandler) {
         var xmlhttp = new XMLHttpRequest();
 
         // Hiding error boxes and emptying content
@@ -164,24 +200,29 @@ $(document).ready(function() {
         $("#taskworker-log-error-box").css("display", "none");
 
         // Match alphanumerics after a semicolon, until any non-alphanumeric character.
-        var usernameRegExp = /.*:([a-zA-Z0-9]+)/;
+        // var usernameRegExp = /.*:([a-zA-Z0-9]+)/;
 
         // The query might not be valid and not have any username.
-        try {
-            username = usernameRegExp.exec(inputTaskName)[1];    
-        } catch (e) {
-            errHandler(new InvalidQueryError());
+        // try {
+        //     username = usernameRegExp.exec(inputTaskName)[1];
+        // } catch (e) {
+        //     errHandler(new InvalidQueryError());
+        //     return;
+        // }
+
+        if (cacheUrl === "undefined" || cacheUrl === "") {
+            errHandler(new TaskInfoUndefinedError());
             return;
         }
 
         // Searching and storing the cacheurl. It's where the TW Log is located.
-        for (var i = 0; i < taskInfo.desc.columns.length; i++) {
-            if (taskInfo.desc.columns[i] == "tm_cache_url") {
-                cacheUrl = taskInfo.result[i];
-            }
-        }
+        // for (var i = 0; i < taskInfo.desc.columns.length; i++) {
+        //     if (taskInfo.desc.columns[i] == "tm_cache_url") {
+        //         cacheUrl = taskInfo.result[i];
+        //     }
+        // }
 
-        
+
         var url = cacheUrl + "/logfile?name=" + inputTaskName + "_TaskWorker.log&username=" + username;
         console.log("TW url: " + url);
         xmlhttp.onreadystatechange = function() {
@@ -197,7 +238,7 @@ $(document).ready(function() {
             }
         };
 
-        xmlhttp.onerror = function () {
+        xmlhttp.onerror = function() {
             console.log("Network error while fetching TaskWorker log");
         }
 
@@ -206,15 +247,45 @@ $(document).ready(function() {
         xmlhttp.open("GET", url, false);
         xmlhttp.send();
     }
-    
-    
+
+    function displayUploadLog(errHandler) {
+        $("#upload-log-error-box").css("display", "none");
+        $("#upload-log-paragraph").empty();
+
+        if (cacheUrl === "undefined" || cacheUrl === "") {
+            errHandler(new TaskInfoUndefinedError());
+            return;
+        }
+;
+        var xmlhttp = new XMLHttpRequest();
+        var url = cacheUrl + "/logfile?name=" + inputTaskName + ".log&username=" + username;
+
+        xmlhttp.onreadystatechange = function() {
+            if (xmlhttp.readyState == 4) {
+                if (xmlhttp.status = 200) {
+                    var log = xmlhttp.response;
+                    $("#upload-log-paragraph").text(log);
+                    console.log("logging");
+                } else {
+                    var headers = xmlhttp.getAllResponseHeaders().toLowerCase();
+                    errHandler(new ServerError(headers));
+                }
+            }
+        }
+
+        xmlhttp.open("GET", url, false);
+        xmlhttp.send();
+
+    }
+
+
     /**
      * Splits the header string and returns an array with only the interesting headers
      * 
      * @param  {String} The string with all the response headers
      * @return {Array} Array of header strings with some of them removed.
      */
-     function processErrorHeaders(headers) {
+    function processErrorHeaders(headers) {
         var headerArray = headers.split("\r\n");
         var resultArray = [];
 
@@ -224,42 +295,67 @@ $(document).ready(function() {
                 str.search("x-error-detail") != -1 || str.search("x.error-id") != -1) {
 
                 resultArray.push(str);
+            }
+        }
+        return resultArray;
+    }
+
+    function handleUploadLogErr(err) {
+        if (err instanceof TaskInfoUndefinedError) {
+            $("#upload-log-error-box").empty().css("display", "inherit").text("Task info not loaded");
+        } else if (err instanceof ServerError) {
+            $("#upload-log-error-box").empty().css("display", "inherit");
+            var headers = err.headers;
+
+            if (headers != "undefined" && headers != "") {
+                var headerArray = processErrorHeaders(headers);
+
+                for (var i = 0; i < headerArray.length; i++) {
+                    var colonIndex = headerArray[i].search(":");
+                    $("#upload-log-error-box").append("<span id=\"spaced-span\">" + headerArray[i].substr(0, colonIndex + 1) + "</span><span>" + headerArray[i].substr(colonIndex + 1) + "</span>\n");
+                }
+            } else {
+                $("#upload-log-error-box").css("display", "inherit").text("Network error");
+            }
+
         }
     }
-    return resultArray;
-}
 
+    function handleTaskInfoErr(err) {
+        $("#task-info-error-box").empty().css("display", "inherit");
 
-function handleTaskInfoErr(err) {
-    $("#task-info-error-box").empty().css("display", "inherit");
+        var headers = err.headers;
+        var headerArray = processErrorHeaders(headers);
+        for (var i = 0; i < headerArray.length; i++) {
+            var colonIndex = headerArray[i].search(":");
+            $("#task-info-error-box").append("<span id=\"spaced-span\">" + headerArray[i].substr(0, colonIndex + 1) + "</span><span>" + headerArray[i].substr(colonIndex + 1) + "</span>\n");
+        }
+    }
 
-    var headers = err.headers;
-    var headerArray = processErrorHeaders(headers);
-    for (var i = 0; i < headerArray.length; i++) {
-        var colonIndex = headerArray[i].search(":");    
-        $("#task-info-error-box").append("<span id=\"spaced-span\">" + headerArray[i].substr(0, colonIndex+1) 
-            + "</span><span>" + headerArray[i].substr(colonIndex+1) + "</span>\n");
-    } 
-}
+    function handleTaskWorkerLogErr(err) {
 
-function handleTaskWorkerLogErr(err) {
-
-    if (err instanceof InvalidQueryError) {
+        if (err instanceof InvalidQueryError) {
             // This is when it is impossible to determine a username from the search query. 
             // No point in sending a request to server with a null username.
             $("#taskworker-log-error-box").css("display", "inherit").text("Invalid query");
         } else if (err instanceof ServerError) {
             // When a server response code is not equal to 200 - something went wrong.
-            
+
             $("#taskworker-log-error-box").empty().css("display", "inherit");
             var headers = err.headers;
-            var headerArray = processErrorHeaders(headers);
 
-            for (var i = 0; i < headerArray.length; i++) {
-                var colonIndex = headerArray[i].search(":");
-                $("#taskworker-log-error-box").append("<span id=\"spaced-span\">" + headerArray[i].substr(0, colonIndex+1) 
-                   + "</span><span>" + headerArray[i].substr(colonIndex+1) + "</span>\n");
+            if (headers != "undefined" && headers != "") {
+                var headerArray = processErrorHeaders(headers);
+
+                for (var i = 0; i < headerArray.length; i++) {
+                    var colonIndex = headerArray[i].search(":");
+                    $("#taskworker-log-error-box").append("<span id=\"spaced-span\">" + headerArray[i].substr(0, colonIndex + 1) + "</span><span>" + headerArray[i].substr(colonIndex + 1) + "</span>\n");
+                }
+            } else {
+                $("#taskworker-log-error-box").css("display", "inherit").text("Network error");
             }
+        } else if (err instanceof TaskInfoUndefinedError) {
+            $("#taskworker-log-error-box").empty().css("display", "inherit").text("Task info not loaded");
         }
     }
 
@@ -272,7 +368,7 @@ function handleTaskWorkerLogErr(err) {
      * Callback function for handling tar file related problems. (404 not found for example)
      * Not as verbose as html headers.
      */
-     function handleTarGZCallbackErr(xhr, err) {
+    function handleTarGZCallbackErr(xhr, err) {
         $("#task-config-error-box").css("display", "inherit").text(err ? err : xhr.status);
         $("#task-pset-error-box").css("display", "inherit").text(err ? err : xhr.status);
     }
@@ -292,35 +388,35 @@ function handleTaskWorkerLogErr(err) {
     }
 
     function setUrls(dbVersion) {
-        switch(dbVersion) {
+        switch (dbVersion) {
             case "prod":
-            taskInfoUrl = "https://" + document.domain + "/crabserver/prod/task?subresource=search&workflow=";
-            break;
+                taskInfoUrl = "https://" + document.domain + "/crabserver/prod/task?subresource=search&workflow=";
+                break;
             case "preprod":
-            taskInfoUrl = "https://" + document.domain + "/crabserver/preprod/task?subresource=search&workflow=";
-            break;
+                taskInfoUrl = "https://" + document.domain + "/crabserver/preprod/task?subresource=search&workflow=";
+                break;
             case "dev":
-            console.log("setting dev url");
-            taskInfoUrl = "https://" + document.domain + "/crabserver/dev/task?subresource=search&workflow=";
-            break;
+                console.log("setting dev url");
+                taskInfoUrl = "https://" + document.domain + "/crabserver/dev/task?subresource=search&workflow=";
+                break;
             default:
-            break;
+                break;
         }
     }
 
     function setDefaultDbVersionSelector() {
-        switch(document.domain) {
+        switch (document.domain) {
             case "cmsweb.cern.ch":
-            $("#db-selector-box").val("prod");
-            break;
+                $("#db-selector-box").val("prod");
+                break;
             case "cmsweb-testbed.cern.ch":
-            $("#db-selector-box").val("preprod");
-            break;
+                $("#db-selector-box").val("preprod");
+                break;
             case "mmascher-mon.cern.ch":
-            $("#db-selector-box").val("dev")
-            break;
+                $("#db-selector-box").val("dev")
+                break;
             default:
-            break;
+                break;
 
         }
     }
@@ -341,34 +437,19 @@ function handleTaskWorkerLogErr(err) {
             // TODO - refactor a bit?
             $("#task-search-form-input").val(inputTaskName);
             displayTaskInfo(handleTaskInfoErr);
+            loadGlobalDataFromTaskInfo();
             //$("#task-search-form").submit();
-            
-            displayConfigAndPSet(handleConfigPSetErr);  
+
+            displayConfigAndPSet(handleConfigPSetErr);
 
             displayTaskWorkerLog(handleTaskWorkerLogErr);
+
+            displayUploadLog(handleUploadLogErr);
         }
     }
 
-    function displayUploadLog() {
-        var xmlhttp = new XMLHttpRequest();
-        xmlhttp.onreadystatechange = function () {
-            if (xmlhttp.readyState == 4) {
-                console.log("what");
-                console.log(xmlhttp.status);
-                return xmlhttp.status == 200 ? true : false;        
-            }     
-        }
-
-        // TODO - check if username is null or undefined
-        var url = "https://" + document.domain + "/crabcache/logfile?name=" + inputTaskName + ".log&username=" + username;
-        console.log(url);
-        xmlhttp.open("GET", url, false);
-        xmlhttp.send();
-
-    }
 
 });
-
 
 
 
@@ -379,11 +460,11 @@ function handleTaskWorkerLogErr(err) {
 //             //var tar = new TarGZ;
 //             // tar.parseTar(h.data.join(''));;
 //             if (f.filename == "debug/crabConfig.py") {
-//             	console.log(f.data);
+//              console.log(f.data);
 //             }
 //             // console.log(h);
 //             // tar.files.forEach(function(f) {
-//             // 	console.log(f.filename);
+//             //   console.log(f.filename);
 //             }, null, function(xhr, e){ alert(e ? e : xhr.status); });
 // }
 
