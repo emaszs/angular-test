@@ -16,6 +16,8 @@ $(document).ready(function() {
 
     var userWebDir = "";
 
+    var scriptExe = "";
+
     // In most cases the user won't want to override the default database
     setDefaultDbVersionSelector();
 
@@ -46,32 +48,25 @@ $(document).ready(function() {
         console.log("test");
         
 
-        
-
-        
-
-        try {
-            displayTaskInfo(handleTaskInfoErr);
-            loadGlobalDataFromTaskInfo();
-            displayConfigAndPSet(handleConfigPSetErr);
-            displayTaskWorkerLog(handleTaskWorkerLogErr);
-        } catch (e) {
-            console.log(e);
-        }
-
+    
+        displayTaskInfo(handleTaskInfoErr);
+        loadGlobalDataFromTaskInfo();
+        displayConfigAndPSet(handleConfigPSetErr);
+        displayTaskWorkerLog(handleTaskWorkerLogErr);
         displayUploadLog(handleUploadLogErr);
+        displayScriptExe(handleScriptExeErr);
 
         // displayUploadLog();
         //document.location.hash = "/task/" + inputTaskName;
-        console.log(inputTaskName);
 
     });
 
     // Has to be run after displayTaskInfo
     function loadGlobalDataFromTaskInfo() {
-        userWebDir = "";
-        username = "";
-        cacheUrl = "";
+        // userWebDir = "";
+        // username = "";
+        // cacheUrl = "";
+        // scriptExe = "";
 
         if (taskInfo != "undefined" && taskInfo != "") {
             for (var i = 0; i < taskInfo.desc.columns.length; i++) {
@@ -84,6 +79,10 @@ $(document).ready(function() {
                         break;
                     case "tm_cache_url":
                         cacheUrl = taskInfo.result[i];
+
+                        break;
+                    case "tm_scriptexe":
+                        scriptExe = taskInfo.result[i];
                         break;
                     default:
                         break;
@@ -252,32 +251,68 @@ $(document).ready(function() {
         $("#upload-log-error-box").css("display", "none");
         $("#upload-log-paragraph").empty();
 
+        console.log("testing cache url " + cacheUrl);
+
         if (cacheUrl === "undefined" || cacheUrl === "") {
             errHandler(new TaskInfoUndefinedError());
             return;
         }
-;
+
         var xmlhttp = new XMLHttpRequest();
         var url = cacheUrl + "/logfile?name=" + inputTaskName + ".log&username=" + username;
 
         xmlhttp.onreadystatechange = function() {
             if (xmlhttp.readyState == 4) {
-                if (xmlhttp.status = 200) {
+                if (xmlhttp.status == 200) {
                     var log = xmlhttp.response;
                     $("#upload-log-paragraph").text(log);
-                    console.log("logging");
+                    console.log(xmlhttp.response);
                 } else {
                     var headers = xmlhttp.getAllResponseHeaders().toLowerCase();
+                    //console.log(headers);
                     errHandler(new ServerError(headers));
                 }
             }
         }
 
+        xmlhttp.onerror = function() {
+            console.log("error");
+        }
+
         xmlhttp.open("GET", url, false);
         xmlhttp.send();
-
     }
 
+    function displayScriptExe(errHandler) {
+        $("#script-exe-error-box").css("display", "none");
+        $("#script-exe-paragraph").empty();
+
+        if (scriptExe === "undefined" || scriptExe === "") {
+            errHandler(new TaskInfoUndefinedError);
+            return;
+        } else if (scriptExe === "None") {
+            errHandler(new ScriptExeNotUsedError);
+            return;
+        } 
+
+        var xmlhttp = new XMLHttpRequest();
+
+        var urlEnd = "/sandbox.tar.gz";
+        var urlMiddle = userWebDir.split("mon")[1];
+        var urlStart = "https://mmascher-mon.cern.ch/scheddmon/5";
+
+        var url = urlStart + urlMiddle + urlEnd;
+
+        var tgz = TarGZ.stream(url, function(f, h) {
+            if (f.filename == scriptExe) {
+                $("#script-exe-paragraph").text(f.data);
+                console.log(f.data);
+            }
+        }, null, null);
+        // TODO - callback err?
+
+
+    }
 
     /**
      * Splits the header string and returns an array with only the interesting headers
@@ -302,17 +337,18 @@ $(document).ready(function() {
 
     function handleUploadLogErr(err) {
         if (err instanceof TaskInfoUndefinedError) {
-            $("#upload-log-error-box").empty().css("display", "inherit").text("Task info not loaded");
+            $("#upload-log-error-box").css("display", "inherit").text("Task info not loaded");
         } else if (err instanceof ServerError) {
             $("#upload-log-error-box").empty().css("display", "inherit");
             var headers = err.headers;
 
             if (headers != "undefined" && headers != "") {
                 var headerArray = processErrorHeaders(headers);
-
+                console.log(headerArray);
                 for (var i = 0; i < headerArray.length; i++) {
                     var colonIndex = headerArray[i].search(":");
-                    $("#upload-log-error-box").append("<span id=\"spaced-span\">" + headerArray[i].substr(0, colonIndex + 1) + "</span><span>" + headerArray[i].substr(colonIndex + 1) + "</span>\n");
+                    // console.log(headerArray[i].substr(0, colonIndex + 1) + " " + headerArray[i].substr(colonIndex + 1));
+                    $("#upload-log-error-box").append("<span id=\"spaced-span\">" + headerArray[i].substr(0, colonIndex + 1) + "</span><span>" + headerArray[i].substr(colonIndex + 1) + "</span><br/>");
                 }
             } else {
                 $("#upload-log-error-box").css("display", "inherit").text("Network error");
@@ -328,7 +364,7 @@ $(document).ready(function() {
         var headerArray = processErrorHeaders(headers);
         for (var i = 0; i < headerArray.length; i++) {
             var colonIndex = headerArray[i].search(":");
-            $("#task-info-error-box").append("<span id=\"spaced-span\">" + headerArray[i].substr(0, colonIndex + 1) + "</span><span>" + headerArray[i].substr(colonIndex + 1) + "</span>\n");
+            $("#task-info-error-box").append("<span id=\"spaced-span\">" + headerArray[i].substr(0, colonIndex + 1) + "</span><span>" + headerArray[i].substr(colonIndex + 1) + "</span><br/>");
         }
     }
 
@@ -364,6 +400,14 @@ $(document).ready(function() {
         $("#task-pset-error-box").css("display", "inherit").text("Task Info not loaded, can't get PSet")
     }
 
+    function handleScriptExeErr(err) {
+        if (err instanceof ScriptExeNotUsedError) {
+            $("#script-exe-error-box").css("display", "inherit").text("ScriptExe was not used");
+        } else if (err instanceof TaskInfoUndefinedError) {
+            $("#script-exe-error-box").css("display", "inherit").text("Task info not loaded");
+        }
+    }
+
     /**
      * Callback function for handling tar file related problems. (404 not found for example)
      * Not as verbose as html headers.
@@ -385,6 +429,10 @@ $(document).ready(function() {
 
     function TaskInfoUndefinedError() {
         this.name = "TaskInfoUndefinedError";
+    }
+
+    function ScriptExeNotUsedError() {
+        this.name = "ScriptExeNotUsedError";
     }
 
     function setUrls(dbVersion) {
@@ -436,15 +484,13 @@ $(document).ready(function() {
 
             // TODO - refactor a bit?
             $("#task-search-form-input").val(inputTaskName);
+
             displayTaskInfo(handleTaskInfoErr);
             loadGlobalDataFromTaskInfo();
-            //$("#task-search-form").submit();
-
             displayConfigAndPSet(handleConfigPSetErr);
-
             displayTaskWorkerLog(handleTaskWorkerLogErr);
-
             displayUploadLog(handleUploadLogErr);
+            displayScriptExe(handleScriptExeErr);
         }
     }
 
