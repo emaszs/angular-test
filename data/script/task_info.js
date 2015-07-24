@@ -10,6 +10,8 @@ $(document).ready(function() {
 
     var taskInfoUrl = "";
 
+    var taskStatusUrl = "";
+
     var cacheUrl = "";
 
     var username = "";
@@ -17,6 +19,8 @@ $(document).ready(function() {
     var userWebDir = "";
 
     var scriptExe = "";
+
+    var inputDataset = "";
 
     // In most cases the user won't want to override the default database
     setDefaultDbVersionSelector();
@@ -55,6 +59,7 @@ $(document).ready(function() {
         displayTaskWorkerLog(handleTaskWorkerLogErr);
         displayUploadLog(handleUploadLogErr);
         displayScriptExe(handleScriptExeErr);
+        displayMainPage();
 
         // displayUploadLog();
         //document.location.hash = "/task/" + inputTaskName;
@@ -63,10 +68,11 @@ $(document).ready(function() {
 
     // Has to be run after displayTaskInfo
     function loadGlobalDataFromTaskInfo() {
-        // userWebDir = "";
-        // username = "";
-        // cacheUrl = "";
-        // scriptExe = "";
+        userWebDir = "";
+        username = "";
+        cacheUrl = "";
+        scriptExe = "";
+        inputDataset = "";
 
         if (taskInfo != "undefined" && taskInfo != "") {
             for (var i = 0; i < taskInfo.desc.columns.length; i++) {
@@ -84,6 +90,8 @@ $(document).ready(function() {
                     case "tm_scriptexe":
                         scriptExe = taskInfo.result[i];
                         break;
+                    case "tm_input_dataset":
+                        inputDataset = taskInfo.result[i];
                     default:
                         break;
                 }
@@ -117,8 +125,6 @@ $(document).ready(function() {
                     insertDataIntoPage(data);
 
                     $("#task-info-error-box").css("display", "none");
-                    // Show table now that info has been loaded and inserted
-                    $("#task-info-table").css("display", "inline");
                 } else {
                     var headers = xmlhttp.getAllResponseHeaders().toLowerCase();
                     // console.log("throwing exception");
@@ -145,7 +151,6 @@ $(document).ready(function() {
         xmlhttp.open("GET", url, false);
         xmlhttp.send();
     }
-
 
     /**
      * Fetches and displays the config file for given task.
@@ -266,7 +271,6 @@ $(document).ready(function() {
                 if (xmlhttp.status == 200) {
                     var log = xmlhttp.response;
                     $("#upload-log-paragraph").text(log);
-                    console.log(xmlhttp.response);
                 } else {
                     var headers = xmlhttp.getAllResponseHeaders().toLowerCase();
                     //console.log(headers);
@@ -310,7 +314,58 @@ $(document).ready(function() {
             }
         }, null, null);
         // TODO - callback err?
+    }
 
+    function displayMainPage(errHandler) {
+        $("#main-error-box").empty().css("display", "none");
+        $("#main-status-info-table tbody").empty();
+
+        if (userWebDir !== "" && userWebDir !== "undefined"
+            && inputTaskName !== "" && inputTaskName !== "undefined") {
+
+            var dashboardUrl = "http://dashb-cms-job.cern.ch/dashboard/templates/"
+                + "task-analysis/#user=default&refresh=0&table=Jobs&p=1&records=25"
+                + "&activemenu=2&status=&site=&tid=" + inputTaskName;
+
+            var dasUrl = "https://cmsweb.cern.ch/das/request?view=list&limit=50"
+                + "&instance=prod%2Fglobal&input=" + inputDataset;
+
+            $("#main-dashboard-link").attr("href", dashboardUrl);
+
+            $("#main-webdir-link").attr("href", userWebDir);
+            $("#main-das-link").attr("href", dasUrl);
+
+            var xmlhttp = new XMLHttpRequest();
+            var url = taskStatusUrl + inputTaskName;
+
+            xmlhttp.onreadystatechange = function() {
+                if (xmlhttp.readyState == 4) {
+                    if (xmlhttp.status == 200) {
+                        var data = JSON.parse(xmlhttp.response);
+                        console.log(data.result);
+                        for (var i = 0; i < data.result.length; i++) {
+                            var obj = data.result[i];
+                            for (var key in obj) {
+                                var attrName = key;
+                                var attrValue = obj[key];
+
+                                $("#main-status-info-table tbody")
+                                    .append("<tr><td>" + attrName + "</td><td>" + attrValue + "<td></tr>");
+                            }
+
+                        }
+                    }
+                }
+            }
+
+            xmlhttp.open("GET", url, false);
+            xmlhttp.send();
+
+        } else {
+            $("#main-error-box").css("display", "inherit").text("Task info not loaded");
+        }
+
+        
 
     }
 
@@ -439,13 +494,15 @@ $(document).ready(function() {
         switch (dbVersion) {
             case "prod":
                 taskInfoUrl = "https://" + document.domain + "/crabserver/prod/task?subresource=search&workflow=";
+                taskStatusUrl = "https://" + document.domain + "/crabserver/prod/workflow?workflow=";
                 break;
             case "preprod":
                 taskInfoUrl = "https://" + document.domain + "/crabserver/preprod/task?subresource=search&workflow=";
+                taskStatusUrl = "https://" + document.domain + "/crabserver/preprod/workflow?workflow=";
                 break;
             case "dev":
-                console.log("setting dev url");
                 taskInfoUrl = "https://" + document.domain + "/crabserver/dev/task?subresource=search&workflow=";
+                taskStatusUrl = "https://" + document.domain + "/crabserver/dev/workflow?workflow=";
                 break;
             default:
                 break;
@@ -491,33 +548,9 @@ $(document).ready(function() {
             displayTaskWorkerLog(handleTaskWorkerLogErr);
             displayUploadLog(handleUploadLogErr);
             displayScriptExe(handleScriptExeErr);
+            displayMainPage();
         }
     }
 
 
 });
-
-
-
-
-// function untarTest() {
-//     var tgz = TarGZ.stream("https://mmascher-mon.cern.ch/scheddmon/5/cms1425/150714_090340:erupeika_crab_tutorial_May2015_MC_analyss/sandbox.tar.gz",
-//         function(f, h) {
-//             //var tar = new TarGZ;
-//             // tar.parseTar(h.data.join(''));;
-//             if (f.filename == "debug/crabConfig.py") {
-//              console.log(f.data);
-//             }
-//             // console.log(h);
-//             // tar.files.forEach(function(f) {
-//             //   console.log(f.filename);
-//             }, null, function(xhr, e){ alert(e ? e : xhr.status); });
-// }
-
-// $.ajax({
-//     url: "https://mmascher-mon.cern.ch/crabcache/logfile?name=150714_090340:erupeika_crab_tutorial_May2015_MC_analysis_TaskWorker.log&username=erupeika",
-//     dataType: "text",
-//     success: function(data) {
-//         console.log(data);
-//     }
-// });

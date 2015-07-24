@@ -82,6 +82,9 @@
 			<!-- Nav tabs -->
 			<ul class="nav nav-tabs" role="tablist" id="task-nav-tabs">
 				<li role="presentation" class="active">
+					<a href="#main" aria-controls="main" role="tab" data-toggle="tab">Main</a>
+				</li>
+				<li role="presentation">
 					<a href="#task-info" aria-controls="task-info-tab" role="tab" data-toggle="tab">Task Info</a>
 				</li>
 				<li role="presentation">
@@ -104,7 +107,38 @@
 
 			<!-- Tab panes -->
 			<div class="tab-content">
-				<div role="tabpanel" class="tab-pane active" id="task-info">
+
+
+				<div role="tabpanel" class="tab-pane active" id="main">
+					<div ><div id="main-error-box" class="alert alert-warning" role="alert">...</div></div>
+
+					<h3>Main</h3>
+
+					<p id="main-paragraph">
+						<div class="btn-group btn-group-justified" role="group">
+							<a id="main-dashboard-link" class="btn btn-default" href="#">Link to dashboard</a>
+							<a id="main-webdir-link" class="btn btn-default"  href="#">Link to webdir</a>
+							<a id="main-das-link" class="btn btn-default" href="#">Link to DAS</a>	
+						</div>
+						<div id="main-status-info"></div>
+					</p>
+
+					<div id="main-status-info-table"> <!-- Task info table -->
+						<table class="table">
+							<thead>
+								<tr>
+									<th></th>
+									<th></th>
+								</tr>
+							</thead>
+							<tbody>
+							</tbody>
+						</table>
+					</div> <!--/ Task info table -->
+
+				</div>
+
+				<div role="tabpanel" class="tab-pane" id="task-info">
 
 					<!-- Error box -->
 					<div  id="task-info-error-box" class="alert alert-warning" role="alert"></div>
