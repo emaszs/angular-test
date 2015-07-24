@@ -4,23 +4,8 @@ $(document).ready(function() {
 
     // Task info is stored upon displaying it. Required for the tm_user_webdir value, which is needed
     // for loading the config and pset files.
-    var taskInfo = "";
-
-    var dbVersion = "";
-
-    var taskInfoUrl = "";
-
-    var taskStatusUrl = "";
-
-    var cacheUrl = "";
-
-    var username = "";
-
-    var userWebDir = "";
-
-    var scriptExe = "";
-
-    var inputDataset = "";
+    var taskInfo = "", dbVersion = "", taskInfoUrl = "", taskStatusUrl = "",
+        cacheUrl = "", username = "", userWebDir = "", scriptExe = "", inputDataset = "";
 
     // In most cases the user won't want to override the default database
     setDefaultDbVersionSelector();
@@ -42,37 +27,23 @@ $(document).ready(function() {
         taskInfo = "";
 
         // Change the URL so that it can be copied/pasted more easily
-
-
         var temp = window.location.href.split("/ui/")[0] + "/ui/task/" + inputTaskName;
         //window.location.href = temp;
 
         // TODO - is this hack ok?
         window.history.pushState("", "", temp);
         console.log("test");
-        
 
-    
-        displayTaskInfo(handleTaskInfoErr);
-        loadGlobalDataFromTaskInfo();
-        displayConfigAndPSet(handleConfigPSetErr);
-        displayTaskWorkerLog(handleTaskWorkerLogErr);
-        displayUploadLog(handleUploadLogErr);
-        displayScriptExe(handleScriptExeErr);
-        displayMainPage();
+        clearPreviousContent();
+        loadContent();
 
         // displayUploadLog();
         //document.location.hash = "/task/" + inputTaskName;
-
     });
 
     // Has to be run after displayTaskInfo
     function loadGlobalDataFromTaskInfo() {
-        userWebDir = "";
-        username = "";
-        cacheUrl = "";
-        scriptExe = "";
-        inputDataset = "";
+        userWebDir = "", username = "", cacheUrl = "", scriptExe = "", inputDataset = "";
 
         if (taskInfo != "undefined" && taskInfo != "") {
             for (var i = 0; i < taskInfo.desc.columns.length; i++) {
@@ -108,8 +79,6 @@ $(document).ready(function() {
         // var url = "https://mmascher-mon.cern.ch/crabserver/dev/task?subresource=search&workflow=";
         var url = taskInfoUrl + inputTaskName;
         console.log(url);
-        // Emptying table in case of previous request
-        $("#task-info-table tbody").empty();
 
         // Response processing
         xmlhttp.onreadystatechange = function() {
@@ -120,11 +89,12 @@ $(document).ready(function() {
 
                     // Storing the data for the use of other display functions
                     taskInfo = data;
-                    // console.log(data);
-                    // Creating table contents
-                    insertDataIntoPage(data);
 
-                    $("#task-info-error-box").css("display", "none");
+                    // Creating table contents
+                    for (i = 0; i < data.desc.columns.length; i++) {
+                        $("#task-info-table tbody")
+                            .append("<tr><td>" + data.desc.columns[i] + "</td><td>" + data.result[i] + "</td></tr>");
+            }
                 } else {
                     var headers = xmlhttp.getAllResponseHeaders().toLowerCase();
                     // console.log("throwing exception");
@@ -132,20 +102,9 @@ $(document).ready(function() {
                 }
             }
         };
-
         xmlhttp.onerror = function() {
             console.log("Network error while fetching Task Info");
         }
-
-        // Helper function.
-        // Inserts task info column names and values into #task-info-table.
-        function insertDataIntoPage(data) {
-            for (i = 0; i < data.desc.columns.length; i++) {
-                $("#task-info-table tbody")
-                    .append("<tr><td>" + data.desc.columns[i] + "</td><td>" + data.result[i] + "</td></tr>");
-            }
-        }
-
         // Synchronous request.
         // Sends get request for JSON data
         xmlhttp.open("GET", url, false);
@@ -158,22 +117,11 @@ $(document).ready(function() {
     function displayConfigAndPSet(errHandler) {
         // var userWebDir = "";
 
-        // Hiding error boxes and emptying content
-        $("#task-config-paragraph").empty();
-        $("#task-pset-paragraph").empty();
-        $("#task-config-error-box").css("display", "none");
-        $("#task-pset-error-box").css("display", "none");
 
         if (userWebDir === "undefined" || userWebDir === "") {
             errHandler(new TaskInfoUndefinedError());
             return;
         }
-        // Searching for the user webdir field in stored TaskInfo data.
-        // for (var i = 0; i < taskInfo.desc.columns.length; i++) {
-        //     if (taskInfo.desc.columns[i] == "tm_user_webdir") {
-        //         userWebDir = taskInfo.result[i];
-        //     }
-        // }
 
         var urlEnd = "/sandbox.tar.gz";
         var urlMiddle = userWebDir.split("mon")[1];
@@ -199,33 +147,10 @@ $(document).ready(function() {
     function displayTaskWorkerLog(errHandler) {
         var xmlhttp = new XMLHttpRequest();
 
-        // Hiding error boxes and emptying content
-        $("#taskworker-log-paragraph").empty();
-        $("#taskworker-log-error-box").css("display", "none");
-
-        // Match alphanumerics after a semicolon, until any non-alphanumeric character.
-        // var usernameRegExp = /.*:([a-zA-Z0-9]+)/;
-
-        // The query might not be valid and not have any username.
-        // try {
-        //     username = usernameRegExp.exec(inputTaskName)[1];
-        // } catch (e) {
-        //     errHandler(new InvalidQueryError());
-        //     return;
-        // }
-
         if (cacheUrl === "undefined" || cacheUrl === "") {
             errHandler(new TaskInfoUndefinedError());
             return;
         }
-
-        // Searching and storing the cacheurl. It's where the TW Log is located.
-        // for (var i = 0; i < taskInfo.desc.columns.length; i++) {
-        //     if (taskInfo.desc.columns[i] == "tm_cache_url") {
-        //         cacheUrl = taskInfo.result[i];
-        //     }
-        // }
-
 
         var url = cacheUrl + "/logfile?name=" + inputTaskName + "_TaskWorker.log&username=" + username;
         console.log("TW url: " + url);
@@ -246,17 +171,12 @@ $(document).ready(function() {
             console.log("Network error while fetching TaskWorker log");
         }
 
-
         // Synchronous request. Has to be loaded before config and pset, because they depend on this information.
         xmlhttp.open("GET", url, false);
         xmlhttp.send();
     }
 
     function displayUploadLog(errHandler) {
-        $("#upload-log-error-box").css("display", "none");
-        $("#upload-log-paragraph").empty();
-
-        console.log("testing cache url " + cacheUrl);
 
         if (cacheUrl === "undefined" || cacheUrl === "") {
             errHandler(new TaskInfoUndefinedError());
@@ -288,8 +208,6 @@ $(document).ready(function() {
     }
 
     function displayScriptExe(errHandler) {
-        $("#script-exe-error-box").css("display", "none");
-        $("#script-exe-paragraph").empty();
 
         if (scriptExe === "undefined" || scriptExe === "") {
             errHandler(new TaskInfoUndefinedError);
@@ -317,8 +235,7 @@ $(document).ready(function() {
     }
 
     function displayMainPage(errHandler) {
-        $("#main-error-box").empty().css("display", "none");
-        $("#main-status-info-table tbody").empty();
+
 
         if (userWebDir !== "" && userWebDir !== "undefined"
             && inputTaskName !== "" && inputTaskName !== "undefined") {
@@ -362,11 +279,9 @@ $(document).ready(function() {
             xmlhttp.send();
 
         } else {
-            $("#main-error-box").css("display", "inherit").text("Task info not loaded");
+            // $("#main-error-box").css("display", "inherit").text("Task info not loaded");
+            errHandler(new TaskInfoUndefinedError);
         }
-
-        
-
     }
 
     /**
@@ -463,6 +378,10 @@ $(document).ready(function() {
         }
     }
 
+    function handleMainErr(err) {
+        $("#main-error-box").css("display", "inherit").text("Task info not loaded");
+    }
+
     /**
      * Callback function for handling tar file related problems. (404 not found for example)
      * Not as verbose as html headers.
@@ -539,18 +458,45 @@ $(document).ready(function() {
             dbVersion = $("#db-selector-box").val();
             setUrls(dbVersion);
 
-            // TODO - refactor a bit?
+            // TODO - refactor a bit
             $("#task-search-form-input").val(inputTaskName);
-
-            displayTaskInfo(handleTaskInfoErr);
-            loadGlobalDataFromTaskInfo();
-            displayConfigAndPSet(handleConfigPSetErr);
-            displayTaskWorkerLog(handleTaskWorkerLogErr);
-            displayUploadLog(handleUploadLogErr);
-            displayScriptExe(handleScriptExeErr);
-            displayMainPage();
+            clearPreviousContent();
+            loadContent();
         }
     }
 
+    function loadContent() {
+        displayTaskInfo(handleTaskInfoErr);
+        loadGlobalDataFromTaskInfo();
+        displayConfigAndPSet(handleConfigPSetErr);
+        displayTaskWorkerLog(handleTaskWorkerLogErr);
+        displayUploadLog(handleUploadLogErr);
+        displayScriptExe(handleScriptExeErr);
+        displayMainPage(handleMainErr);
+    }
 
+    function clearPreviousContent() {
+        // $("#task-info-table tbody").empty();
+        // $("#task-info-error-box").css("display", "none");
+
+        // $("#task-config-paragraph").empty();
+        // $("#task-pset-paragraph").empty();
+        // $("#task-config-error-box").css("display", "none");
+        // $("#task-pset-error-box").css("display", "none");
+
+        // $("#taskworker-log-paragraph").empty();
+        // $("#taskworker-log-error-box").css("display", "none");
+
+        // $("#upload-log-error-box").css("display", "none");
+        // $("#upload-log-paragraph").empty();
+
+        // $("#script-exe-error-box").css("display", "none");
+        // $("#script-exe-paragraph").empty();
+
+        // $("#main-error-box").empty().css("display", "none");
+        // $("#main-status-info-table tbody").empty();
+        
+        $(".alert, .alert-warning").empty().css("display", "none");
+        $(".dynamic-content").empty();
+    }
 });
