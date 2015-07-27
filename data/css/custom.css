@@ -1,7 +1,7 @@
 /* hiding things before there is any data to display */
 #task-info-error-box, #task-config-error-box,
 #task-pset-error-box, #taskworker-log-error-box,
-#upload-log-error-box {
+#upload-log-error-box, #main-error-box {
 	display: none;
 }
 
