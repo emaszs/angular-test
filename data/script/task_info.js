@@ -5,7 +5,8 @@ $(document).ready(function() {
     // Task info is stored upon displaying it. Required for the tm_user_webdir value, which is needed
     // for loading the config and pset files.
     var taskInfo = "", dbVersion = "", taskInfoUrl = "", taskStatusUrl = "",
-        cacheUrl = "", username = "", userWebDir = "", scriptExe = "", inputDataset = "";
+        cacheUrl = "", sandboxApiUrl = "", username = "", userWebDir = "",
+        scriptExe = "", inputDataset = "";
 
     // In most cases the user won't want to override the default database
     setDefaultDbVersionSelector();
@@ -116,7 +117,7 @@ $(document).ready(function() {
      */
     function displayConfigAndPSet(errHandler) {
         // var userWebDir = "";
-
+        var xmlhttp = new XMLHttpRequest();
 
         if (userWebDir === "undefined" || userWebDir === "") {
             errHandler(new TaskInfoUndefinedError());
@@ -124,12 +125,21 @@ $(document).ready(function() {
         }
 
         var urlEnd = "/sandbox.tar.gz";
-        var urlMiddle = userWebDir.split("mon")[1];
-        var urlStart = "https://mmascher-mon.cern.ch/scheddmon/5";
+        // var urlMiddle = userWebDir.split("mon")[1];
+        // var urlStart = "https://mmascher-mon.cern.ch/scheddmon/5";
 
-        var url = urlStart + urlMiddle + urlEnd;
+        // var url = urlStart + urlMiddle + urlEnd;
 
-        var tgz = TarGZ.stream(url, function(f, h) {
+
+        sandboxUrl = getSandboxUrl();
+
+        if (sandboxUrl === "undefined" || sandboxUrl === "") {
+            sandboxUrl = userWebDir;
+         }
+
+        console.log("sand:" + sandboxUrl);
+
+        var tgz = TarGZ.stream(sandboxUrl, function(f, h) {
             if (f.filename == "debug/crabConfig.py") {
                 $("#task-config-paragraph").text(f.data);
             }
@@ -138,6 +148,29 @@ $(document).ready(function() {
                 $("#task-pset-paragraph").text(f.data);
             }
         }, null, handleTarGZCallbackErr);
+
+
+        // Queries the proxy api. It returns a url where the sandbox is located. If it returns empty, then the 
+        // url found in TaskInfo should be used.
+        function getSandboxUrl() {
+            var foundUrl = ""
+            xmlhttp.onreadystatechange = function() {
+                if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                    var data = JSON.parse(xmlhttp.response);
+                    foundUrl = data.result[0];
+                } else {
+                    var headers = xmlhttp.getAllResponseHeaders().toLowerCase();
+                    // errHandler(new TaskInfoUndefinedError());
+                    foundUrl = null
+                }   
+            } 
+
+            xmlhttp.open("GET", sandboxApiUrl + inputTaskName, false);
+            xmlhttp.send();
+
+            // TODO delete this and add null check on function call
+            return foundUrl;
+        }
     }
 
 
@@ -215,7 +248,7 @@ $(document).ready(function() {
         } else if (scriptExe === "None") {
             errHandler(new ScriptExeNotUsedError);
             return;
-        } 
+        }
 
         var xmlhttp = new XMLHttpRequest();
 
@@ -286,7 +319,7 @@ $(document).ready(function() {
 
     /**
      * Splits the header string and returns an array with only the interesting headers
-     * 
+     *
      * @param  {String} The string with all the response headers
      * @return {Array} Array of header strings with some of them removed.
      */
@@ -341,7 +374,7 @@ $(document).ready(function() {
     function handleTaskWorkerLogErr(err) {
 
         if (err instanceof InvalidQueryError) {
-            // This is when it is impossible to determine a username from the search query. 
+            // This is when it is impossible to determine a username from the search query.
             // No point in sending a request to server with a null username.
             $("#taskworker-log-error-box").css("display", "inherit").text("Invalid query");
         } else if (err instanceof ServerError) {
@@ -414,14 +447,17 @@ $(document).ready(function() {
             case "prod":
                 taskInfoUrl = "https://" + document.domain + "/crabserver/prod/task?subresource=search&workflow=";
                 taskStatusUrl = "https://" + document.domain + "/crabserver/prod/workflow?workflow=";
+                sandboxApiUrl = "https://" + document.domain + "/crabserver/prod/task?subresource=webdirprx&workflow="
                 break;
             case "preprod":
                 taskInfoUrl = "https://" + document.domain + "/crabserver/preprod/task?subresource=search&workflow=";
                 taskStatusUrl = "https://" + document.domain + "/crabserver/preprod/workflow?workflow=";
+                sandboxApiUrl = "https://" + document.domain + "/crabserver/preprod/task?subresource=webdirprx&workflow="
                 break;
             case "dev":
                 taskInfoUrl = "https://" + document.domain + "/crabserver/dev/task?subresource=search&workflow=";
                 taskStatusUrl = "https://" + document.domain + "/crabserver/dev/workflow?workflow=";
+                sandboxApiUrl = "https://" + document.domain + "/crabserver/dev/task?subresource=webdirprx&workflow="
                 break;
             default:
                 break;
@@ -436,10 +472,8 @@ $(document).ready(function() {
             case "cmsweb-testbed.cern.ch":
                 $("#db-selector-box").val("preprod");
                 break;
-            case "mmascher-mon.cern.ch":
-                $("#db-selector-box").val("dev")
-                break;
             default:
+                $("#db-selector-box").val("dev")
                 break;
 
         }
@@ -495,7 +529,7 @@ $(document).ready(function() {
 
         // $("#main-error-box").empty().css("display", "none");
         // $("#main-status-info-table tbody").empty();
-        
+
         $(".alert, .alert-warning").empty().css("display", "none");
         $(".dynamic-content").empty();
     }
